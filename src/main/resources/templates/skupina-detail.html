@@ -19,18 +19,39 @@
 <body>
 	<main>
 
-		<h1>Skupina</h1>
+		<a th:href="@{'/home'}">Atlas</a>
+		
+		<hr>
+		
+		<h1 th:text="${skupina.nazev}"></h1>
+			
+    <hr>
+                      
+    <a th:href="@{'/skupina/nova?idNadrizeneSkupiny='+${skupina.id}}">Přidat skupinu</a>            
+    |
+    <a th:href="@{'/zastupce/novy?idNadrizeneSkupiny='+${skupina.id}}">Přidat zástupce</a>
+    |
+    <a th:href="@{'/skupina/'+${skupina.id}+'/editovat'}">Editovat</a>
 			
 		<hr>
 		
 		<span th:each="breadcrumb : ${skupina.cesta}">
-		  <a th:href="'/skupina/'+${breadcrumb.id}"><b th:text="${breadcrumb.nazev}"></b></a>
+		  | <a th:href="'/skupina/'+${breadcrumb.id}"><b th:text="${breadcrumb.nazev}"></b></a>
 		</span>
 		
 		<hr>
-		
+    
+    <h2>Podskupiny</h2>
+    		
+		<ul>
+		  <li th:each="podskupina : ${podskupiny}"><a th:href="'/skupina/'+${podskupina.id}" th:text="${podskupina.nazev}"></a></li>
+		</ul>
 
-    <p th:text="${skupina.nazev}"></p>
+    <h2>Zástupci</h2>
+
+    <ul>
+      <li th:each="zastupce : ${zastupci}"><a th:href="'/zastupce/'+${zastupce.id}" th:text="${zastupce.nazev}"></a></li>
+    </ul>
 
 	</main>
 

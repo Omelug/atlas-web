@@ -15,7 +15,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import cz.gymtrebon.zaverecky.vjanecek.atlas.dto.Skupina;
+import cz.gymtrebon.zaverecky.vjanecek.atlas.dto.Zastupce;
 import cz.gymtrebon.zaverecky.vjanecek.atlas.form.SkupinaForm;
+import cz.gymtrebon.zaverecky.vjanecek.atlas.form.ZastupceForm;
 import cz.gymtrebon.zaverecky.vjanecek.atlas.service.AtlasService;
 import lombok.RequiredArgsConstructor;
  
@@ -28,12 +30,8 @@ public class AtlasController {
 	
 	@GetMapping(value = {"", "home"})
 	public String home(Model model) { 
-		return "home";
-	}
-
-	@GetMapping("/zastupce/novy")
-	public String novyZastupce(Model model) { 
-		return "zastupce-form";
+		Skupina skupina = service.najdiRootSkupinu();
+		return detailSkupiny(model, skupina.getId());
 	}
 
 	@GetMapping("/skupina/{id}")
@@ -43,14 +41,37 @@ public class AtlasController {
 		
 		Skupina skupina = service.najdiSkupinuDleId(skupinaId);
 		model.addAttribute("skupina", skupina);
+		model.addAttribute("podskupiny", service.seznamPodskupin(skupina.getId()));
+		model.addAttribute("zastupci", service.seznamZastupcu(skupina.getId()));
 		
 		return "skupina-detail";
 	}
 
 	@GetMapping("/skupina/nova")
-	public String novaSkupina(Model model) {
+	public String novaSkupina(
+			@RequestParam("idNadrizeneSkupiny") Optional<Integer> idNadrizeneSkupiny, 
+			Model model) {
 		SkupinaForm form = new SkupinaForm();
-		form.setIdNadrizeneSkupiny(service.najdiRootSkupnu().getId());
+		if (idNadrizeneSkupiny.isPresent()) {
+			form.setIdNadrizeneSkupiny(idNadrizeneSkupiny.get());	
+		}
+		model.addAttribute("nadrizeneSkupiny", service.seznamSkupin());
+		model.addAttribute("skupina", form);
+		return "skupina-form";
+	}
+
+	@GetMapping("/skupina/{id}/editovat")
+	public String editovatSkupinu(
+			@PathVariable("id") Integer id, 
+			Model model) {
+		
+		Skupina skupina = service.najdiSkupinuDleId(id);
+		SkupinaForm form = new SkupinaForm();
+		form.setId(skupina.getId());
+		form.setIdNadrizeneSkupiny(skupina.getIdNadrizeneSkupiny());	
+		form.setNazev(skupina.getNazev());
+		
+		model.addAttribute("nadrizeneSkupiny", service.seznamSkupin());
 		model.addAttribute("skupina", form);
 		return "skupina-form";
 	}
@@ -69,8 +90,9 @@ public class AtlasController {
 			@Valid @ModelAttribute("skupina") SkupinaForm form,
 			BindingResult bindingResult) { 
 
-		boolean novyZakaznik = form.getId() == null;
-		
+ 		boolean novyZakaznik = form.getId() == null;
+ 		model.addAttribute("nadrizeneSkupiny", service.seznamSkupin());
+ 		
 		if (bindingResult.hasErrors()) {
 			return "skupina-form";
 		}
@@ -89,9 +111,81 @@ public class AtlasController {
 		return "redirect:/skupina/" + idSkupiny;
 	}
 
-	@GetMapping("/skupina/vyhledat")
-	public String vybratSkupinu(Model model) { 
-		return "skupina-pruzkumnik";
+	@GetMapping("/zastupce/{id}")
+	public String detailZastupce(
+			Model model,
+			@PathVariable("id") Integer zastupceId) { 
+		
+		Zastupce zastupce = service.najdiZastupceDleId(zastupceId);
+		model.addAttribute("zastupce", zastupce);
+		
+		return "zastupce-detail";
+	}
+	
+	@GetMapping("/zastupce/novy")
+	public String novyZastupce(
+			@RequestParam("idNadrizeneSkupiny") Optional<Integer> idNadrizeneSkupiny,
+			Model model) { 
+
+		ZastupceForm form = new ZastupceForm();
+		if (idNadrizeneSkupiny.isPresent()) {
+			form.setIdNadrizeneSkupiny(idNadrizeneSkupiny.get());	
+		}
+		model.addAttribute("nadrizeneSkupiny", service.seznamSkupin());
+		model.addAttribute("zastupce", form);
+		
+		return "zastupce-form";
 	}
 
+	@GetMapping("/zastupce/{id}/editovat")
+	public String editovatZastupce(
+			@PathVariable("id") Integer id, 
+			Model model) {
+		
+		Zastupce zastupce = service.najdiZastupceDleId(id);
+		ZastupceForm form = new ZastupceForm();
+		form.setId(zastupce.getId());
+		form.setIdNadrizeneSkupiny(zastupce.getIdNadrizeneSkupiny());	
+		form.setNazev(zastupce.getNazev());
+		
+		model.addAttribute("nadrizeneSkupiny", service.seznamSkupin());
+		model.addAttribute("zastupce", form);
+		return "zastupce-form";
+	}
+
+	@PostMapping(value="/zastupce/ulozit", params="akce-zpet")
+	public String editaceSkupinyZpet(
+			Model model,
+			@ModelAttribute("zastupce") ZastupceForm form,
+			BindingResult bindingResult) {
+		return "redirect:/";
+	} 
+
+	@PostMapping(value="/zastupce/ulozit", params="akce-ulozit")
+	public String editaceSkupinyUlozit(
+			Model model,
+			@Valid @ModelAttribute("zastupce") ZastupceForm form,
+			BindingResult bindingResult) { 
+
+ 		boolean novyZakaznik = form.getId() == null;
+ 		model.addAttribute("nadrizeneSkupiny", service.seznamSkupin());
+ 		
+		if (bindingResult.hasErrors()) {
+			return "zastupce-form";
+		}
+
+		Integer idZastupce = null; 
+		if (novyZakaznik) {
+			idZastupce = service.vytvoritZastupce(
+				form.getIdNadrizeneSkupiny(),	
+				form.getNazev());
+		} else {
+			idZastupce = service.ulozZastupce(
+				form.getIdNadrizeneSkupiny(),
+				form.getId(),
+				form.getNazev());
+		}		
+		return "redirect:/zastupce/" + idZastupce;
+	}	
+	
 }

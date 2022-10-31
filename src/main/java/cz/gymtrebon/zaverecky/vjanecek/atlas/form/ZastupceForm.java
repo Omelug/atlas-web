@@ -6,7 +6,7 @@ import javax.validation.constraints.NotNull;
 import lombok.Data;
 
 @Data
-public class SkupinaForm {
+public class ZastupceForm {
 	
 	private Integer id;
 	

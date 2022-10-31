@@ -19,16 +19,23 @@
 <body>
 	<main>
 
-		<h1>Atlas kytek</h1>
-
-		<hr>
-											
-		<a th:href="@{'/nova-skupina'}">Přidat skupinu</a>						
+		<a th:href="@{'/home'}">Atlas</a>
 		
-		<a th:href="@{'/novy-zastupce'}">Přidat zástupce</a>
+		<hr>
+		
+		<h1 th:text="${zastupce.nazev}"></h1>
+			
+    <hr>
+                      
+    <a th:href="@{'/zastupce/'+${zastupce.id}+'/editovat'}">Editovat</a>
 			
 		<hr>
-						
+		
+		<span th:each="breadcrumb : ${zastupce.cesta}">
+		  | <a th:href="'/skupina/'+${breadcrumb.id}"><b th:text="${breadcrumb.nazev}"></b></a>
+		</span>
+		
+		<hr>
 
 	</main>
 

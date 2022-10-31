@@ -19,11 +19,11 @@
 <body>
 	<main>
 
-		<h1>Založení nové skupiny</h1>
+		<h1>Založení nového zástupce</h1>
 			
 		<hr>
 						
-	  <form th:action="@{/skupina/ulozit}" th:object="${skupina}" method="post">
+	  <form th:action="@{/zastupce/ulozit}" th:object="${zastupce}" method="post">
 	  
 	    <input type="hidden" id="inputId" th:field="*{id}">
 
@@ -33,7 +33,7 @@
 		      <label for="idNadrizeneSkupiny">Nadřazená skupina</label>
 		      <select id="idNadrizeneSkupiny" class="form-control" th:field="*{idNadrizeneSkupiny}" th:classappend="${#fields.hasErrors('idNadrizeneSkupiny')} ? is-invalid">
 		        <option value=""></option>
-		        <option th:each="s : ${nadrizeneSkupiny}" th:value="${s.id}" th:text="${s.nazev}" th:selected="${s.id==skupina.idNadrizeneSkupiny}"></option>
+		        <option th:each="s : ${nadrizeneSkupiny}" th:value="${s.id}" th:text="${s.nazev}" th:selected="${s.id==zastupce.idNadrizeneSkupiny}"></option>
 		      </select>
 		      <p th:if="${#fields.hasErrors('idNadrizeneSkupiny')}" th:errors="*{idNadrizeneSkupiny}" class="invalid-feedback"></p>
 		    </div>        
@@ -42,7 +42,7 @@
 	    <div class="form-row">
 	      <div class="form-group col-md-6">
 	        <label for="inputNazev">Název</label>
-	        <input type="text" class="form-control" id="inputNazev" placeholder="Název skupiny" th:field="*{nazev}" th:classappend="${#fields.hasErrors('nazev')} ? is-invalid">
+	        <input type="text" class="form-control" id="inputNazev" placeholder="Název zástupce" th:field="*{nazev}" th:classappend="${#fields.hasErrors('nazev')} ? is-invalid">
 	        <p th:if="${#fields.hasErrors('nazev')}" th:errors="*{nazev}" class="invalid-feedback"></p>
 	      </div>
 	    </div>

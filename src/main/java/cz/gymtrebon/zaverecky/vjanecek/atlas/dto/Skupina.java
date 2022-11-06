@@ -12,7 +12,7 @@ public class Skupina {
 	
 	private Integer idNadrizeneSkupiny;
 	
-	private String nazev;
+	private String nazev, textSkupiny;
 
 	List<Popisek> cesta = new ArrayList<>();
 	

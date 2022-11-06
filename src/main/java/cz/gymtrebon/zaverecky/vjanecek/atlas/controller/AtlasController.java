@@ -70,12 +70,24 @@ public class AtlasController {
 		form.setId(skupina.getId());
 		form.setIdNadrizeneSkupiny(skupina.getIdNadrizeneSkupiny());	
 		form.setNazev(skupina.getNazev());
+		form.setTextSkupiny(skupina.getTextSkupiny());
 		
 		model.addAttribute("nadrizeneSkupiny", service.seznamSkupin());
 		model.addAttribute("skupina", form);
 		return "skupina-form";
 	}
-
+	@PostMapping(value="/skupina/ulozit", params="akce-smazat")
+	public String smazaniSkupiny(
+			Model model,
+			@ModelAttribute("skupina") SkupinaForm form,
+			BindingResult bindingResult) {
+		if (!(form.getId() == null)) {
+			service.smazatSkupinu(form.getId());	
+		}
+		
+		return "redirect:/skupina/" + form.getIdNadrizeneSkupiny();
+	}
+	
 	@PostMapping(value="/skupina/ulozit", params="akce-zpet")
 	public String editaceSkupinyZpet(
 			Model model,
@@ -90,7 +102,7 @@ public class AtlasController {
 			@Valid @ModelAttribute("skupina") SkupinaForm form,
 			BindingResult bindingResult) { 
 
- 		boolean novyZakaznik = form.getId() == null;
+ 		boolean novaSkupina = form.getId() == null;
  		model.addAttribute("nadrizeneSkupiny", service.seznamSkupin());
  		
 		if (bindingResult.hasErrors()) {
@@ -98,15 +110,18 @@ public class AtlasController {
 		}
 
 		Integer idSkupiny = null; 
-		if (novyZakaznik) {
+		if (novaSkupina) {
 			idSkupiny = service.vytvoritSkupinu(
 				form.getIdNadrizeneSkupiny(),	
-				form.getNazev());
+				form.getNazev(),
+				form.getTextSkupiny());
+			
 		} else {
 			idSkupiny = service.ulozSkupinu(
 				form.getIdNadrizeneSkupiny(),
 				form.getId(),
-				form.getNazev());
+				form.getNazev(),
+				form.getTextSkupiny());
 		}		
 		return "redirect:/skupina/" + idSkupiny;
 	}
@@ -147,27 +162,46 @@ public class AtlasController {
 		form.setId(zastupce.getId());
 		form.setIdNadrizeneSkupiny(zastupce.getIdNadrizeneSkupiny());	
 		form.setNazev(zastupce.getNazev());
+		form.setNazev2(zastupce.getNazev2());
+		form.setAutor(zastupce.getAutor());
+		form.setBarvy(zastupce.getBarvy());
+		form.setText(zastupce.getText());
 		
 		model.addAttribute("nadrizeneSkupiny", service.seznamSkupin());
 		model.addAttribute("zastupce", form);
 		return "zastupce-form";
 	}
-
-	@PostMapping(value="/zastupce/ulozit", params="akce-zpet")
-	public String editaceSkupinyZpet(
+	@PostMapping(value="/zastupce/ulozit", params="akce-smazat")
+	public String smazaniZastupce(
 			Model model,
 			@ModelAttribute("zastupce") ZastupceForm form,
 			BindingResult bindingResult) {
-		return "redirect:/";
+		if (!(form.getId() == null)) {
+			service.smazatPolozku(form.getId());	
+		}
+		
+		return "redirect:/skupina/" + form.getIdNadrizeneSkupiny();
+	} 
+
+	@PostMapping(value="/zastupce/ulozit", params="akce-zpet")
+	public String editaceZastupceZpet(
+			Model model,
+			@ModelAttribute("zastupce") ZastupceForm form,
+			BindingResult bindingResult) {
+		boolean novyZastupce = form.getId() == null;
+		if (novyZastupce) {
+			return "redirect:/";
+		}
+		return "redirect:/zastupce/" + form.getId();
 	} 
 
 	@PostMapping(value="/zastupce/ulozit", params="akce-ulozit")
-	public String editaceSkupinyUlozit(
+	public String editaceZastupceUlozit(
 			Model model,
 			@Valid @ModelAttribute("zastupce") ZastupceForm form,
 			BindingResult bindingResult) { 
 
- 		boolean novyZakaznik = form.getId() == null;
+ 		boolean novyZastupce = form.getId() == null;
  		model.addAttribute("nadrizeneSkupiny", service.seznamSkupin());
  		
 		if (bindingResult.hasErrors()) {
@@ -175,15 +209,25 @@ public class AtlasController {
 		}
 
 		Integer idZastupce = null; 
-		if (novyZakaznik) {
+		if (novyZastupce) {
 			idZastupce = service.vytvoritZastupce(
 				form.getIdNadrizeneSkupiny(),	
-				form.getNazev());
+				form.getNazev(),
+				form.getNazev2(),
+				form.getAutor(),
+				form.getBarvy(),
+				form.getText()
+				);
 		} else {
 			idZastupce = service.ulozZastupce(
 				form.getIdNadrizeneSkupiny(),
 				form.getId(),
-				form.getNazev());
+				form.getNazev(),
+				form.getNazev2(),
+				form.getAutor(),
+				form.getBarvy(),
+				form.getText()
+				);
 		}		
 		return "redirect:/zastupce/" + idZastupce;
 	}	

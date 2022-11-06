@@ -40,6 +40,18 @@ public class Polozka {
 	@Column(name="nazev", nullable=true, length=250)
 	private String nazev;
 	
+	@Column(name="nazev2", nullable=true, length=250)
+	private String nazev2;
+	
+	@Column(name="autor", nullable=true, length=250)
+	private String autor;
+	
+	@Column(name="barvy", nullable=true, length=250)
+	private String barvy;
+	
+	@Column(name="text", nullable=true)
+	private String text;
+	
 	@ManyToMany(mappedBy="nadrizenaSkupina")
 	private List<Polozka> polozky = new ArrayList<>();
 	

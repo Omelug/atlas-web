@@ -12,7 +12,7 @@ public class Zastupce {
 	
 	private Integer idNadrizeneSkupiny;
 	
-	private String nazev;
+	private String nazev, nazev2, autor, barvy, text;
 	
 	List<Popisek> cesta = new ArrayList<>();
 }

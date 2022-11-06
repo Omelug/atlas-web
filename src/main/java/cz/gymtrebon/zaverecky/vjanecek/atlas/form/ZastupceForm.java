@@ -15,5 +15,15 @@ public class ZastupceForm {
 	
 	@NotEmpty(message = "Název je povinná položka")
 	private String nazev;
+
+	private String nazev2;
+	
+	@NotEmpty(message = "Autor je povinná položka")
+	private String autor;
+	
+	private String text;
+	
+	private String barvy;
+	
 	
 }

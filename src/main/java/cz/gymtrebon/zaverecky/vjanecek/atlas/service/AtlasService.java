@@ -3,6 +3,8 @@ package cz.gymtrebon.zaverecky.vjanecek.atlas.service;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.validation.constraints.NotNull;
+
 import org.springframework.stereotype.Service;
 
 import cz.gymtrebon.zaverecky.vjanecek.atlas.dto.Popisek;
@@ -52,63 +54,80 @@ public class AtlasService {
 		}
 		return zastupce;
 	}
+	public Integer vytvoritSkupinu(Integer idNadrizeneSkupiny, String nazev, String text) {
 
-	public Integer vytvoritSkupinu(
-			Integer idNadrizeneSkupiny,
-			String nazev) {
-		
 		Polozka nadrizena = polozkaRepo.getById(idNadrizeneSkupiny);
-		
+
 		Polozka p = new Polozka();
 		p.setNazev(nazev);
+		p.setText(text);
 		p.setTyp(Typ.SKUPINA);
 		p.setNadrizenaSkupina(nadrizena);
 		polozkaRepo.save(p);
 		return p.getId();
 	}
 
-	public Integer ulozSkupinu(
-			Integer idNadrizeneSkupiny,
-			Integer idSkupiny,
-			String nazev) {
-		
+	public Integer ulozSkupinu(Integer idNadrizeneSkupiny, Integer idSkupiny, String nazev, String text) {
+
 		Polozka nadrizena = polozkaRepo.getById(idNadrizeneSkupiny);
 		Polozka skupina = polozkaRepo.getById(idSkupiny);
 		skupina.setNazev(nazev);
+		skupina.setText(text);
 		skupina.setTyp(Typ.SKUPINA);
 		skupina.setNadrizenaSkupina(nadrizena);
 		polozkaRepo.save(skupina);
 		return skupina.getId();
 	}
+	public void smazatSkupinu(Integer skupinaId) {
+		List<Skupina> podskupiny = seznamPodskupin(skupinaId);
+		for (Skupina skupina : podskupiny) {
+			smazatPolozku(skupina.getId());
+		}
+		List<Zastupce> zastupci = seznamZastupcu(skupinaId);
+		for (Zastupce zastupce : zastupci) {
+			smazatPolozku(zastupce.getId());
+		}
+		smazatPolozku(skupinaId);
+	}
+	public void smazatPolozku(Integer zastupceId) {
+		polozkaRepo.deleteById(zastupceId);
+	}
 
-	public Integer vytvoritZastupce(
-			Integer idNadrizeneSkupiny,
-			String nazev) {
-		
+	public Integer vytvoritZastupce(Integer idNadrizeneSkupiny, String nazev, String nazev2, String autor, String barvy,
+			String text) {
+
 		Polozka nadrizena = polozkaRepo.getById(idNadrizeneSkupiny);
-		
+
 		Polozka zastupce = new Polozka();
 		zastupce.setNazev(nazev);
+		zastupce.setNazev2(nazev2);
+		zastupce.setAutor(autor);
+		zastupce.setBarvy(barvy);
+		zastupce.setText(text);
+
 		zastupce.setTyp(Typ.ZASTUPCE);
 		zastupce.setNadrizenaSkupina(nadrizena);
 		polozkaRepo.save(zastupce);
 		return zastupce.getId();
 	}
 
-	public Integer ulozZastupce(
-			Integer idNadrizeneSkupiny,
-			Integer idSkupiny,
-			String nazev) {
-		
+	public Integer ulozZastupce(Integer idNadrizeneSkupiny, Integer idSkupiny, String nazev, String nazev2,
+			String autor, String barvy, String text) {
+
 		Polozka nadrizena = polozkaRepo.getById(idNadrizeneSkupiny);
 		Polozka zastupce = polozkaRepo.getById(idSkupiny);
 		zastupce.setNazev(nazev);
+		zastupce.setNazev2(nazev2);
+		zastupce.setAutor(autor);
+		zastupce.setBarvy(barvy);
+		zastupce.setText(text);
+
 		zastupce.setTyp(Typ.ZASTUPCE);
 		zastupce.setNadrizenaSkupina(nadrizena);
 		polozkaRepo.save(zastupce);
 		return zastupce.getId();
-	}	
-	
+	}
+
 	public Skupina najdiSkupinuDleId(Integer idSkupiny) {
 		Polozka polozka = polozkaRepo.getById(idSkupiny);
 		return polozkaToSkupina(polozka);
@@ -123,11 +142,12 @@ public class AtlasService {
 		Skupina s = new Skupina();
 		s.setId(polozka.getId());
 		s.setNazev(polozka.getNazev());
+		s.setTextSkupiny(polozka.getText());
 		if (polozka.getNadrizenaSkupina() != null) {
 			s.setIdNadrizeneSkupiny(polozka.getNadrizenaSkupina().getId());
 		}
-		
- 		Polozka pom = polozka.getNadrizenaSkupina();
+
+		Polozka pom = polozka.getNadrizenaSkupina();
 		while (pom != null && pom.getTyp() != Typ.ROOT) {
 			Popisek b = new Popisek();
 			b.setId(pom.getId());
@@ -135,7 +155,7 @@ public class AtlasService {
 			s.getCesta().add(0, b);
 			pom = pom.getNadrizenaSkupina();
 		}
-		
+
 		return s;
 	}
 
@@ -143,11 +163,15 @@ public class AtlasService {
 		Zastupce zastupce = new Zastupce();
 		zastupce.setId(polozka.getId());
 		zastupce.setNazev(polozka.getNazev());
+		zastupce.setNazev2(polozka.getNazev2());
+		zastupce.setAutor(polozka.getAutor());
+		zastupce.setBarvy(polozka.getBarvy());
+		zastupce.setText(polozka.getText());
 		if (polozka.getNadrizenaSkupina() != null) {
 			zastupce.setIdNadrizeneSkupiny(polozka.getNadrizenaSkupina().getId());
 		}
-		
- 		Polozka pom = polozka.getNadrizenaSkupina();
+
+		Polozka pom = polozka.getNadrizenaSkupina();
 		while (pom != null && pom.getTyp() != Typ.ROOT) {
 			Popisek b = new Popisek();
 			b.setId(pom.getId());
@@ -155,7 +179,7 @@ public class AtlasService {
 			zastupce.getCesta().add(0, b);
 			pom = pom.getNadrizenaSkupina();
 		}
-		
+
 		return zastupce;
 	}
 
@@ -165,4 +189,5 @@ public class AtlasService {
 		p.setNazev(polozka.getNazev());
 		return p;
 	}
+
 }

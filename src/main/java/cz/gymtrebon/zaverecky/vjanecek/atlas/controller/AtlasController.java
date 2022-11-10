@@ -57,6 +57,7 @@ public class AtlasController {
 		}
 		model.addAttribute("nadrizeneSkupiny", service.seznamSkupin());
 		model.addAttribute("skupina", form);
+		model.addAttribute("nova", true);
 		return "skupina-form";
 	}
 
@@ -74,6 +75,7 @@ public class AtlasController {
 		
 		model.addAttribute("nadrizeneSkupiny", service.seznamSkupin());
 		model.addAttribute("skupina", form);
+		model.addAttribute("nova", false);
 		return "skupina-form";
 	}
 	@PostMapping(value="/skupina/ulozit", params="akce-smazat")
@@ -84,7 +86,9 @@ public class AtlasController {
 		if (!(form.getId() == null)) {
 			service.smazatSkupinu(form.getId());	
 		}
-		
+		if ( form.getIdNadrizeneSkupiny() == null) {
+			return home(model);
+		}
 		return "redirect:/skupina/" + form.getIdNadrizeneSkupiny();
 	}
 	
@@ -93,7 +97,11 @@ public class AtlasController {
 			Model model,
 			@ModelAttribute("skupina") SkupinaForm form,
 			BindingResult bindingResult) {
-		return "redirect:/";
+		boolean novaSkupina = form.getId() == null;
+		if (novaSkupina) {
+			return "redirect:/skupina/" + form.getIdNadrizeneSkupiny();
+		}
+		return "redirect:/skupina/" + form.getId();
 	} 
 
 	@PostMapping(value="/skupina/ulozit", params="akce-ulozit")
@@ -148,6 +156,7 @@ public class AtlasController {
 		}
 		model.addAttribute("nadrizeneSkupiny", service.seznamSkupin());
 		model.addAttribute("zastupce", form);
+		model.addAttribute("novy", true);
 		
 		return "zastupce-form";
 	}
@@ -169,6 +178,8 @@ public class AtlasController {
 		
 		model.addAttribute("nadrizeneSkupiny", service.seznamSkupin());
 		model.addAttribute("zastupce", form);
+		model.addAttribute("novy", false);
+		
 		return "zastupce-form";
 	}
 	@PostMapping(value="/zastupce/ulozit", params="akce-smazat")
@@ -190,7 +201,7 @@ public class AtlasController {
 			BindingResult bindingResult) {
 		boolean novyZastupce = form.getId() == null;
 		if (novyZastupce) {
-			return "redirect:/";
+			return "redirect:/"+ form.getIdNadrizeneSkupiny();
 		}
 		return "redirect:/zastupce/" + form.getId();
 	} 

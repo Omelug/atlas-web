@@ -66,7 +66,7 @@ public class AtlasService {
 		polozkaRepo.save(p);
 		return p.getId();
 	}
-
+ 
 	public Integer ulozSkupinu(Integer idNadrizeneSkupiny, Integer idSkupiny, String nazev, String text) {
 
 		Polozka nadrizena = polozkaRepo.getById(idNadrizeneSkupiny);
@@ -90,7 +90,9 @@ public class AtlasService {
 		smazatPolozku(skupinaId);
 	}
 	public void smazatPolozku(Integer zastupceId) {
-		polozkaRepo.deleteById(zastupceId);
+		if (!(polozkaRepo.getById(zastupceId).getTyp() == Typ.ROOT)) {
+			polozkaRepo.deleteById(zastupceId);	
+		}
 	}
 
 	public Integer vytvoritZastupce(Integer idNadrizeneSkupiny, String nazev, String nazev2, String autor, String barvy,

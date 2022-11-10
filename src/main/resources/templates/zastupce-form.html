@@ -86,7 +86,7 @@
 			</div>
 			<!-- https://getbootstrap.com/docs/4.0/components/buttons/ -->
 			
-			<button type="submit" class="btn btn-danger" name="akce-smazat">Smazat</button>
+			<button th:if="${novy == false}"  type="submit" class="btn btn-danger" name="akce-smazat">Smazat</button>
 			
 			<button type="submit" class="btn btn-primary" name="akce-ulozit">Uložit</button>
 

@@ -1,0 +1,71 @@
+ID,PARENT,ISGROUP,LATIN_NAME,NAME,AUTHOR,MORE_INFO,COLOR
+1,0,1,Apiaceae,,,,
+2,1,0,Agrocharis melanantha,,Hochst.,"Erect perennial herb. <b>Stem</b>: sulcate, with setose hairs. <b>Leaves</b>: lower and middle stem leaves 3 -pinnate. <b>Inflorescence</b>: in dense umbels with often very long peduncles. Involucel of narrowly lanceolate, marginally setulose bracteoles.Flowers: blackish purple or rarely yellowish. <b>Fruit</b>: oblong-ellipsoid with spines. <br/>
+       Scattered in grassland, moist path sides, thickets, forest glades; common around Hut 2, up to 2900 m a.s.l. Native range is Tropical and South Africa, Madagascar, SW. Arabian Peninsula.","black, purple, yellow"
+3,1,0,Lefebvrea angustisecta,Peucedanum angustisectum (Engl.) Norman;Peucedanum camerunense Jacq.-Fél.,Engl.,"A monocarpic, branched herb up to 1.5 m. <b>Leaves</b>: very variable, usually biternate, leaflets lanceolate 1.5-8 cm long, margins serrate. Upper stem leaves often trifoliate. <b>Inflorescence</b>: compound umbels of small flowers with whitish green petals and violet anthers. <b>Fruit</b>: mericarp strongly flattened with wings. <br/>
+       In montane grasslands above forest up to 3000 m a.s.l. Common around Hut 2.",pink
+4,1,0,Pimpinella oreophila,,Hook. f.,"Afroalpine perennial herb, 15 cm high. <b>Stem</b>: sulcate, green to blackish purple. <b>Leaves</b>: basal leaves pinnate with 1 pairs, leaflets ovate, median and upper stem leaves simple to trisect, leaflets lanceolate. <b>Inflorescence</b>: partial umbels ñ 7 -flowered. <b>Flowers</b>: petals white to creamy-green, sometimes tinted with purplish. <b>Fruit</b>: oblong-ovoid, glabrous, 2 mm. <br/>
+       Upland grasslands 2600-3600 m a.s.l. Native in mountains of tropical Africa.","white, green, purple"
+5,0,1,Asteraceae,,,,
+6,5,0,Anisopappus chinensis,"buchwaldii (O.Hoffm.) S.Ortiz, Paiva & Rodr.-Oubina var.;macrocephala (Humbert) S. Oritz, Paiva & Rodr.-Oubina",Hook. & Arn.;,"Robust herb, up to 120 cm tall. <b>Leaves</b>: simple, crenate, bullate. Growing usually near the tree line. <br/>
+               Common around Mann' s Spring. Widespread in tropical Africa, other subspecies of Anisopappus, Anisopappus chinensis subsp. chinensis occur also in Southeast Asia.",
+7,5,0,Bidens pilosa,,L.,"Annual plant. <b>Leaves</b>: pinnately compound. <b>Stem</b>: reddish tinged; 4-angled. <b>Flowers</b>: ray florets white, sometimes reduced; disc florets yellow. <br/>
+       Native in tropical and Central America, recently widespread in warm areas around the world. On Mt. Cameroon grows in anthropogenic vegetation around mountain huts.","white, yellow."
+8,5,0,Bidens mannii,,T.G.J Rayner,"<b>Leaves</b>: pinnatisect, shiny above. <b>Stem</b>: dark red-brown especially at the base. <b>Inflorescence</b>: capitula 4-7 cm wide.<br/>
+       Usually growing on exposed lava flows formed by large stones. Common on 1999 lava flow on the path from Bokwango to Mann's spring or around Hut 2. Endemic to Cameroonian mountains. IUCN red list status: vulnerable.",ray and disc florets yellow
+9,5,0,Laggera crispata,,(Vahl) Hepper & J.R.I.Wood,"Robust, strongly aromatic herb covered by sticky glands, multi-stemmed. <b>Stem</b>: with wings, woody at the base, branched. <b>Inflorescence</b>: capitula around 10 mm long.<br/>
+        On Mt. Cameroon rather rare. Growing near the forest margins. Occurring in Asia, tropical and South Africa.",
+10,5,0,Erigeron bonariensis,,L.,"Annual or biennial herb, 0.4-1.5 m high. <b>Leaves</b>: linear or linear lanceolate, hispid. <b>Inflorescence</b>: capitula many, 5-7 mm in diameter.<br/>
+       Generally believed to be native to South America. Widespread in warmer regions of the world.",white
+11,5,0,Conyza subscaposa,,O.Hoffm.,"Small herb, usually 10-20 cm tall. <b>Leaves</b>: rosette, some of the capitula's pendant. <br/>
+       Peak of the flowering at the end of the dry season April-May. Occurring in short-stemmed grasslands, or gaps in tall grasslands. On Mt. Cameroon growing along the long elevational range from tree line almost to the summit. Tropical mountains in Africa.",yellow
+12,5,0,Crassocephalum gracile,,(Hook.f. ex Hook.f.) Milne-Redh. ex Guinea,"<b>Inflorescence</b>: heads up to 2 cm broad, involucre shortly pubescent. <b>Leaves</b>: with rounded stipuliform auricules at the base, ovate, eliptic, cunate down to the point of attachment. <br/>
+       On Mt. Cameroon growing from tree line up to 3000 m a.s.l. <br/>
+  <br/>
+       Similar species <i>Crassoceyphalum bougheyanum</i> C.D.Adams has bigger heads about 2.5 cm broad, involucral bracts glabrescent and without basal stipuliform auricles. C. bougheyanum is usually growing in the mountain forest edge and in forest gaps.",yellow
+13,5,0,Crepis hypochaeridea,,(DC.) Thell.,"Branching scapes with multiple heads. <b>Leaves</b>: in rosette. <b>Florets</b>: all ligulate and hermaphrodite.<br/>
+       On Mt. Cameroon scattered in short grasslands at higher altitudes (2900  3800 m a.s.l.). Mountains of tropical Africa and South Africa.",yellow
+14,5,0,Dichrocephala chrysanthemifolia,,(Blume) DC.,"<b>Leaves</b>: pinnatipartite, broadly auriculate at the base. <b>Flowers</b>: flower heads, in lax terminal panicles or solitary, 6-8 mm in diameter. Outer florets white to yellow with (at anthesis) purplish tinge on the lobes. Inner florets white to yellow with reddish to purple tinge on lobes. <br/>
+       On Mt. Cameroon at higher altitudes, common around Hut 2. Palaeotropical.","white, yellow, purple"
+15,5,0,Dichrocephala integrifolia,,L.f.;Kuntze,"<b>Leaves</b>: pinnatipartite with the terminal lobe usually much bigger and broadly ovate, petiolate not auriculate. <b>Inflorescence</b>: flower heads in panicles, 3-4 mm in diameter. <b>Flowers</b>: outer florets white or rarely mauve, inner florets white or pale yellow. <br/>
+       On Mt. Cameroon usually in ruderal places around huts. Palaeotropical, introduced to tropical America and Australia","white, mauve, yellow"
+16,5,0,Galinsoga quadriradiata,,Ruiz & Pav.,"The plant hispid with long spreading hairs, 20-60 cm tall. <b>Flowers</b>: ray florets white and disc florets yellow. <br/>
+                Growing in anthropogenic vegetation around the huts. Native in Central America, invasive around the world from tropical to temperate regions.","white, yellow"
+17,5,0,Helichrysum biafranum,,Hook.f.,"<b>Leaves</b>: linear to linear-lanceolate. <b>Stem</b>: narrowly winged. <b>Inflorescence</b>: capitula 6-7 mm broad. <br/>
+       Growing only on Mt. Cameroon (endemic). Very rare, found in 1934 near Mannïs Spring. In 2018 snapped near Hut 2.",yellow
+18,5,0,Helichrysum forskahlii,,J.F.Gmel;Hilliard & B.L.Burtt,"Perennial herb with the variable habitus. <b>Leaves</b>: small, lanceolate or linear (ericoid) wooly tomentose, often with recurved margins, base half-amplexicaul. <b>Inflorescence</b>: capitula small, about 2 mm long. <br/>
+       On Mt.Cameroon common along the whole elevation range of mountain grasslands. Widespread in Africa, found also in Yemen and Saudi Arabia.",yellow
+19,5,0,Helichrysum stenopterum,,DC.,"<b>Leaves</b>: linear to linear-lanceolate scabridous above, white- or grey-felted beneath, glabrescent in older leaves. <b>Stems</b>: narrowly winged. <b>Inflorescenctpsla</b>: capitula 1-2.5 mm broad. Involucral bracts bright yellow. <br/>
+       On Mt. Cameroon common from forest margin up to approximately 2900 m a.s.l. Widespread in Africa.",yellow
+20,5,0,Helichrysum cameroonense,,Hutch. & Dalziel,"<b>Leaves</b>: ovate-lanceolate, broadly acuminate at the base, densely tomentose on both surfaces. <b>Inflorescence</b>: involucral bracts bright lemon-yellow, lighter than the florets, flower heads 2-2.5 cm across.<br/>
+       Most common up to 3000 m a.s.l. In higher altitudes replaced by H. mannii. Occurring only in Western Cameroon.",yellow
+21,5,0,Helichrysum foetidum,,(L.) Cass.,"<b>Leaves</b>: narrowly lanceolate glabrescent above, similar or white-tomentellous beneath. <b>Stem</b>: not winged. <b>Inflorescence</b>: involucral bracts bright yellow, Heads 1-1.5 cm across.<br/>
+       From treeline up to 3000 m a.s.l. Mountains of the tropical Africa and South Africa. Invasive in Southwest Europe.","yellow, white"
+22,5,0,Helichrysum globosum,,Sch.Bip,"<br/>
+<b>Leaves</b>: most of the leaves arranged in rosette, flower heads oblong 4-5 mm long and 2.5-3 mm broad. <b>Inflorescence</b>: involucral bracts shiny-brown.<br/>
+       On Mt. Cameroon scattered in disturbed habitats and short grassland. Peak of the flowering March-May. Widespread in mountains of Tropical Africa.",yellow
+23,5,0,Helichrysum mannii,,Hook.f.,"<b>Leaves</b>: lanceolate to ovate-lanceolate, scabride above, wooly-tomentose beneath. <b>Inflorescence</b>: Involucral bracts silver-white. Peak of flowering December-January. <br/>
+       On Mt. Cameroon common above 3000 m a.s.l. Occurring only on Mt. Cameroon and Bioko.","silver, white"
+24,5,0,Inula mannii,,Hook.f.; Oliv. & Hiern,"Erect perennial herb, usually about 1.5-2 m tall. <b>Leaves</b>: leaves in rosette large, stem leaves sessile, auriculate at the base, woolly beneath. <b>Flowers</b>: corolla dark purple.  <br/>
+       Rather rare species (quite common around P &amp; T), at lower altitudes near tree line or higher but than in leeward places. East and West Africa.",purple
+25,5,0,Lactuca glandulifera,,Hook.f.,"Scandent herb. <b>Leaves</b>: usually 3-lobed, sometimes 5-lobed or simple, the base sagittate-semi-amplexicaul. <b>Inflorescence</b>: paniculate. <b>Flowers</b>: all ligulate, yellow. <br/>
+       Usually climb on shrubs growing on grasslands. Can be found for example around Hut 2. Widespread in Tropical Africa.",yellow
+26,5,0,Lactuca inermis,,Forssk.,"Perennial herb, very variable in size, robust in lower but small at high elevations. <b>Leaves</b>: stem leaves linear to linear-lanceolate, <b>Inflorescence</b>: terminal. <b>Flowers</b>: florets all ligulate, pale blue. <br/>
+       On Mt. Cameroon very common from tree line to the summit. Widespread in tropical and subtropical Africa.",blue
+27,5,0,Microglossa densiflora,,Hook.f.,"A climbing shrub. <b>Leaves</b>: ovate, rounded or broadly cuneate at base, coarsely serrate-dentate. <b>Inflorescence</b>: flower heads densely crowded in terminal corymbs. <br/>
+       Common around Mannïs spring and 1999 craters. Representing taxonomically unresolved complex with Microglossa pyrifolia (Lam.) Kuntze. Occurring in African mountains.","yellow, white"
+28,5,0,Senecio burtonii,,Hook.f.,"Perennial robust herb 1-1.5 m tall. <b>Leaves</b>: denticulate, woolly-tomentose with white hairs beneath, rigid. <b>Flowers</b>: florets yellow. <br/>
+       On Mt. Cameroon common with wide altitudinal range from tree line up to close to the summit. Endemic to West Cameroon.",yellow
+29,5,0,Senecio purpureus,,L.,"Around 1 m tall perennial herb. <b>Leaves</b>: coarsely and doubly dentate or lobulate, pubescent beneath. <b>Flowers</b>: florets mauve or pink.<br/>
+       Wide altitudinal range. It can be found along the whole altitudinal gradient from tree line up to the summit. Very common on lava ash around the summit. Widespread in African mountains.","mauve, purpe, pink"
+30,5,0,Vernonia blumeoides,,Hook.f,"About 1 -1.5 m high perennial herb or small shrub.  <b>Leaves</b>: shortly petiolate, pubescent and minutely glandular beneath, scabrid above. <b>Flowers</b>: florets mauve to reddish-purple, stem shortly pubescent. <br/>
+       On Mt. Cameroon common near the tree line. Occurring in Nigeria and Cameroon.","mauve, red, purple"
+31,5,0,Sonchus angustissimus,,Hook.f.,"1-2.5 m tall herb. <b>Leaves</b>: linear to linear-lanceolate, entire or runcinate-pinnatifid, most of the leaves crowded at the bottom of the stem. <b>Inflorescence</b>: Outer involucral bracts densely setose. <b>Flowers</b>: florets yellow. <br/>
+       On Mt. Cameroon scattered occurrence up to 3200 m a.s.l., common around Mannïs Spring. Tropical Africa.",yellow
+32,0,1,Boraginaceae,,,,
+33,32,0,Cynoglossum amplifolium,,,"<b>Stem</b>: erect, branched above, up to 1.5 m. <b>Flowers</b>: pale blue (in contrast to deep blue flowers in C. coeruelum, which prefers more sunny places) arranged in cymes which elongate in fruit. <b>Fruit</b>: with egg-shaped nutlets covered with barbed spines. <br/>
+       Growing in grasslands, shrubby areas, half-shaded, moist sites, 2000-3000 m a.s.l.",blue
+34,32,0,Myosotis abyssinica,,Boiss. & Reut.,"Annual erect herb 5-30 cm high, covered with bulbous-based hairs often surrounded with cystoliths. <b>Leaves</b>: oblong to oblanceolate. <b>Flowers</b>: subsessile in scorpioid cymes with few leafy bracts in lower part, white of blue corolla, calyx longer than the fruiting pedicels. <br/>
+       Below edges of lava fells and depressions. On Mt. Cameroon rather rare at 2600-3200m. Distributed in African Tropical mountains.","white, "
+35,32,0,Cardamine hirsuta,,L.,"White flowering small annual 5-30 cm, glabrous or with scattered hairs. <b>Leaves</b>: forming a rosette, pinnatipartite, with a terminal and 2 pairs of lateral leaflets. <br/>
+       Worldwide, native to Eurasia and Africa, introduced to America and Australia.",white

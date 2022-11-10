@@ -16,7 +16,6 @@ public class SkupinaForm {
 	@NotEmpty(message = "Název je povinná položka")
 	private String nazev;
 	
-	@NotEmpty(message = "Neco napis")
 	private String textSkupiny;
 	
 }

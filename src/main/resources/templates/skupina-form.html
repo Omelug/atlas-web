@@ -57,18 +57,21 @@
 			<div class="form-row">
 				<div class="form-group col-md-6">
 					<label for="inputTextSkupiny">Text</label>
-					<input type="text" class="form-control" id="inputTextSkupiny" placeholder="Text" th:field="*{textSkupiny}"
-						th:classappend="${#fields.hasErrors('textSkupiny')} ? is-invalid">
-					<p th:if="${#fields.hasErrors('textSkupiny')}" th:errors="*{textSkupiny}" class="invalid-feedback"></p>
+					<input type="text" class="form-control" id="inputTextSkupiny" placeholder="Text"
+						th:field="*{textSkupiny}" th:classappend="${#fields.hasErrors('textSkupiny')} ? is-invalid">
+					<p th:if="${#fields.hasErrors('textSkupiny')}" th:errors="*{textSkupiny}" class="invalid-feedback">
+					</p>
 				</div>
 			</div>
-			<button type="submit" class="btn btn-danger" name="akce-smazat">Smazat</button>
+			
+			<button th:if="${nova == false AND skupina.idNadrizeneSkupiny != NULL}" type="submit" class="btn btn-danger" name="akce-smazat">Smazat</button>
 
 			<button type="submit" class="btn btn-primary" name="akce-ulozit">Uložit</button>
 
 			<button type="submit" class="btn btn-secondary" name="akce-zpet">Zpět</button>
 
 		</form>
+
 
 	</main>
 

@@ -17,9 +17,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 import cz.gymtrebon.zaverecky.vjanecek.atlas.dto.Skupina;
 import cz.gymtrebon.zaverecky.vjanecek.atlas.dto.Zastupce;
 import cz.gymtrebon.zaverecky.vjanecek.atlas.form.SkupinaForm;
+import cz.gymtrebon.zaverecky.vjanecek.atlas.form.TestForm;
 import cz.gymtrebon.zaverecky.vjanecek.atlas.form.ZastupceForm;
 import cz.gymtrebon.zaverecky.vjanecek.atlas.service.AtlasService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.java.Log;
  
 @Controller
 @RequestMapping("/")
@@ -27,10 +29,26 @@ import lombok.RequiredArgsConstructor;
 public class AtlasController {
 
 	private final AtlasService service;
+	private static String text = "";
+	@GetMapping(value = {"", "test"})
+	public String test(Model model) {
+		TestForm form = new TestForm();
+		form.setCelyText(text);
+		model.addAttribute("text", form);
+		return "test";
+	}
+	@PostMapping(value="/test2", params="akce-test")
+	public String test(
+			Model model,
+			@ModelAttribute("test") TestForm form) {
+		text = form.getCelyText();
+		return "redirect:/test";
+	} 
 	
 	@GetMapping(value = {"", "home"})
 	public String home(Model model) { 
 		Skupina skupina = service.najdiRootSkupinu();
+		model.addAttribute("home", true);
 		return detailSkupiny(model, skupina.getId());
 	}
 

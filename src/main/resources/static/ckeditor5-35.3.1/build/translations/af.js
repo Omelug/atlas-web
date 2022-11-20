@@ -1,0 +1,1 @@
+(function(r){const e=r["af"]=r["af"]||{};e.dictionary=Object.assign(e.dictionary||{},{"%0 of %1":"%0 van %1",Bold:"Vet",Italic:"Kursief","Show more items":"Wys meer items",Strikethrough:"Deurstreep",Subscript:"Onderskrif",Superscript:"Boskrif",Underline:"Onderstreep"});e.getPluralForm=function(r){return r!=1}})(window.CKEDITOR_TRANSLATIONS||(window.CKEDITOR_TRANSLATIONS={}));

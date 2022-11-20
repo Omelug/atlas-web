@@ -36,7 +36,7 @@ public class AtlasApplication implements CommandLineRunner {
 		p.setNazev("ATLAS");
 		p.setTyp(Typ.ROOT);
 		polozkaRepo.save(p);
-
+		
 	}	
 	
 	

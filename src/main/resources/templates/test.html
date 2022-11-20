@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="cs" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+	<meta charset="utf-8">
+	<title>CKEditor 5 - Classic editor</title>
+	<script type="text/javascript" th:src="@{/ckeditor5-35.3.1/build/ckeditor.js}"></script>
+	
+</head>
+
+<div id="main">
+	<div th:if="${text != null}">
+		<p th:text="${text.celyText}"> fesfse</p>
+
+		<div th:utext="${text.celyText}">
+
+		</div>
+	</div>
+	<div id = "testdiv">
+
+	</div>
+	<h1>Classic editor</h1>
+	<form th:action="@{/test2}" th:object="${text}" method="post">
+		<div class="form-group col-md-6">
+
+			<textarea id="celyText" class="form-control" name="celyText" th:text="${text.celyText}" field="*{celyText}">
+			</textarea>
+		</div>
+		<button type="submit" class="btn btn-danger" name="akce-test">Test</button>
+	</form>
+	<script>
+			
+		ClassicEditor.create(document.getElementById("celyText"), {
+                // https://ckeditor.com/docs/ckeditor5/latest/features/toolbar/toolbar.html#extended-toolbar-configuration-format
+                toolbar: {
+                    items: [
+						'bold', 'italic', 'strikethrough', 'underline', 'subscript', 'superscript', '|', 'undo', 'redo'
+					],
+                    shouldNotGroupWhenFull: true
+                },
+                removePlugins: [
+                    'ExportPdf',
+                    'ExportWord',
+                    'CKBox',
+                    'CKFinder',
+                    'EasyImage',
+                    'RealTimeCollaborativeComments',
+                    'RealTimeCollaborativeTrackChanges',
+                    'RealTimeCollaborativeRevisionHistory',
+                    'PresenceList',
+                    'Comments',
+                    'TrackChanges',
+                    'TrackChangesData',
+                    'RevisionHistory',
+                    'Pagination',
+                    'WProofreader',
+                    'MathType'
+                ]
+            });
+
+	</script>
+
+
+	</form>
+</div>
+
+</html>

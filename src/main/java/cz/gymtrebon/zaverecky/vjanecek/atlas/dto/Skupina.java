@@ -3,6 +3,8 @@ package cz.gymtrebon.zaverecky.vjanecek.atlas.dto;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.yaml.snakeyaml.tokens.BlockSequenceStartToken;
+
 import lombok.Data;
 
 @Data
@@ -15,5 +17,4 @@ public class Skupina {
 	private String nazev, textSkupiny;
 
 	List<Popisek> cesta = new ArrayList<>();
-	
 }

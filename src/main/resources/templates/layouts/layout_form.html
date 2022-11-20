@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="cs" th:replace="~{layouts/layout_base::content(~{::#headdiv}, ~{::#all})}"
+	th:fragment="layout(head ,info, main, buttons, breadcrumb)" xmlns:th="http://www.thymeleaf.org">
+
+
+<div id="headdiv">
+		<div th:replace="${head}"></div>
+		<script type="text/javascript" th:src="@{/ckeditor5-35.3.1/build/ckeditor.js}"></script>
+	</div>
+<div id="all">
+	<main>
+		<div th:replace="${breadcrumb}"></div>
+
+		<div th:replace="${info}"></div>
+		<div th:replace="${main}"></div>
+		<div th:replace="${buttons}"></div>
+		<script>
+		ClassicEditor.create(document.getElementById("celyText"), {
+                // https://ckeditor.com/docs/ckeditor5/latest/features/toolbar/toolbar.html#extended-toolbar-configuration-format
+                toolbar: {
+                    items: [
+						'bold', 'italic', 'strikethrough', 'underline', 'subscript', 'superscript', '|', 'undo', 'redo'
+					],
+                    shouldNotGroupWhenFull: true
+                },
+                removePlugins: [
+                    'ExportPdf',
+                    'ExportWord',
+                    'CKBox',
+                    'CKFinder',
+                    'EasyImage',
+                    'RealTimeCollaborativeComments',
+                    'RealTimeCollaborativeTrackChanges',
+                    'RealTimeCollaborativeRevisionHistory',
+                    'PresenceList',
+                    'Comments',
+                    'TrackChanges',
+                    'TrackChangesData',
+                    'RevisionHistory',
+                    'Pagination',
+                    'WProofreader',
+                    'MathType'
+                ]
+            });
+	</script>
+	</main>
+</div>
+
+
+</html>

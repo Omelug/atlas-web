@@ -15,4 +15,6 @@ public class Zastupce {
 	private String nazev, nazev2, autor, barvy, text;
 	
 	List<Popisek> cesta = new ArrayList<>();
+	
+	List<Fotka> fotky = new ArrayList<>();
 }

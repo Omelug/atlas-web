@@ -1,26 +1,41 @@
 package cz.gymtrebon.zaverecky.vjanecek.atlas.service;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 import javax.validation.constraints.NotNull;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import cz.gymtrebon.zaverecky.vjanecek.atlas.dto.Fotka;
 import cz.gymtrebon.zaverecky.vjanecek.atlas.dto.Popisek;
 import cz.gymtrebon.zaverecky.vjanecek.atlas.dto.Skupina;
 import cz.gymtrebon.zaverecky.vjanecek.atlas.dto.Zastupce;
+import cz.gymtrebon.zaverecky.vjanecek.atlas.entity.Obrazek;
 import cz.gymtrebon.zaverecky.vjanecek.atlas.entity.Polozka;
 import cz.gymtrebon.zaverecky.vjanecek.atlas.entity.Typ;
+import cz.gymtrebon.zaverecky.vjanecek.atlas.repository.ObrazekRepository;
 import cz.gymtrebon.zaverecky.vjanecek.atlas.repository.PolozkaRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class AtlasService {
 
 	private final PolozkaRepository polozkaRepo;
+	
+	private final ObrazekRepository obrazekRepo;
 
+	@Value( "${images.path}" )
+	private String cestaKObrazkum;
+	
 	public Skupina najdiRootSkupinu() {
 		return polozkaToSkupina(polozkaRepo.findByTyp(Typ.ROOT));
 	}
@@ -172,7 +187,15 @@ public class AtlasService {
 		if (polozka.getNadrizenaSkupina() != null) {
 			zastupce.setIdNadrizeneSkupiny(polozka.getNadrizenaSkupina().getId());
 		}
-
+		if (polozka.getObrazky() != null) {
+			for (Obrazek obrazek : polozka.getObrazky()) {
+				Fotka f = new Fotka();
+				f.setId(obrazek.getId());
+				f.setNazev(obrazek.getJmenoSouboru());
+				f.setUrl("/obrazek/" + obrazek.getId());
+				zastupce.getFotky().add(f);
+			}
+		}
 		Polozka pom = polozka.getNadrizenaSkupina();
 		while (pom != null && pom.getTyp() != Typ.ROOT) {
 			Popisek b = new Popisek();
@@ -192,4 +215,31 @@ public class AtlasService {
 		return p;
 	}
 
+	public void uploadObrazek(Integer polozkaId, MultipartFile file) {
+
+		Polozka p = polozkaRepo.getById(polozkaId);
+		
+		Obrazek o = new Obrazek();
+		o.setPolozka(p);
+		o.setJmenoSouboru(file.getOriginalFilename());
+		
+		obrazekRepo.save(o);
+		
+		try {
+			File f = new File(cestaKObrazkum, String.valueOf(o.getId())); 
+			FileOutputStream fos = new FileOutputStream(f);
+			fos.write(file.getBytes());
+			fos.close();
+		} catch (IOException e) {
+			log.error("Error while saving image", e);
+			throw new RuntimeException("Error while saving image", e);
+		}
+		
+	}
+	
+	public File souborObrazku(Integer obrazekId) {
+		Obrazek o = obrazekRepo.getById(obrazekId);
+		return new File(cestaKObrazkum, String.valueOf(o.getId()));
+	}
+	
 }

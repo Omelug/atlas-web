@@ -12,7 +12,6 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 import org.hibernate.annotations.GenericGenerator;
@@ -21,9 +20,9 @@ import lombok.Getter;
 import lombok.Setter;
 
 @Entity
-@Table(name = "polozka")
+@Table(name = "obrazek")
 @Getter @Setter
-public class Polozka {
+public class Obrazek {
 	
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO, generator="native")
@@ -32,33 +31,11 @@ public class Polozka {
 	private Integer id;
 	
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "nadrizena_skupina_id")
-    private Polozka nadrizenaSkupina;
+    @JoinColumn(name = "polozka_id")
+    private Polozka polozka;
     
-	@Column(name="typ", nullable=true)
-	private Typ typ;
-	
-	@Column(name="nazev", nullable=true, length=250)
-	private String nazev;
-	
-	@Column(name="nazev2", nullable=true, length=250)
-	private String nazev2;
-	
-	@Column(name="autor", nullable=true, length=250)
-	private String autor;
-	
-	@Column(name="barvy", nullable=true, length=250)
-	private String barvy;
-	
-	@Column(name="text", nullable=true)
-	private String text;
-	
-	@ManyToMany(mappedBy="nadrizenaSkupina")
-	private List<Polozka> polozky = new ArrayList<>();
-	
-	@OneToMany(mappedBy="polozka")
-	private List<Obrazek> obrazky = new ArrayList<>();
-	
+	@Column(name="jmeno_souboru", nullable=true)
+	private String jmenoSouboru;
 	
 	@Override
 	public int hashCode() {
@@ -76,7 +53,7 @@ public class Polozka {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		Polozka other = (Polozka) obj;
+		Obrazek other = (Obrazek) obj;
 		if (id == null) {
 			if (other.id != null)
 				return false;

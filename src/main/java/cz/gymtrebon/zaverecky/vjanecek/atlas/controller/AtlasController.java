@@ -1,18 +1,29 @@
 package cz.gymtrebon.zaverecky.vjanecek.atlas.controller;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.Optional;
 
 import javax.validation.Valid;
 
+import org.springframework.core.io.InputStreamResource;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.ui.ModelMap;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.multipart.MultipartFile;
 
 import cz.gymtrebon.zaverecky.vjanecek.atlas.dto.Skupina;
 import cz.gymtrebon.zaverecky.vjanecek.atlas.dto.Zastupce;
@@ -20,8 +31,8 @@ import cz.gymtrebon.zaverecky.vjanecek.atlas.form.SkupinaForm;
 import cz.gymtrebon.zaverecky.vjanecek.atlas.form.TestForm;
 import cz.gymtrebon.zaverecky.vjanecek.atlas.form.ZastupceForm;
 import cz.gymtrebon.zaverecky.vjanecek.atlas.service.AtlasService;
+
 import lombok.RequiredArgsConstructor;
-import lombok.extern.java.Log;
  
 @Controller
 @RequestMapping("/")
@@ -261,4 +272,30 @@ public class AtlasController {
 		return "redirect:/zastupce/" + idZastupce;
 	}	
 	
+	@PostMapping("/zastupce/{id}/upload")
+	public String submit(
+			@RequestParam("file") MultipartFile file, 
+			@PathVariable("id") Integer id, 
+			ModelMap modelMap) throws IOException {
+
+		service.uploadObrazek(id, file);
+		
+		return "redirect:/zastupce/" + id;	    
+	}
+
+	@GetMapping("/obrazek/{id}")
+	public ResponseEntity<InputStreamResource> obrazek(@PathVariable("id") Integer id) throws IOException {
+
+		File file = service.souborObrazku(id);
+		
+		//TODO podle pripony obrazku zvolit spravny MediaType
+		// MediaType.IMAGE_JPEG
+		// MediaType.IMAGE_PNG;
+		
+		MediaType contentType = MediaType.IMAGE_PNG;
+	    return ResponseEntity.ok()
+    		.contentType(contentType)
+    		.body(new InputStreamResource(new FileInputStream(file)));
+	}
+
 }

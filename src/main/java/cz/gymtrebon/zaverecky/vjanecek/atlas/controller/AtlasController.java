@@ -273,7 +273,7 @@ public class AtlasController {
 	}	
 	
 	@PostMapping("/zastupce/{id}/upload")
-	public String submit(
+	public String uploadImage(
 			@RequestParam("file") MultipartFile file, 
 			@PathVariable("id") Integer id, 
 			ModelMap modelMap) throws IOException {
@@ -282,17 +282,28 @@ public class AtlasController {
 		
 		return "redirect:/zastupce/" + id;	    
 	}
+	@GetMapping("/zastupce/{id}/delete/{obrazekid}")
+	public String deleteIamge(
+			@PathVariable("id") Integer id,
+			@PathVariable("obrazekid") Integer obrazekid,
+			ModelMap modelMap) throws IOException {
+
+		service.deleteObrazek(id, obrazekid);
+		
+		return "redirect:/zastupce/" + id;	    
+	}
 
 	@GetMapping("/obrazek/{id}")
 	public ResponseEntity<InputStreamResource> obrazek(@PathVariable("id") Integer id) throws IOException {
 
 		File file = service.souborObrazku(id);
+		MediaType contentType = MediaType.IMAGE_PNG;
 		
 		//TODO podle pripony obrazku zvolit spravny MediaType
 		// MediaType.IMAGE_JPEG
 		// MediaType.IMAGE_PNG;
 		
-		MediaType contentType = MediaType.IMAGE_PNG;
+		
 	    return ResponseEntity.ok()
     		.contentType(contentType)
     		.body(new InputStreamResource(new FileInputStream(file)));

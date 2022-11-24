@@ -16,6 +16,8 @@
 	<h2>Seznam obrázků</h2>
   <div th:each="fotka : ${zastupce.fotky}">
     <a th:href="${fotka.url}"><b th:text="${fotka.nazev}"></b></a>
+    <a th:href="@{'/zastupce/'+${zastupce.id}+'/delete/'+${fotka.id}}"><b th:text="smazat"></b></a>
+    
     <br>
     <img th:src="${fotka.url}">
   </div>

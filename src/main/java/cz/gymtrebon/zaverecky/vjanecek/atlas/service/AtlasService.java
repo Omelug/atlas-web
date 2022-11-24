@@ -241,5 +241,16 @@ public class AtlasService {
 		Obrazek o = obrazekRepo.getById(obrazekId);
 		return new File(cestaKObrazkum, String.valueOf(o.getId()));
 	}
+
+	public void deleteObrazek(Integer id, Integer obrazekId) {
+		// TODO Auto-generated method stub
+		Obrazek o = obrazekRepo.getById(obrazekId);
+		
+		File f = new File(cestaKObrazkum, String.valueOf(o.getId())); 
+		f.delete();
+		
+		obrazekRepo.delete(o);
+		
+	}
 	
 }

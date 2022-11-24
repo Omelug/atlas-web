@@ -50,7 +50,7 @@ public class Polozka {
 	@Column(name="barvy", nullable=true, length=250)
 	private String barvy;
 	
-	@Column(name="text", nullable=true)
+	@Column(name="text", nullable=true, length=2500)
 	private String text;
 	
 	@ManyToMany(mappedBy="nadrizenaSkupina")

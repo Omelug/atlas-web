@@ -111,7 +111,7 @@ public class AtlasApplication implements CommandLineRunner {
 		List<String[]> imageList = readAllLines(pathImages);
 		for (int i = 1; i < imageList.size();i++) {
 			String[] polozka = imageList.get(i);
-			int idPolozky = Integer.valueOf(polozka[0]);
+			int idObrazku = Integer.valueOf(polozka[0]);
 			int idParenta = Integer.valueOf(polozka[1]);
 			
 			Obrazek obrazek = new Obrazek();
@@ -120,7 +120,7 @@ public class AtlasApplication implements CommandLineRunner {
 			obrazek.setJmenoSouboru(polozka[2]);
 			
 			obrazekRepo.save(obrazek);
-			mapovaniimageId.put(idPolozky, obrazek.getId());
+			mapovaniimageId.put(idObrazku, obrazek.getId());
 		}
 	}
 	

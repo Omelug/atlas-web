@@ -9,74 +9,81 @@
 </div>
 
 <div id="main">
-	<form th:action="@{/zastupce/ulozit}" th:object="${zastupce}" method="post">
+	<div class="row">
+		<div class="form-group col-md-6">
+			<form th:action="@{/zastupce/ulozit}" th:object="${zastupce}" method="post">
 
-		<input type="hidden" id="inputId" th:field="*{id}">
+				<input type="hidden" id="inputId" th:field="*{id}">
 
-		<div class="form-row">
+				<div class="form-row">
+					<label for="idNadrizeneSkupiny">Nadřazená skupina</label>
+					<select id="idNadrizeneSkupiny" class="form-control" th:field="*{idNadrizeneSkupiny}"
+						th:classappend="${#fields.hasErrors('idNadrizeneSkupiny')} ? is-invalid">
+						<option value=""></option>
+						<option th:each="s : ${nadrizeneSkupiny}" th:value="${s.id}" th:text="${s.nazev}"
+							th:selected="${s.id==zastupce.idNadrizeneSkupiny}"></option>
+					</select>
+					<p th:if="${#fields.hasErrors('idNadrizeneSkupiny')}" th:errors="*{idNadrizeneSkupiny}"
+						class="invalid-feedback"></p>
+				</div>
 
-			<div class="form-group col-md-6">
-				<label for="idNadrizeneSkupiny">Nadřazená skupina</label>
-				<select id="idNadrizeneSkupiny" class="form-control" th:field="*{idNadrizeneSkupiny}"
-					th:classappend="${#fields.hasErrors('idNadrizeneSkupiny')} ? is-invalid">
-					<option value=""></option>
-					<option th:each="s : ${nadrizeneSkupiny}" th:value="${s.id}" th:text="${s.nazev}"
-						th:selected="${s.id==zastupce.idNadrizeneSkupiny}"></option>
-				</select>
-				<p th:if="${#fields.hasErrors('idNadrizeneSkupiny')}" th:errors="*{idNadrizeneSkupiny}"
-					class="invalid-feedback"></p>
-			</div>
+				<div class="form-row">
+					<label for="inputNazev">Název</label>
+					<input type="text" class="form-control" id="inputNazev" placeholder="Název zástupce"
+						th:field="*{nazev}" th:classappend="${#fields.hasErrors('nazev')} ? is-invalid">
+					<p th:if="${#fields.hasErrors('nazev')}" th:errors="*{nazev}" class="invalid-feedback"></p>
+				</div>
+				<div class="form-row">
+					<label for="inputNazev2">Další názvy</label>
+					<input type="text" class="form-control" id="inputNazev2" placeholder="Další název"
+						th:field="*{nazev2}" th:classappend="${#fields.hasErrors('nazev2')} ? is-invalid">
+					<p th:if="${#fields.hasErrors('nazev2')}" th:errors="*{nazev2}" class="invalid-feedback"></p>
+				</div>
+				<div class="form-row">
+					<label for="inputAutor">Autor</label>
+					<input type="text" class="form-control" id="inputAutor" placeholder="Autor" th:field="*{autor}"
+						th:classappend="${#fields.hasErrors('autor')} ? is-invalid">
+					<p th:if="${#fields.hasErrors('autor')}" th:errors="*{autor}" class="invalid-feedback"></p>
+				</div>
+				<div class="form-row">
+					<label for="inputBarvy">Barvy</label>
+					<input type="text" class="form-control" id="inputBarvy" placeholder="Barva" th:field="*{barvy}"
+						th:classappend="${#fields.hasErrors('barvy')} ? is-invalid">
+					<p th:if="${#fields.hasErrors('barvy')}" th:errors="*{barvy}" class="invalid-feedback"></p>
+				</div>
+				<div class="form-row">
+					<label for="inputTextSkupiny">Text</label>
+					<textarea id="celyText" class="form-control" name="celyText" th:text="${zastupce.text}"
+						th:field="*{text}">
+					</textarea>
+				</div>
+				<hr>
+				<!-- https://getbootstrap.com/docs/4.0/components/buttons/ -->
+
+				<button th:if="${novy == false}" type="submit" class="btn btn-danger" name="akce-smazat">Smazat</button>
+
+				<button type="submit" class="btn btn-primary" name="akce-ulozit">Uložit</button>
+
+				<button type="submit" class="btn btn-secondary" name="akce-zpet">Zpět</button>
+
+			</form>
 		</div>
-
-		<div class="form-row">
-			<div class="form-group col-md-6">
-				<label for="inputNazev">Název</label>
-				<input type="text" class="form-control" id="inputNazev" placeholder="Název zástupce" th:field="*{nazev}"
-					th:classappend="${#fields.hasErrors('nazev')} ? is-invalid">
-				<p th:if="${#fields.hasErrors('nazev')}" th:errors="*{nazev}" class="invalid-feedback"></p>
-			</div>
+		<div class="form-group col-md-6">
+			<form th:action="@{'/zastupce/'+${zastupce.id}+'/upload'}" method="post" enctype="multipart/form-data">
+				<table>
+					<tr>
+						<td><label path="file">Choose image:</label></td>
+					</tr>
+					<tr>
+						<td><input type="file" name="file" /></td>
+					</tr>
+					<tr>
+						<td><input type="submit" value="Nahrát" /></td>
+					</tr>
+				</table>
+			</form>
 		</div>
-		<div class="form-row">
-			<div class="form-group col-md-6">
-				<label for="inputNazev2">Další názvy</label>
-				<input type="text" class="form-control" id="inputNazev2" placeholder="Další název" th:field="*{nazev2}"
-					th:classappend="${#fields.hasErrors('nazev2')} ? is-invalid">
-				<p th:if="${#fields.hasErrors('nazev2')}" th:errors="*{nazev2}" class="invalid-feedback"></p>
-			</div>
-		</div>
-		<div class="form-row">
-			<div class="form-group col-md-6">
-				<label for="inputAutor">Autor</label>
-				<input type="text" class="form-control" id="inputAutor" placeholder="Autor" th:field="*{autor}"
-					th:classappend="${#fields.hasErrors('autor')} ? is-invalid">
-				<p th:if="${#fields.hasErrors('autor')}" th:errors="*{autor}" class="invalid-feedback"></p>
-			</div>
-		</div>
-		<div class="form-row">
-			<div class="form-group col-md-6">
-				<label for="inputBarvy">Barvy</label>
-				<input type="text" class="form-control" id="inputBarvy" placeholder="Barva" th:field="*{barvy}"
-					th:classappend="${#fields.hasErrors('barvy')} ? is-invalid">
-				<p th:if="${#fields.hasErrors('barvy')}" th:errors="*{barvy}" class="invalid-feedback"></p>
-			</div>
-		</div>
-		<div class="form-row">
-			<div class="form-group col-md-6">
-				<label for="inputTextSkupiny">Text</label>
-				<textarea id="celyText" class="form-control" name="celyText" th:text="${zastupce.text}"
-					th:field="*{text}">
-				</textarea>
-			</div>
-		</div>
-		<!-- https://getbootstrap.com/docs/4.0/components/buttons/ -->
-
-		<button th:if="${novy == false}" type="submit" class="btn btn-danger" name="akce-smazat">Smazat</button>
-
-		<button type="submit" class="btn btn-primary" name="akce-ulozit">Uložit</button>
-
-		<button type="submit" class="btn btn-secondary" name="akce-zpet">Zpět</button>
-
-	</form>
+	</div>
 </div>
 
 </html>

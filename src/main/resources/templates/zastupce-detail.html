@@ -21,25 +21,9 @@
     <br>
     <img th:src="${fotka.url}">
   </div>
-	 
-	<hr>
-	
-<form th:action="@{'/zastupce/'+${zastupce.id}+'/upload'}" method="post" enctype="multipart/form-data">
-    <table>
-        <tr>
-            <td><label path="file">Vyberte soubor k ulozeni</label></td>
-            <td><input type="file" name="file" /></td>
-        </tr>
-        <tr>
-            <td><input type="submit" value="Nahrát" /></td>
-        </tr>
-    </table>
-</form>   
-	
-	
 </div>
 <div id="buttons">
-	<a th:href="@{'/zastupce/'+${zastupce.id}+'/editovat'}">Editovat</a>
+	<a class="btn btn-primary" th:href="@{'/zastupce/'+${zastupce.id}+'/editovat'}">Editovat</a>
 </div>
 
 <div id="breadcrumb">

@@ -49,6 +49,7 @@ public class AtlasApplication implements CommandLineRunner {
 		log.info("Atlas Command Line Runner");
 		
 		Map<Integer, Integer> mapovaniId = new HashMap<>();
+		Map<Integer, Integer> mapovaniimageId = new HashMap<>();
 		
 		Polozka p = new Polozka();
 		p.setNadrizenaSkupina(null);
@@ -76,10 +77,10 @@ public class AtlasApplication implements CommandLineRunner {
 		o.setPolozka(zastupce);
 		obrazekRepo.save(o);
 */		
-		Path path = Paths.get(ClassLoader.getSystemResource("static/FLOWER.csv").toURI());
-		List<String[]> imageList = readAllLines(path);
-		for (int i = 1; i < imageList.size();i++) {
-			String[] polozka = imageList.get(i);
+		Path pathFlowers = Paths.get(ClassLoader.getSystemResource("static/FLOWER.csv").toURI());
+		List<String[]> flowerList = readAllLines(pathFlowers);
+		for (int i = 1; i < flowerList.size();i++) {
+			String[] polozka = flowerList.get(i);
 			int idPolozky = Integer.valueOf(polozka[0]);
 			int idParenta = Integer.valueOf(polozka[1]);
 
@@ -101,18 +102,31 @@ public class AtlasApplication implements CommandLineRunner {
 			
 			polozkaRepo.save(pol);
 			mapovaniId.put(idPolozky, pol.getId());
-			log.info("---------------------------------");
+			/*log.info("---------------------------------");
 			for (String string : polozka) {
 				log.info(string);
-			}
+			}*/
 		}
-		
-	}	
+		Path pathImages = Paths.get(ClassLoader.getSystemResource("static/IMAGE_FLOWER.csv").toURI());
+		List<String[]> imageList = readAllLines(pathImages);
+		for (int i = 1; i < imageList.size();i++) {
+			String[] polozka = imageList.get(i);
+			int idObrazku = Integer.valueOf(polozka[0]);
+			int idParenta = Integer.valueOf(polozka[1]);
+			
+			Obrazek obrazek = new Obrazek();
+			Polozka imageParent = polozkaRepo.getById(mapovaniId.get(idParenta));
+			obrazek.setPolozka(imageParent);
+			obrazek.setJmenoSouboru(polozka[2]);
+			
+			obrazekRepo.save(obrazek);
+			mapovaniimageId.put(idObrazku, obrazek.getId());
+		}
+	}
 	
 	@Bean(name = "multipartResolver")
 	public CommonsMultipartResolver multipartResolver() {
-	    CommonsMultipartResolver multipartResolver = new CommonsMultipartResolver();
-	    multipartResolver.setMaxUploadSize(100000);
+	    CommonsMultipartResolver multipartResolver = new CommonsMultipartResolver(); 
 	    return multipartResolver;
 	}		
 	public List<String[]> readAllLines(Path filePath) throws Exception {
@@ -122,6 +136,4 @@ public class AtlasApplication implements CommandLineRunner {
 	        }
 	    }
 	}
-	
-	
 }

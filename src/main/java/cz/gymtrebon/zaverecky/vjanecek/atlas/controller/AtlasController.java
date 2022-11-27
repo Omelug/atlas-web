@@ -27,9 +27,11 @@ import org.springframework.web.multipart.MultipartFile;
 
 import cz.gymtrebon.zaverecky.vjanecek.atlas.dto.Skupina;
 import cz.gymtrebon.zaverecky.vjanecek.atlas.dto.Zastupce;
+import cz.gymtrebon.zaverecky.vjanecek.atlas.entity.Obrazek;
 import cz.gymtrebon.zaverecky.vjanecek.atlas.form.SkupinaForm;
 import cz.gymtrebon.zaverecky.vjanecek.atlas.form.TestForm;
 import cz.gymtrebon.zaverecky.vjanecek.atlas.form.ZastupceForm;
+import cz.gymtrebon.zaverecky.vjanecek.atlas.repository.ObrazekRepository;
 import cz.gymtrebon.zaverecky.vjanecek.atlas.service.AtlasService;
 
 import lombok.RequiredArgsConstructor;
@@ -167,10 +169,8 @@ public class AtlasController {
 	public String detailZastupce(
 			Model model,
 			@PathVariable("id") Integer zastupceId) { 
-		
 		Zastupce zastupce = service.najdiZastupceDleId(zastupceId);
 		model.addAttribute("zastupce", zastupce);
-		
 		return "zastupce-detail";
 	}
 	
@@ -298,12 +298,10 @@ public class AtlasController {
 
 		File file = service.souborObrazku(id);
 		MediaType contentType = MediaType.IMAGE_PNG;
-		
-		//TODO podle pripony obrazku zvolit spravny MediaType
-		// MediaType.IMAGE_JPEG
-		// MediaType.IMAGE_PNG;
-		
-		
+		String path = file.getName().toString(); 
+		if (path.endsWith(".jpg") || path.endsWith(".jpeg") ) {
+			contentType = MediaType.IMAGE_JPEG;
+		}
 	    return ResponseEntity.ok()
     		.contentType(contentType)
     		.body(new InputStreamResource(new FileInputStream(file)));

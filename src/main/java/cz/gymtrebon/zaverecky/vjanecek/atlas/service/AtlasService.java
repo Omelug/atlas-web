@@ -1,12 +1,15 @@
 package cz.gymtrebon.zaverecky.vjanecek.atlas.service;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
-
-import javax.validation.constraints.NotNull;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -15,6 +18,7 @@ import org.springframework.web.multipart.MultipartFile;
 import cz.gymtrebon.zaverecky.vjanecek.atlas.dto.Fotka;
 import cz.gymtrebon.zaverecky.vjanecek.atlas.dto.Popisek;
 import cz.gymtrebon.zaverecky.vjanecek.atlas.dto.Skupina;
+import cz.gymtrebon.zaverecky.vjanecek.atlas.dto.TransportniPolozka;
 import cz.gymtrebon.zaverecky.vjanecek.atlas.dto.Zastupce;
 import cz.gymtrebon.zaverecky.vjanecek.atlas.entity.Obrazek;
 import cz.gymtrebon.zaverecky.vjanecek.atlas.entity.Polozka;
@@ -155,6 +159,10 @@ public class AtlasService {
 		return polozkaToZastupce(polozka);
 	}
 
+	public Obrazek najdiObrazekDleId(Integer id) {
+		return obrazekRepo.getById(id);
+	}
+
 	public Skupina polozkaToSkupina(Polozka polozka) {
 		Skupina s = new Skupina();
 		s.setId(polozka.getId());
@@ -224,7 +232,7 @@ public class AtlasService {
 		o.setJmenoSouboru(file.getOriginalFilename());
 		
 		obrazekRepo.save(o);
-		
+		log.info("Uploading file " + file.getOriginalFilename());
 		try {
 			File f = new File(cestaKObrazkum, String.valueOf(o.getId())); 
 			FileOutputStream fos = new FileOutputStream(f);
@@ -236,10 +244,38 @@ public class AtlasService {
 		}
 		
 	}
-	
+
+	public void uploadObrazek(Integer polozkaId, File file) {
+
+		Polozka p = polozkaRepo.getById(polozkaId);
+		
+		Obrazek o = new Obrazek();
+		o.setPolozka(p);
+		o.setJmenoSouboru(file.getName());
+		
+		obrazekRepo.save(o);
+		log.info("Importing file " + file.getAbsolutePath());
+		try {
+			File f = new File(cestaKObrazkum, String.valueOf(o.getId()));
+			InputStream in = new BufferedInputStream(new FileInputStream(file));
+		 	OutputStream out = new BufferedOutputStream(new FileOutputStream(f));
+		 	byte[] buffer = new byte[1024];
+	        int lengthRead;
+	        while ((lengthRead = in.read(buffer)) > 0) {
+	            out.write(buffer, 0, lengthRead);
+	            out.flush();
+	        }		 	
+	        out.close();
+	        in.close();
+		} catch (IOException e) {
+			log.error("Error while saving image", e);
+			throw new RuntimeException("Error while saving image", e);
+		}
+	}
+
 	public File souborObrazku(Integer obrazekId) {
 		Obrazek o = obrazekRepo.getById(obrazekId);
-		return new File(cestaKObrazkum, String.valueOf(o.getJmenoSouboru()));
+		return new File(cestaKObrazkum, String.valueOf(o.getId()));
 	}
 
 	public void deleteObrazek(Integer id, Integer obrazekId) {
@@ -251,5 +287,20 @@ public class AtlasService {
 		obrazekRepo.delete(o);
 		
 	}
+	
+
+	//TODO rekurzivni funkce pro zanoreni do podpolozek
+	public TransportniPolozka findT() {
+		TransportniPolozka result = new TransportniPolozka();
+		Polozka polozka = polozkaRepo.findByTyp(Typ.ROOT);
+		result.setNazev(polozka.getNazev());
+		/**....*/
+		for (Polozka p : polozka.getPolozky()) {
+			result.getPodpolozky().add(result);
+		} 
+		return result;
+	} 
+	
+	
 	
 }

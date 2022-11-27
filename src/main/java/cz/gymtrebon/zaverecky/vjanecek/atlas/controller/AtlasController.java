@@ -295,10 +295,10 @@ public class AtlasController {
 
 	@GetMapping("/obrazek/{id}")
 	public ResponseEntity<InputStreamResource> obrazek(@PathVariable("id") Integer id) throws IOException {
-
+		Obrazek obr = service.najdiObrazekDleId(id);
 		File file = service.souborObrazku(id);
 		MediaType contentType = MediaType.IMAGE_PNG;
-		String path = file.getName().toString(); 
+		String path = obr.getJmenoSouboru().toString(); 
 		if (path.endsWith(".jpg") || path.endsWith(".jpeg") ) {
 			contentType = MediaType.IMAGE_JPEG;
 		}

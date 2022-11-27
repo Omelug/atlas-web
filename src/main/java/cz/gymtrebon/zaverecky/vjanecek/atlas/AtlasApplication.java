@@ -1,6 +1,9 @@
 package cz.gymtrebon.zaverecky.vjanecek.atlas;
 
+import java.io.File;
+import java.io.FileReader;
 import java.io.Reader;
+import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -14,6 +17,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
+import org.springframework.util.ResourceUtils;
 import org.springframework.web.multipart.commons.CommonsMultipartResolver;
 
 import com.opencsv.CSVReader;
@@ -59,26 +63,8 @@ public class AtlasApplication implements CommandLineRunner {
 
 		mapovaniId.put(0, p.getId());
 
-		/*
-		Polozka prvni = new Polozka();
-		prvni.setNadrizenaSkupina(p);
-		prvni.setNazev("Skupina");
-		prvni.setTyp(Typ.SKUPINA);
-		polozkaRepo.save(prvni);
-
-		Polozka zastupce = new Polozka();
-		zastupce.setNadrizenaSkupina(p);
-		zastupce.setNazev("Zastupce");
-		zastupce.setTyp(Typ.ZASTUPCE);
-		polozkaRepo.save(zastupce);
-		
-		Obrazek o = new Obrazek();
-		o.setJmenoSouboru("jmeno");
-		o.setPolozka(zastupce);
-		obrazekRepo.save(o);
-*/		
-		Path pathFlowers = Paths.get(ClassLoader.getSystemResource("static/FLOWER.csv").toURI());
-		List<String[]> flowerList = readAllLines(pathFlowers);
+		File flowers = ResourceUtils.getFile("classpath:data/FLOWER.csv");
+		List<String[]> flowerList = readAllLines(flowers);
 		for (int i = 1; i < flowerList.size();i++) {
 			String[] polozka = flowerList.get(i);
 			int idPolozky = Integer.valueOf(polozka[0]);
@@ -107,21 +93,30 @@ public class AtlasApplication implements CommandLineRunner {
 				log.info(string);
 			}*/
 		}
-		Path pathImages = Paths.get(ClassLoader.getSystemResource("static/IMAGE_FLOWER.csv").toURI());
-		List<String[]> imageList = readAllLines(pathImages);
+		
+		File imagesCSV = ResourceUtils.getFile("classpath:data/IMAGE_FLOWER.csv");
+		List<String[]> imageList = readAllLines(imagesCSV);
+		File imagesFolder = ResourceUtils.getFile("classpath:data/images/AppVitek2022");
 		for (int i = 1; i < imageList.size();i++) {
 			String[] polozka = imageList.get(i);
-			int idObrazku = Integer.valueOf(polozka[0]);
+			//int idObrazku = Integer.valueOf(polozka[0]);
 			int idParenta = Integer.valueOf(polozka[1]);
-			
+			/*
 			Obrazek obrazek = new Obrazek();
 			Polozka imageParent = polozkaRepo.getById(mapovaniId.get(idParenta));
 			obrazek.setPolozka(imageParent);
 			obrazek.setJmenoSouboru(polozka[2]);
+			*/
+			String nameFromCsv = polozka[2];
+			String[] parts = nameFromCsv.split("/");
+			String fileName = parts[parts.length - 1].replaceAll("%20", " ");
+			File imagesFile = new File(imagesFolder, fileName);	
+			atlasService.uploadObrazek(mapovaniId.get(idParenta), imagesFile);
 			
-			obrazekRepo.save(obrazek);
-			mapovaniimageId.put(idObrazku, obrazek.getId());
+			//obrazekRepo.save(obrazek);
+			//mapovaniimageId.put(idObrazku, obrazek.getId());
 		}
+		
 	}
 	
 	@Bean(name = "multipartResolver")
@@ -129,8 +124,9 @@ public class AtlasApplication implements CommandLineRunner {
 	    CommonsMultipartResolver multipartResolver = new CommonsMultipartResolver(); 
 	    return multipartResolver;
 	}		
-	public List<String[]> readAllLines(Path filePath) throws Exception {
-	    try (Reader reader = Files.newBufferedReader(filePath)) {
+	
+	public List<String[]> readAllLines(File file) throws Exception {
+	    try (Reader reader = new FileReader(file)) {
 	        try (CSVReader csvReader = new CSVReader(reader)) {
 	            return csvReader.readAll();
 	        }

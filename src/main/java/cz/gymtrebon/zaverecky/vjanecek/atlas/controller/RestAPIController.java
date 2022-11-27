@@ -38,7 +38,6 @@ import lombok.RequiredArgsConstructor;
 public class RestAPIController {
 
 	private final AtlasService service;
-	private static String text = "";
 
 	@GetMapping("/skupiny/{id}")
 	public ResponseEntity<Skupina> obrazek(@PathVariable("id") Integer id) {

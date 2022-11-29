@@ -35,10 +35,13 @@ import cz.gymtrebon.zaverecky.vjanecek.atlas.repository.ObrazekRepository;
 import cz.gymtrebon.zaverecky.vjanecek.atlas.service.AtlasService;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.java.Log;
+import lombok.extern.slf4j.Slf4j;
  
 @Controller
 @RequestMapping("/")
 @RequiredArgsConstructor
+@Slf4j
 public class AtlasController {
 
 	private final AtlasService service;
@@ -109,11 +112,13 @@ public class AtlasController {
 		model.addAttribute("nova", false);
 		return "skupina-form";
 	}
+	//rekurzivni 
 	@PostMapping(value="/skupina/ulozit", params="akce-smazat")
 	public String smazaniSkupiny(
 			Model model,
 			@ModelAttribute("skupina") SkupinaForm form,
 			BindingResult bindingResult) {
+		log.info("form id  je " + form.getId() );
 		if (!(form.getId() == null)) {
 			service.smazatSkupinu(form.getId());	
 		}
@@ -204,6 +209,7 @@ public class AtlasController {
 		form.setAutor(zastupce.getAutor());
 		form.setBarvy(zastupce.getBarvy());
 		form.setText(zastupce.getText());
+		form.setFotky(zastupce.getFotky());
 		
 		model.addAttribute("nadrizeneSkupiny", service.seznamSkupin());
 		model.addAttribute("zastupce", form);
@@ -258,6 +264,8 @@ public class AtlasController {
 				form.getBarvy(),
 				form.getText()
 				);
+			Zastupce zastupce = service.najdiZastupceDleId(idZastupce);
+			service.pripojitObrazky(zastupce); 
 		} else {
 			idZastupce = service.ulozZastupce(
 				form.getIdNadrizeneSkupiny(),
@@ -272,25 +280,31 @@ public class AtlasController {
 		return "redirect:/zastupce/" + idZastupce;
 	}	
 	
-	@PostMapping("/zastupce/{id}/upload")
+	@PostMapping("/zastupce/{polozkaId}/upload")
 	public String uploadImage(
 			@RequestParam("file") MultipartFile file, 
-			@PathVariable("id") Integer id, 
+			@PathVariable("polozkaId") Integer polozkaId, 
 			ModelMap modelMap) throws IOException {
-
-		service.uploadObrazek(id, file);
+		service.uploadObrazek(polozkaId, file);
 		
-		return "redirect:/zastupce/" + id;	    
+		return "redirect:/zastupce/" + polozkaId + "/editovat";	    
+	}
+	@PostMapping("/zastupce/obrazekNoId/upload")
+	public String uploadImage(
+			@RequestParam("file") MultipartFile file,
+			ModelMap modelMap) throws IOException {
+		service.uploadObrazek(file);		
+		return "redirect:/zastupce/novy";
 	}
 	@GetMapping("/zastupce/{id}/delete/{obrazekid}")
-	public String deleteIamge(
+	public String deleteImage(
 			@PathVariable("id") Integer id,
 			@PathVariable("obrazekid") Integer obrazekid,
 			ModelMap modelMap) throws IOException {
 
 		service.deleteObrazek(id, obrazekid);
 		
-		return "redirect:/zastupce/" + id;	    
+		return "redirect:/zastupce/" + id+ "/editovat";	    
 	}
 
 	@GetMapping("/obrazek/{id}")

@@ -3,6 +3,7 @@ package cz.gymtrebon.zaverecky.vjanecek.atlas.entity;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -53,10 +54,10 @@ public class Polozka {
 	@Column(name="text", nullable=true, length=2500)
 	private String text;
 	
-	@ManyToMany(mappedBy="nadrizenaSkupina")
+	@ManyToMany(mappedBy="nadrizenaSkupina", cascade = CascadeType.REMOVE)
 	private List<Polozka> polozky = new ArrayList<>();
 	
-	@OneToMany(mappedBy="polozka")
+	@OneToMany(mappedBy="polozka", cascade = CascadeType.REMOVE)
 	private List<Obrazek> obrazky = new ArrayList<>();
 	
 	

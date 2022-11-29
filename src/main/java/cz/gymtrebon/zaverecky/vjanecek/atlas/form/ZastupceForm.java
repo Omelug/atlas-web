@@ -1,8 +1,12 @@
 package cz.gymtrebon.zaverecky.vjanecek.atlas.form;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 
+import cz.gymtrebon.zaverecky.vjanecek.atlas.dto.Fotka;
 import lombok.Data;
 
 @Data
@@ -23,6 +27,8 @@ public class ZastupceForm {
 	private String text;
 	
 	private String barvy;
+	
+	List<Fotka> fotky = new ArrayList<>();
 	
 	
 }

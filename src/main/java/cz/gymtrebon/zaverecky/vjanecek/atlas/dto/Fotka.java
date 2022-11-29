@@ -6,9 +6,7 @@ import lombok.Data;
 public class Fotka {
 
 	private Integer id;
-	
 	private String nazev;
-	
 	private String url;
 	
 }

@@ -26,8 +26,6 @@
 				<p th:if="${#fields.hasErrors('idNadrizeneSkupiny')}" th:errors="*{idNadrizeneSkupiny}"
 					class="invalid-feedback"></p>
 			</div>
-			<div class="form-row">
-			</div>
 		</div>
 
 		<div class="form-row">
@@ -38,15 +36,7 @@
 				<p th:if="${#fields.hasErrors('nazev')}" th:errors="*{nazev}" class="invalid-feedback"></p>
 			</div>
 		</div>
-		<!-- <div class="form-row">
-			<div class="form-group col-md-6">
-				<label for="inputTextSkupiny">Text</label>
-				<input type="text" class="form-control" id="inputTextSkupiny" placeholder="Text"
-					th:field="*{textSkupiny}" th:classappend="${#fields.hasErrors('textSkupiny')} ? is-invalid">
-				<p th:if="${#fields.hasErrors('textSkupiny')}" th:errors="*{textSkupiny}" class="invalid-feedback">
-				</p>
-			</div>
-		</div> -->
+
 		<div class="form-row">
 			<div class="form-group col-md-6">
 				<label for="inputTextSkupiny">Text</label>

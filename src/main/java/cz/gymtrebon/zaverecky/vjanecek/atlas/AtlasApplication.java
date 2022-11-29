@@ -3,10 +3,6 @@ package cz.gymtrebon.zaverecky.vjanecek.atlas;
 import java.io.File;
 import java.io.FileReader;
 import java.io.Reader;
-import java.net.URI;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -22,7 +18,6 @@ import org.springframework.web.multipart.commons.CommonsMultipartResolver;
 
 import com.opencsv.CSVReader;
 
-import cz.gymtrebon.zaverecky.vjanecek.atlas.entity.Obrazek;
 import cz.gymtrebon.zaverecky.vjanecek.atlas.entity.Polozka;
 import cz.gymtrebon.zaverecky.vjanecek.atlas.entity.Typ;
 import cz.gymtrebon.zaverecky.vjanecek.atlas.repository.ObrazekRepository;
@@ -88,10 +83,7 @@ public class AtlasApplication implements CommandLineRunner {
 			
 			polozkaRepo.save(pol);
 			mapovaniId.put(idPolozky, pol.getId());
-			/*log.info("---------------------------------");
-			for (String string : polozka) {
-				log.info(string);
-			}*/
+		
 		}
 		
 		File imagesCSV = ResourceUtils.getFile("classpath:data/IMAGE_FLOWER.csv");
@@ -112,6 +104,7 @@ public class AtlasApplication implements CommandLineRunner {
 			String fileName = parts[parts.length - 1].replaceAll("%20", " ");
 			File imagesFile = new File(imagesFolder, fileName);	
 			atlasService.uploadObrazek(mapovaniId.get(idParenta), imagesFile);
+			
 			
 			//obrazekRepo.save(obrazek);
 			//mapovaniimageId.put(idObrazku, obrazek.getId());

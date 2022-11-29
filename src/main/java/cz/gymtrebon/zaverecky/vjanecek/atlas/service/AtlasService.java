@@ -4,13 +4,24 @@ import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
+import javax.persistence.Column;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+
+import org.hibernate.annotations.GenericGenerator;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -18,6 +29,7 @@ import org.springframework.web.multipart.MultipartFile;
 import cz.gymtrebon.zaverecky.vjanecek.atlas.dto.Fotka;
 import cz.gymtrebon.zaverecky.vjanecek.atlas.dto.Popisek;
 import cz.gymtrebon.zaverecky.vjanecek.atlas.dto.Skupina;
+import cz.gymtrebon.zaverecky.vjanecek.atlas.dto.TransportniObrazek;
 import cz.gymtrebon.zaverecky.vjanecek.atlas.dto.TransportniPolozka;
 import cz.gymtrebon.zaverecky.vjanecek.atlas.dto.Zastupce;
 import cz.gymtrebon.zaverecky.vjanecek.atlas.entity.Obrazek;
@@ -25,6 +37,7 @@ import cz.gymtrebon.zaverecky.vjanecek.atlas.entity.Polozka;
 import cz.gymtrebon.zaverecky.vjanecek.atlas.entity.Typ;
 import cz.gymtrebon.zaverecky.vjanecek.atlas.repository.ObrazekRepository;
 import cz.gymtrebon.zaverecky.vjanecek.atlas.repository.PolozkaRepository;
+import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -32,14 +45,17 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 @Slf4j
 public class AtlasService {
-
 	private final PolozkaRepository polozkaRepo;
-	
 	private final ObrazekRepository obrazekRepo;
 
-	@Value( "${images.path}" )
+	//private final ObrazekRepository pomocneObrazekRepo;
+	//private final ObrazekRepository pomocnePolozkaRepo;
+
+	@Value("${images.path}")
 	private String cestaKObrazkum;
-	
+	@Value("${prozatimniImages.path}")
+	private String cestaKProzatimnimObrazkum;
+
 	public Skupina najdiRootSkupinu() {
 		return polozkaToSkupina(polozkaRepo.findByTyp(Typ.ROOT));
 	}
@@ -73,6 +89,7 @@ public class AtlasService {
 		}
 		return zastupce;
 	}
+
 	public Integer vytvoritSkupinu(Integer idNadrizeneSkupiny, String nazev, String text) {
 
 		Polozka nadrizena = polozkaRepo.getById(idNadrizeneSkupiny);
@@ -85,7 +102,7 @@ public class AtlasService {
 		polozkaRepo.save(p);
 		return p.getId();
 	}
- 
+
 	public Integer ulozSkupinu(Integer idNadrizeneSkupiny, Integer idSkupiny, String nazev, String text) {
 
 		Polozka nadrizena = polozkaRepo.getById(idNadrizeneSkupiny);
@@ -97,10 +114,11 @@ public class AtlasService {
 		polozkaRepo.save(skupina);
 		return skupina.getId();
 	}
+
 	public void smazatSkupinu(Integer skupinaId) {
 		List<Skupina> podskupiny = seznamPodskupin(skupinaId);
 		for (Skupina skupina : podskupiny) {
-			smazatPolozku(skupina.getId());
+			smazatSkupinu(skupina.getId());
 		}
 		List<Zastupce> zastupci = seznamZastupcu(skupinaId);
 		for (Zastupce zastupce : zastupci) {
@@ -108,9 +126,10 @@ public class AtlasService {
 		}
 		smazatPolozku(skupinaId);
 	}
+
 	public void smazatPolozku(Integer zastupceId) {
 		if (!(polozkaRepo.getById(zastupceId).getTyp() == Typ.ROOT)) {
-			polozkaRepo.deleteById(zastupceId);	
+			polozkaRepo.deleteById(zastupceId);
 		}
 	}
 
@@ -197,11 +216,7 @@ public class AtlasService {
 		}
 		if (polozka.getObrazky() != null) {
 			for (Obrazek obrazek : polozka.getObrazky()) {
-				Fotka f = new Fotka();
-				f.setId(obrazek.getId());
-				f.setNazev(obrazek.getJmenoSouboru());
-				f.setUrl("/obrazek/" + obrazek.getId());
-				zastupce.getFotky().add(f);
+				zastupce.getFotky().add(fotkazObrazku(obrazek));
 			}
 		}
 		Polozka pom = polozka.getNadrizenaSkupina();
@@ -216,6 +231,14 @@ public class AtlasService {
 		return zastupce;
 	}
 
+	public Fotka fotkazObrazku(Obrazek obrazek) {
+		Fotka f = new Fotka();
+		f.setId(obrazek.getId());
+		f.setNazev(obrazek.getJmenoSouboru());
+		f.setUrl("/obrazek/" + obrazek.getId());
+		return f;
+	}
+
 	public Popisek polozkaToPopisek(Polozka polozka) {
 		Popisek p = new Popisek();
 		p.setId(polozka.getId());
@@ -225,16 +248,14 @@ public class AtlasService {
 
 	public void uploadObrazek(Integer polozkaId, MultipartFile file) {
 
-		Polozka p = polozkaRepo.getById(polozkaId);
-		
 		Obrazek o = new Obrazek();
-		o.setPolozka(p);
 		o.setJmenoSouboru(file.getOriginalFilename());
-		
+		Polozka p = polozkaRepo.getById(polozkaId);
+		o.setPolozka(p);
 		obrazekRepo.save(o);
 		log.info("Uploading file " + file.getOriginalFilename());
 		try {
-			File f = new File(cestaKObrazkum, String.valueOf(o.getId())); 
+			File f = new File(cestaKObrazkum, String.valueOf(o.getId()));
 			FileOutputStream fos = new FileOutputStream(f);
 			fos.write(file.getBytes());
 			fos.close();
@@ -242,31 +263,50 @@ public class AtlasService {
 			log.error("Error while saving image", e);
 			throw new RuntimeException("Error while saving image", e);
 		}
-		
+
+	}
+
+	// zarazeni do prozatimniho seznamu a slozky
+	public void uploadObrazek(MultipartFile file) {
+
+		/*Obrazek o = new Obrazek();
+		o.setJmenoSouboru(file.getOriginalFilename());
+		pomocneObrazekRepo.save(o);
+		log.info("Uploading file (prozatimniObrazekRepo)" + file.getOriginalFilename());
+		try {
+			File f = new File(cestaKProzatimnimObrazkum, String.valueOf(o.getId()));
+			FileOutputStream fos = new FileOutputStream(f);
+			fos.write(file.getBytes());
+			fos.close();
+		} catch (IOException e) {
+			log.error("Error while saving image", e);
+			throw new RuntimeException("Error while saving image", e);
+		}*/
+
 	}
 
 	public void uploadObrazek(Integer polozkaId, File file) {
 
 		Polozka p = polozkaRepo.getById(polozkaId);
-		
+
 		Obrazek o = new Obrazek();
 		o.setPolozka(p);
 		o.setJmenoSouboru(file.getName());
-		
+
 		obrazekRepo.save(o);
 		log.info("Importing file " + file.getAbsolutePath());
 		try {
 			File f = new File(cestaKObrazkum, String.valueOf(o.getId()));
 			InputStream in = new BufferedInputStream(new FileInputStream(file));
-		 	OutputStream out = new BufferedOutputStream(new FileOutputStream(f));
-		 	byte[] buffer = new byte[1024];
-	        int lengthRead;
-	        while ((lengthRead = in.read(buffer)) > 0) {
-	            out.write(buffer, 0, lengthRead);
-	            out.flush();
-	        }		 	
-	        out.close();
-	        in.close();
+			OutputStream out = new BufferedOutputStream(new FileOutputStream(f));
+			byte[] buffer = new byte[1024];
+			int lengthRead;
+			while ((lengthRead = in.read(buffer)) > 0) {
+				out.write(buffer, 0, lengthRead);
+				out.flush();
+			}
+			out.close();
+			in.close();
 		} catch (IOException e) {
 			log.error("Error while saving image", e);
 			throw new RuntimeException("Error while saving image", e);
@@ -280,27 +320,85 @@ public class AtlasService {
 
 	public void deleteObrazek(Integer id, Integer obrazekId) {
 		Obrazek o = obrazekRepo.getById(obrazekId);
-		
-		File f = new File(cestaKObrazkum, String.valueOf(o.getId())); 
-		f.delete();
-		
-		obrazekRepo.delete(o);
-		
-	}
-	
 
-	//TODO rekurzivni funkce pro zanoreni do podpolozek
-	public TransportniPolozka findT() {
-		TransportniPolozka result = new TransportniPolozka();
-		Polozka polozka = polozkaRepo.findByTyp(Typ.ROOT);
-		result.setNazev(polozka.getNazev());
-		/**....*/
-		for (Polozka p : polozka.getPolozky()) {
-			result.getPodpolozky().add(result);
-		} 
-		return result;
-	} 
-	
-	
-	
+		File f = new File(cestaKObrazkum, String.valueOf(o.getId()));
+		f.delete();
+
+		obrazekRepo.delete(o);
+
+	}
+
+	// TODO rekurzivni funkce pro zanoreni do podpolozek
+	public TransportniPolozka polozkaToTP(Integer idPolozky) {
+		TransportniPolozka tp = new TransportniPolozka();
+		Polozka polozka = polozkaRepo.getById(idPolozky);
+
+		tp.setNazev(polozka.getNazev());
+		tp.setText(polozka.getText());
+		tp.setTyp(polozka.getTyp());
+		try {
+			tp.setNadrizenaSkupinaid(polozka.getNadrizenaSkupina().getId());
+		} catch (Exception e) {
+			tp.setNadrizenaSkupinaid(0); // TODO Tady je id pro hlavni slozku
+			log.info("getNadrizenaSkupina je NULL");
+		}
+
+		tp.setId(polozka.getId());
+		tp.setAutor(polozka.getAutor());
+		tp.setBarvy(polozka.getBarvy());
+		tp.setNazev2(polozka.getNazev2());
+
+		return tp;
+	}
+
+	public void rekurzivniPridavaniPolozek(Integer idPolozky, List<TransportniPolozka> database) {
+		pridatDoTransportniPolozka(idPolozky, database);
+		for (Polozka podpolozka : polozkaRepo.getById(idPolozky).getPolozky()) {
+			rekurzivniPridavaniPolozek(podpolozka.getId(), database);
+		}
+	}
+
+	public void pridatDoTransportniPolozka(Integer idPolozky, List<TransportniPolozka> listTP) {
+		TransportniPolozka tp = polozkaToTP(idPolozky);
+		listTP.add(tp);
+	}
+
+	public void pripojitObrazky(Zastupce zastupce) {
+		/*for (Obrazek obrazek : pomocneObrazekRepo.findAll()) {
+			if (obrazek.getPolozka().getId() == null) {
+				obrazek.setPolozka(polozkaRepo.getById(zastupce.getId()));
+
+				zastupce.getFotky().add(fotkazObrazku(obrazek));
+				File f = new File(cestaKProzatimnimObrazkum, String.valueOf(obrazek.getId()));
+
+				obrazek.setId(null);
+				Obrazek ob = obrazekRepo.save(obrazek);
+				f.renameTo(new File(cestaKObrazkum, String.valueOf(ob.getId())));
+			}
+		}*/
+	}
+
+	public void pridavaniObrazku(List<TransportniObrazek> obrazky) {
+		List<Obrazek> obrazkyList = obrazekRepo.findAll();
+		for (Obrazek obrazek : obrazkyList) {
+			TransportniObrazek to = obrazekToTO(obrazek);
+			obrazky.add(to);
+		}
+	}
+
+	private TransportniObrazek obrazekToTO(Obrazek obrazek) {
+		TransportniObrazek to = new TransportniObrazek();
+		to.setId(obrazek.getId());
+		to.setJmenoSouboru(obrazek.getJmenoSouboru());
+		to.setPolozkaid(obrazek.getPolozka().getId());
+		return to;
+	}
+
+	public InputStream inputStream(Integer obrazekId) throws FileNotFoundException {
+		Obrazek o = obrazekRepo.getById(obrazekId);
+		File f = new File(cestaKObrazkum, String.valueOf(o.getId()));
+		InputStream vysledek = new FileInputStream(f);
+		return vysledek;
+	}
+
 }

@@ -11,6 +11,7 @@ public interface PolozkaRepository extends JpaRepository<Polozka, Integer> {
 	
 	Polozka findByTyp(Typ typ);
 	
+	
 	List<Polozka> findAllByTyp(Typ typ);
 	
 	List<Polozka> findByNadrizenaSkupinaAndTyp(Polozka polozka, Typ typ);

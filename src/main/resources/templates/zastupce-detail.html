@@ -3,25 +3,58 @@
 	xmlns:th="http://www.thymeleaf.org">
 
 <div id="info">
-	<i>
-		<h1 th:text="${zastupce.nazev}"></h1>
-	</i>
+	<div class="row">
+		<div class="form-group col-md-6">
+			<i>
+				<h1 th:text="${zastupce.nazev}"></h1>
+			</i>
 
-	<p th:text="${zastupce.nazev2}"></p>
-	<p th:text="${zastupce.autor}"></p>
-	<p th:text="${zastupce.barvy}"></p>
-	<p th:utext="${zastupce.text}"></p>
+			<p th:text="${zastupce.nazev2}"></p>
+			<p th:text="${zastupce.autor}"></p>
+			<p th:text="${zastupce.barvy}"></p>
+			<p th:utext="${zastupce.text}"></p>
 
-	<hr>
-	<h2>Seznam obrázků</h2>
-  <div th:each="fotka : ${zastupce.fotky}">
-    <a th:href="${fotka.url}"><b th:text="${fotka.nazev}"></b></a>
-    <a th:href="@{'/zastupce/'+${zastupce.id}+'/delete/'+${fotka.id}}"><b th:text="smazat"></b></a>
-    
-    <br>
-    <img th:src="${fotka.url}">
-  </div>
-  <hr>
+		</div>
+		<hr>
+		<div class="form-group col-md-6">
+			<h2 th:if="${zastupce.fotky != null}">Image list</h2>
+			<h2 th:if="${zastupce.fotky == null}">Image list is Empty</h2>
+			<div th:if="${zastupce.fotky != null}">
+				<th:block
+					th:with="partitions=${T(org.apache.commons.collections4.ListUtils).partition(zastupce.fotky, 2)}">
+					<div class="row" th:each="partition: ${partitions}">
+						<div class="col-sm-4" th:each="fotka: ${partition}">
+							<div class="fotka">
+								<a class="jmeaObrazku" th:href="${fotka.url}"><b th:text="${fotka.nazev}"></b></a>
+								<a class="smazat" th:href="@{'/zastupce/'+${zastupce.id}+'/delete/'+${fotka.id}}">
+								<b th:text="smazat"></b></a>
+								<br>
+								<img class="img-fluid" th:src="${fotka.url}">
+							</div>
+						</div>
+					</div>
+				</th:block>
+			</div>
+			<form
+				th:action="${novy == true} ? @{'/zastupce/obrazekNoId/upload'} : @{'/zastupce/'+${zastupce.id}+'/upload'} "
+				method="post" enctype="multipart/form-data">
+				<table>
+					<tr>
+						<td><label path="file">Choose image:</label></td>
+					</tr>
+					<tr>
+						<td><input type="file" name="file" /></td>
+					</tr>
+					<tr>
+						<td><input type="submit" value="Nahrát" /></td>
+					</tr>
+				</table>
+			</form>
+			<br>
+		</div>
+	</div>
+</div>
+<hr>
 </div>
 <div id="buttons">
 	<a class="btn btn-primary" th:href="@{'/zastupce/'+${zastupce.id}+'/editovat'}">Editovat</a>

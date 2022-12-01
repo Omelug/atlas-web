@@ -287,7 +287,7 @@ public class AtlasController {
 			ModelMap modelMap) throws IOException {
 		service.uploadObrazek(polozkaId, file);
 		
-		return "redirect:/zastupce/" + polozkaId + "/editovat";	    
+		return "redirect:/zastupce/" + polozkaId;	    
 	}
 	@PostMapping("/zastupce/obrazekNoId/upload")
 	public String uploadImage(
@@ -304,7 +304,7 @@ public class AtlasController {
 
 		service.deleteObrazek(id, obrazekid);
 		
-		return "redirect:/zastupce/" + id+ "/editovat";	    
+		return "redirect:/zastupce/" + id;	    
 	}
 
 	@GetMapping("/obrazek/{id}")

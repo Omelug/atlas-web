@@ -23,3 +23,14 @@ font-size: 15px;
 a{
 	
 }
+.jmeaObrazku{
+	font-family: "Times New Roman", Times, serif;
+	color: #000000;
+	font-style: normal;
+	font-variant: normal;
+}
+.smazatObrazek{
+	font-family: "Times New Roman", Times, serif;
+	color: rgb(255, 0, 0);
+	font-variant: normal;
+}

@@ -64,42 +64,10 @@
 				<!-- https://getbootstrap.com/docs/4.0/components/buttons/ -->
 
 				<button th:if="${novy == false}" type="submit" class="btn btn-danger" name="akce-smazat">Smazat</button>
-
 				<button type="submit" class="btn btn-primary" name="akce-ulozit">Uložit</button>
-
 				<button type="submit" class="btn btn-secondary" name="akce-zpet">Zpět</button>
 			</form>
 		</div>
-		<div class="form-group col-md-6">
-			<form
-				th:action="${novy == true} ? @{'/zastupce/obrazekNoId/upload'} : @{'/zastupce/'+${zastupce.id}+'/upload'} "
-				method="post" enctype="multipart/form-data">
-				<table>
-					<tr>
-						<td><label path="file">Choose image:</label></td>
-					</tr>
-					<tr>
-						<td><input type="file" name="file" /></td>
-					</tr>
-					<tr>
-						<td><input type="submit" value="Nahrát" /></td>
-					</tr>
-				</table>
-			</form>
-
-			<h2>Seznam obrázků</h2>
-			<div th:if="${zastupce.fotky != null}">
-				<div th:each=" fotka : ${zastupce.fotky}">
-					<a th:href="${fotka.url}"><b th:text="${fotka.nazev}"></b></a>
-					<a th:href="@{'/zastupce/'+${zastupce.id}+'/delete/'+${fotka.id}}"><b th:text="smazat"></b></a>
-
-					<br>
-					<img style="height: 200px;" th:src="${fotka.url}">
-				</div>
-			</div>
-		</div>
-
-	</div>
 </div>
 
 </html>

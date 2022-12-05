@@ -264,8 +264,6 @@ public class AtlasController {
 				form.getBarvy(),
 				form.getText()
 				);
-			Zastupce zastupce = service.najdiZastupceDleId(idZastupce);
-			service.pripojitObrazky(zastupce); 
 		} else {
 			idZastupce = service.ulozZastupce(
 				form.getIdNadrizeneSkupiny(),
@@ -289,13 +287,7 @@ public class AtlasController {
 		
 		return "redirect:/zastupce/" + polozkaId;	    
 	}
-	@PostMapping("/zastupce/obrazekNoId/upload")
-	public String uploadImage(
-			@RequestParam("file") MultipartFile file,
-			ModelMap modelMap) throws IOException {
-		service.uploadObrazek(file);		
-		return "redirect:/zastupce/novy";
-	}
+	
 	@GetMapping("/zastupce/{id}/delete/{obrazekid}")
 	public String deleteImage(
 			@PathVariable("id") Integer id,
@@ -312,8 +304,8 @@ public class AtlasController {
 		Obrazek obr = service.najdiObrazekDleId(id);
 		File file = service.souborObrazku(id);
 		MediaType contentType = MediaType.IMAGE_PNG;
-		String path = obr.getJmenoSouboru().toString(); 
-		if (path.endsWith(".jpg") || path.endsWith(".jpeg") ) {
+		String jmenoObrazku = obr.getJmenoSouboru().toString(); 
+		if (jmenoObrazku.endsWith(".jpg") || jmenoObrazku.endsWith(".jpeg") ) {
 			contentType = MediaType.IMAGE_JPEG;
 		}
 	    return ResponseEntity.ok()

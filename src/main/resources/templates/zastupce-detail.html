@@ -19,6 +19,7 @@
 		<div class="form-group col-md-6">
 			<h2 th:if="${zastupce.fotky != null}">Image list</h2>
 			<h2 th:if="${zastupce.fotky == null}">Image list is Empty</h2>
+			<!-- https://stackoverflow.com/questions/39509689/combining-conditions-and-iterations-in-thymeleaf/39515137#39515137  -->
 			<div th:if="${zastupce.fotky != null}">
 				<th:block
 					th:with="partitions=${T(org.apache.commons.collections4.ListUtils).partition(zastupce.fotky, 2)}">

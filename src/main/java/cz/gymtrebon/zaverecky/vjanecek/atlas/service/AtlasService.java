@@ -47,14 +47,9 @@ import lombok.extern.slf4j.Slf4j;
 public class AtlasService {
 	private final PolozkaRepository polozkaRepo;
 	private final ObrazekRepository obrazekRepo;
-
-	//private final ObrazekRepository pomocneObrazekRepo;
-	//private final ObrazekRepository pomocnePolozkaRepo;
-
+	
 	@Value("${images.path}")
 	private String cestaKObrazkum;
-	@Value("${prozatimniImages.path}")
-	private String cestaKProzatimnimObrazkum;
 
 	public Skupina najdiRootSkupinu() {
 		return polozkaToSkupina(polozkaRepo.findByTyp(Typ.ROOT));
@@ -266,25 +261,6 @@ public class AtlasService {
 
 	}
 
-	// zarazeni do prozatimniho seznamu a slozky
-	public void uploadObrazek(MultipartFile file) {
-
-		/*Obrazek o = new Obrazek();
-		o.setJmenoSouboru(file.getOriginalFilename());
-		pomocneObrazekRepo.save(o);
-		log.info("Uploading file (prozatimniObrazekRepo)" + file.getOriginalFilename());
-		try {
-			File f = new File(cestaKProzatimnimObrazkum, String.valueOf(o.getId()));
-			FileOutputStream fos = new FileOutputStream(f);
-			fos.write(file.getBytes());
-			fos.close();
-		} catch (IOException e) {
-			log.error("Error while saving image", e);
-			throw new RuntimeException("Error while saving image", e);
-		}*/
-
-	}
-
 	public void uploadObrazek(Integer polozkaId, File file) {
 
 		Polozka p = polozkaRepo.getById(polozkaId);
@@ -328,7 +304,7 @@ public class AtlasService {
 
 	}
 
-	// TODO rekurzivni funkce pro zanoreni do podpolozek
+	// rekurzivni funkce pro zanoreni do podpolozek
 	public TransportniPolozka polozkaToTP(Integer idPolozky) {
 		TransportniPolozka tp = new TransportniPolozka();
 		Polozka polozka = polozkaRepo.getById(idPolozky);
@@ -339,7 +315,7 @@ public class AtlasService {
 		try {
 			tp.setNadrizenaSkupinaid(polozka.getNadrizenaSkupina().getId());
 		} catch (Exception e) {
-			tp.setNadrizenaSkupinaid(0); // TODO Tady je id pro hlavni slozku
+			tp.setNadrizenaSkupinaid(0); //TODO  Tady je id pro hlavni slozku
 			log.info("getNadrizenaSkupina je NULL");
 		}
 
@@ -361,21 +337,6 @@ public class AtlasService {
 	public void pridatDoTransportniPolozka(Integer idPolozky, List<TransportniPolozka> listTP) {
 		TransportniPolozka tp = polozkaToTP(idPolozky);
 		listTP.add(tp);
-	}
-
-	public void pripojitObrazky(Zastupce zastupce) {
-		/*for (Obrazek obrazek : pomocneObrazekRepo.findAll()) {
-			if (obrazek.getPolozka().getId() == null) {
-				obrazek.setPolozka(polozkaRepo.getById(zastupce.getId()));
-
-				zastupce.getFotky().add(fotkazObrazku(obrazek));
-				File f = new File(cestaKProzatimnimObrazkum, String.valueOf(obrazek.getId()));
-
-				obrazek.setId(null);
-				Obrazek ob = obrazekRepo.save(obrazek);
-				f.renameTo(new File(cestaKObrazkum, String.valueOf(ob.getId())));
-			}
-		}*/
 	}
 
 	public void pridavaniObrazku(List<TransportniObrazek> obrazky) {

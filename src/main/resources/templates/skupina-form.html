@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="cs" th:replace="~{layouts/layout_form::layout(_ , ~{::#info} , ~{::#main} , _ , _ )}"
+<html lang="en" th:replace="~{layouts/layout_form::layout(_ , ~{::#info} , ~{::#main} , _ , _ )}"
 	xmlns:th="http://www.thymeleaf.org">
 
 <div id="info">
@@ -16,7 +16,7 @@
 		<div class="form-row">
 
 			<div class="form-group col-md-6">
-				<label for="idNadrizeneSkupiny">Nadřazená skupina</label>
+				<label for="idNadrizeneSkupiny">Parent group</label>
 				<select id="idNadrizeneSkupiny" class="form-control" th:field="*{idNadrizeneSkupiny}"
 					th:classappend="${#fields.hasErrors('idNadrizeneSkupiny')} ? is-invalid">
 					<option value=""></option>
@@ -30,7 +30,7 @@
 
 		<div class="form-row">
 			<div class="form-group col-md-6">
-				<label for="inputNazev">Název</label>
+				<label for="inputNazev">Name</label>
 				<input type="text" class="form-control" id="inputNazev" placeholder="Název skupiny" th:field="*{nazev}"
 					th:classappend="${#fields.hasErrors('nazev')} ? is-invalid">
 				<p th:if="${#fields.hasErrors('nazev')}" th:errors="*{nazev}" class="invalid-feedback"></p>
@@ -40,18 +40,19 @@
 		<div class="form-row">
 			<div class="form-group col-md-6">
 				<label for="inputTextSkupiny">Text</label>
-				<textarea id="celyText" class="form-control" name="celyText" th:text="${skupina.textSkupiny}"
+				<textarea id="inputTextSkupiny" class="form-control" name="celyText" th:text="${skupina.textSkupiny}"
 					th:field="*{textSkupiny}">
 				</textarea>
+				<p th:if="${#fields.hasErrors('textSkupiny')}" th:errors="*{textSkupiny}" class="invalid-feedback"></p>
 			</div>
 		</div>
 
-		<button th:if="${nova == false AND skupina.idNadrizeneSkupiny != NULL}" type="submit" class="btn btn-danger"
-			name="akce-smazat">Smazat</button>
+		<button th:if="${nova == false && skupina.idNadrizeneSkupiny != NULL}" type="submit" class="btn btn-danger"
+			name="akce-smazat">Delete</button>
 
-		<button type="submit" class="btn btn-primary" name="akce-ulozit">Uložit</button>
+		<button type="submit" class="btn btn-primary" name="akce-ulozit">Save</button>
 
-		<button type="submit" class="btn btn-secondary" name="akce-zpet">Zpět</button>
+		<button type="submit" class="btn btn-secondary" name="akce-zpet">Back</button>
 
 	</form>
 </div>

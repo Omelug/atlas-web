@@ -3,14 +3,22 @@ package cz.gymtrebon.zaverecky.vjanecek.atlas;
 import java.io.File;
 import java.io.FileReader;
 import java.io.Reader;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Supplier;
 
+//import cz.gymtrebon.zaverecky.vjanecek.atlas.kos.UserRepository;
+import cz.gymtrebon.zaverecky.vjanecek.atlas.entity.Polozka;
+import cz.gymtrebon.zaverecky.vjanecek.atlas.entity.Typ;
+import cz.gymtrebon.zaverecky.vjanecek.atlas.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
+import org.springframework.util.ResourceUtils;
 import org.springframework.web.multipart.commons.CommonsMultipartResolver;
 
 import com.opencsv.CSVReader;
@@ -21,7 +29,7 @@ import cz.gymtrebon.zaverecky.vjanecek.atlas.service.AtlasService;
 import lombok.extern.java.Log;
 
 @SpringBootApplication
-@EnableJpaRepositories(basePackages="cz.gymtrebon.zaverecky.vjanecek.atlas.repository") 
+@EnableJpaRepositories(basePackageClasses = UserRepository.class,basePackages="cz.gymtrebon.zaverecky.vjanecek.atlas.repository")
 @Log
 public class AtlasApplication implements CommandLineRunner {
 
@@ -30,10 +38,10 @@ public class AtlasApplication implements CommandLineRunner {
 	
 	@Autowired
 	private ObrazekRepository obrazekRepo;
-	
+
 	@Autowired
 	private AtlasService atlasService;
-	
+
 	public static void main(String[] args) {
 		SpringApplication.run(AtlasApplication.class, args);
 	}
@@ -41,10 +49,10 @@ public class AtlasApplication implements CommandLineRunner {
 	@Override
 	public void run(String ... args) throws Exception {
 		log.info("Atlas Command Line Runner");
-		
-		/*Map<Integer, Integer> mapovaniId = new HashMap<>();
+/*
 		Map<Integer, Integer> mapovaniimageId = new HashMap<>();
-		
+		Map<Integer, Integer> mapovaniId = new HashMap<>();
+
 		Polozka p = new Polozka();
 		p.setNadrizenaSkupina(null);
 		p.setNazev("ATLAS");
@@ -52,8 +60,8 @@ public class AtlasApplication implements CommandLineRunner {
 		polozkaRepo.save(p);
 
 		mapovaniId.put(0, p.getId());
-
-		File flowers = ResourceUtils.getFile("classpath:data/FLOWER.csv");
+*/
+		/*File flowers = ResourceUtils.getFile("classpath:data/FLOWER.csv");
 		List<String[]> flowerList = readAllLines(flowers);
 		for (int i = 1; i < flowerList.size();i++) {
 			String[] polozka = flowerList.get(i);
@@ -79,8 +87,9 @@ public class AtlasApplication implements CommandLineRunner {
 			mapovaniId.put(idPolozky, pol.getId());
 		
 		}
-		
-		File imagesCSV = ResourceUtils.getFile("classpath:data/IMAGE_FLOWER.csv");
+
+
+		File imagesCSV = ResourceUtils.getFile("classpath:data/IMAGE_FLOWER2.csv");
 		List<String[]> imageList = readAllLines(imagesCSV);
 		File imagesFolder = ResourceUtils.getFile("classpath:data/images/AppVitek2022");
 		for (int i = 1; i < imageList.size();i++) {
@@ -91,10 +100,11 @@ public class AtlasApplication implements CommandLineRunner {
 			String[] parts = nameFromCsv.split("/");
 			String fileName = parts[parts.length - 1].replaceAll("%20", " ");
 			File imagesFile = new File(imagesFolder, fileName);	
+			log.info("ImageFiesFile:   " + imagesFile.getAbsolutePath());
 			atlasService.uploadObrazek(mapovaniId.get(idParenta), imagesFile);
 			
-		}*/
-		
+		}
+		*/
 	}
 	
 	@Bean(name = "multipartResolver")

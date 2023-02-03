@@ -52,11 +52,17 @@ public class AtlasService {
 	private String cestaKObrazkum;
 
 	public Skupina najdiRootSkupinu() {
+		List<Polozka> polozky = polozkaRepo.findAllByTyp(Typ.ROOT);
+		for (Polozka polozka : polozky) {
+			log.info("Polozka: " + polozka.getNazev());
+		}
+
 		return polozkaToSkupina(polozkaRepo.findByTyp(Typ.ROOT));
 	}
 
 	public List<Popisek> seznamSkupin() {
 		List<Popisek> skupiny = new ArrayList<>();
+
 		skupiny.add(polozkaToPopisek(polozkaRepo.findByTyp(Typ.ROOT)));
 		for (Polozka polozka : polozkaRepo.findAllByTyp(Typ.SKUPINA)) {
 			Popisek p = new Popisek();

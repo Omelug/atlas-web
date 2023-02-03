@@ -16,7 +16,7 @@
 				<input type="hidden" id="inputId" th:field="*{id}">
 
 				<div class="form-row">
-					<label for="idNadrizeneSkupiny">Nadřazená skupina</label>
+					<label for="idNadrizeneSkupiny">Parent group</label>
 					<select id="idNadrizeneSkupiny" class="form-control" th:field="*{idNadrizeneSkupiny}"
 						th:classappend="${#fields.hasErrors('idNadrizeneSkupiny')} ? is-invalid">
 						<option value=""></option>
@@ -28,25 +28,25 @@
 				</div>
 
 				<div class="form-row">
-					<label for="inputNazev">Název</label>
+					<label for="inputNazev">Name</label>
 					<input type="text" class="form-control" id="inputNazev" placeholder="Název zástupce"
 						th:field="*{nazev}" th:classappend="${#fields.hasErrors('nazev')} ? is-invalid">
 					<p th:if="${#fields.hasErrors('nazev')}" th:errors="*{nazev}" class="invalid-feedback"></p>
 				</div>
 				<div class="form-row">
-					<label for="inputNazev2">Další názvy</label>
+					<label for="inputNazev2">Other names</label>
 					<input type="text" class="form-control" id="inputNazev2" placeholder="Další název"
 						th:field="*{nazev2}" th:classappend="${#fields.hasErrors('nazev2')} ? is-invalid">
 					<p th:if="${#fields.hasErrors('nazev2')}" th:errors="*{nazev2}" class="invalid-feedback"></p>
 				</div>
 				<div class="form-row">
-					<label for="inputAutor">Autor</label>
+					<label for="inputAutor">Author</label>
 					<input type="text" class="form-control" id="inputAutor" placeholder="Autor" th:field="*{autor}"
 						th:classappend="${#fields.hasErrors('autor')} ? is-invalid">
 					<p th:if="${#fields.hasErrors('autor')}" th:errors="*{autor}" class="invalid-feedback"></p>
 				</div>
 				<div class="form-row">
-					<label for="inputBarvy">Barvy</label>
+					<label for="inputBarvy">Colors</label>
 					<input type="text" class="form-control" id="inputBarvy" placeholder="Barva" th:field="*{barvy}"
 						th:classappend="${#fields.hasErrors('barvy')} ? is-invalid">
 					<p th:if="${#fields.hasErrors('barvy')}" th:errors="*{barvy}" class="invalid-feedback"></p>
@@ -63,9 +63,9 @@
 				<hr>
 				<!-- https://getbootstrap.com/docs/4.0/components/buttons/ -->
 
-				<button th:if="${novy == false}" type="submit" class="btn btn-danger" name="akce-smazat">Smazat</button>
-				<button type="submit" class="btn btn-primary" name="akce-ulozit">Uložit</button>
-				<button type="submit" class="btn btn-secondary" name="akce-zpet">Zpět</button>
+				<button th:if="${novy == false}" type="submit" class="btn btn-danger" name="akce-smazat">Delete</button>
+				<button type="submit" class="btn btn-primary" name="akce-ulozit">Save</button>
+				<button type="submit" class="btn btn-secondary" name="akce-zpet">Back</button>
 			</form>
 		</div>
 </div>

@@ -27,8 +27,8 @@
 						<div class="col-sm-4" th:each="fotka: ${partition}">
 							<div class="fotka">
 								<a class="jmeaObrazku" th:href="${fotka.url}"><b th:text="${fotka.nazev}"></b></a>
-								<a class="smazat" th:href="@{'/zastupce/'+${zastupce.id}+'/delete/'+${fotka.id}}">
-								<b th:text="smazat"></b></a>
+								<a th:if="${#authorization.expression('hasAuthority(''EDITOR'')')}" class="smazat" th:href="@{'/zastupce/'+${zastupce.id}+'/delete/'+${fotka.id}}">
+								<b th:if="${#authorization.expression('hasAuthority(''EDITOR'')')}" th:text="smazat"></b></a>
 								<br>
 								<img class="img-fluid" th:src="${fotka.url}">
 							</div>
@@ -37,6 +37,7 @@
 				</th:block>
 			</div>
 			<form
+					th:if="${#authorization.expression('hasAuthority(''EDITOR'')')}"
 				th:action="${novy == true} ? @{'/zastupce/obrazekNoId/upload'} : @{'/zastupce/'+${zastupce.id}+'/upload'} "
 				method="post" enctype="multipart/form-data">
 				<table>
@@ -57,15 +58,15 @@
 </div>
 <hr>
 </div>
-<div id="buttons">
-	<a class="btn btn-primary" th:href="@{'/zastupce/'+${zastupce.id}+'/editovat'}">Editovat</a>
+<div th:if="${#authorization.expression('hasAuthority(''EDITOR'')')}" id="buttons">
+	<a class="btn btn-primary" th:href="@{'/zastupce/'+${zastupce.id}+'/editovat'}">Edit</a>
 </div>
 
 <div id="breadcrumb">
 	<span th:each="breadcrumb : ${zastupce.cesta}">
 		> <a th:href="'/skupina/'+${breadcrumb.id}"><b th:text="${breadcrumb.nazev}"></b></a>
 	</span>
-	<th:if="${not#lists.isEmpty(zastupce.cesta)}" hr>
+	<hr th:if="${not#lists.isEmpty(zastupce.cesta)}" hr>
 </div>
 
 

@@ -5,6 +5,8 @@ import java.io.FileReader;
 import java.io.Reader;
 import java.util.List;
 
+//import cz.gymtrebon.zaverecky.vjanecek.atlas.kos.UserRepository;
+import cz.gymtrebon.zaverecky.vjanecek.atlas.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
@@ -21,7 +23,7 @@ import cz.gymtrebon.zaverecky.vjanecek.atlas.service.AtlasService;
 import lombok.extern.java.Log;
 
 @SpringBootApplication
-@EnableJpaRepositories(basePackages="cz.gymtrebon.zaverecky.vjanecek.atlas.repository") 
+@EnableJpaRepositories(basePackageClasses = UserRepository.class,basePackages="cz.gymtrebon.zaverecky.vjanecek.atlas.repository")
 @Log
 public class AtlasApplication implements CommandLineRunner {
 
@@ -30,10 +32,10 @@ public class AtlasApplication implements CommandLineRunner {
 	
 	@Autowired
 	private ObrazekRepository obrazekRepo;
-	
+
 	@Autowired
 	private AtlasService atlasService;
-	
+
 	public static void main(String[] args) {
 		SpringApplication.run(AtlasApplication.class, args);
 	}
@@ -42,7 +44,7 @@ public class AtlasApplication implements CommandLineRunner {
 	public void run(String ... args) throws Exception {
 		log.info("Atlas Command Line Runner");
 		
-		/*Map<Integer, Integer> mapovaniId = new HashMap<>();
+   		/*Map<Integer, Integer> mapovaniId = new HashMap<>();
 		Map<Integer, Integer> mapovaniimageId = new HashMap<>();
 		
 		Polozka p = new Polozka();

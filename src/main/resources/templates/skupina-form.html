@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="cs" th:replace="~{layouts/layout_form::layout(_ , ~{::#info} , ~{::#main} , _ , _ )}"
+<html lang="en" th:replace="~{layouts/layout_form::layout(_ , ~{::#info} , ~{::#main} , _ , _ )}"
 	xmlns:th="http://www.thymeleaf.org">
 
 <div id="info">
@@ -46,7 +46,7 @@
 			</div>
 		</div>
 
-		<button th:if="${nova == false AND skupina.idNadrizeneSkupiny != NULL}" type="submit" class="btn btn-danger"
+		<button th:if="${nova == false && skupina.idNadrizeneSkupiny != NULL}" type="submit" class="btn btn-danger"
 			name="akce-smazat">Smazat</button>
 
 		<button type="submit" class="btn btn-primary" name="akce-ulozit">Uložit</button>

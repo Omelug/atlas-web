@@ -1,5 +1,6 @@
 <!doctype html>
-<html lang="cs"  th:fragment="content(start, content)" xmlns:th="http://www.thymeleaf.org" >
+<html lang="en" th:fragment="content(start, content)" xmlns:th="http://www.thymeleaf.org"
+	  xmlns:sec="http://www.w3.org/1999/xhtml">
 
 <head>
 	<meta charset="utf-8">
@@ -20,6 +21,11 @@
 </head>
 
 <body>
+	<div>
+		<div class="d-flex flex-row-reverse">
+			<a th:href="@{/login-page}" class=" d-flex flex-row-revers" role="button" th:text="${#authentication.getPrincipal().getUsername()}" >Login</a>
+		</div>
+
 	<a th:href="@{'/home'}">Atlas</a>
 			<hr>
 	</div>

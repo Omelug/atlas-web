@@ -5,7 +5,6 @@
 	<span th:each="breadcrumb : ${skupina.cesta}">
 		> <a th:href="'/skupina/'+${breadcrumb.id}"><b th:text="${breadcrumb.nazev}"></b></a>
 	</span>
-	<th:if="${not#lists.isEmpty(skupina.cesta)}" hr>
 </div>
 
 <div id="info">
@@ -13,8 +12,8 @@
 	<p th:utext="${skupina.textSkupiny}"></p>
 </div>
 
-<div id="buttons">
-	<a th:href="@{'/skupina/nova?idNadrizeneSkupiny='+${skupina.id}}">Přidat skupinu</a>
+<div th:if="${#authorization.expression('hasAuthority(''EDITOR'')')}" id="buttons">
+	<a  th:href="@{'/skupina/nova?idNadrizeneSkupiny='+${skupina.id}}">Přidat skupinu</a>
 	|
 	<a th:href="@{'/zastupce/novy?idNadrizeneSkupiny='+${skupina.id}}">Přidat zástupce</a>
 	|
@@ -22,14 +21,14 @@
 </div>
 
 <div id="main">
-	<h2>Podskupiny</h2>
+	<h2 th:if="${not #lists.isEmpty(podskupiny)}" >Podskupiny</h2>
 
 	<ul>
 		<li th:each="podskupina : ${podskupiny}"><a th:href="'/skupina/'+${podskupina.id}"
 				th:text="${podskupina.nazev}"></a></li>
 	</ul>
 
-	<h2>Zástupci</h2>
+	<h2 th:if="${not #lists.isEmpty(zastupci)}">Zástupci</h2>
 
 	<ul>
 		<li th:each="zastupce : ${zastupci}"><a th:href="'/zastupce/'+${zastupce.id}" th:text="${zastupce.nazev}"></a>

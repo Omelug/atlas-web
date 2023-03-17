@@ -37,7 +37,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
                     .permitAll()
                     .and()
                     .logout()
-                    .permitAll();
+                    .permitAll()
+                     .and()
+                    .csrf().disable();
         }
         @Bean
         public PasswordEncoder getPasswordEnconder(){

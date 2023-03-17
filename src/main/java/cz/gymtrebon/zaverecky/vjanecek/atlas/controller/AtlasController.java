@@ -226,7 +226,7 @@ public class AtlasController {
 		
 		return "redirect:/skupina/" + form.getIdNadrizeneSkupiny();
 	}
-	@PreAuthorize("hasAnyAuthority('EDITOR')")
+
 	@PostMapping(value="/zastupce/ulozit", params="akce-zpet")
 	public String editaceZastupceZpet(
 			Model model,
@@ -286,7 +286,7 @@ public class AtlasController {
 		
 		return "redirect:/zastupce/" + polozkaId;	    
 	}
-	@PreAuthorize("hasAnyAuthority('EDITOR')")
+
 	@GetMapping("/zastupce/{id}/delete/{obrazekid}")
 	public String deleteImage(
 			@PathVariable("id") Integer id,

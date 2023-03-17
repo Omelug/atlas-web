@@ -1,4 +1,4 @@
-<html xmlns:th="http://www.thymeleaf.org" xmlns:tiles="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" xmlns:tiles="http://www.thymeleaf.org" xmlns:sec="http://www.w3.org/1999/xhtml">
 <head>
   <title tiles:fragment="title">Messages : Create</title>
   <link rel="stylesheet" href="/styly.css">
@@ -7,7 +7,8 @@
 <div class="centerDiv">
   <form name="f" th:action="@{/login}" method="post" class="centerDiv">
     <fieldset class="fieldset-auto-width centerDiv" style="width: 100%">
-      <legend style="text-align: center">Please Login</legend>
+      <legend sec:authorize="isAuthenticated()"  style="text-align: center"> You are logged [[${#authentication.getPrincipal().getUsername()}]] </legend>
+      <legend sec:authorize="!isAuthenticated()" style="text-align: center">Please Login</legend>
       <br>
       <div class="loginDiv">
         <label for="username" >Username</label>

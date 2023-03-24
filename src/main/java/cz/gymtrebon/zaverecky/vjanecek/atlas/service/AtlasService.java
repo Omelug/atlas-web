@@ -1,45 +1,20 @@
 package cz.gymtrebon.zaverecky.vjanecek.atlas.service;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-
-import javax.persistence.Column;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-
-import org.hibernate.annotations.GenericGenerator;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
-
-import cz.gymtrebon.zaverecky.vjanecek.atlas.dto.Fotka;
-import cz.gymtrebon.zaverecky.vjanecek.atlas.dto.Popisek;
-import cz.gymtrebon.zaverecky.vjanecek.atlas.dto.Skupina;
-import cz.gymtrebon.zaverecky.vjanecek.atlas.dto.TransportniObrazek;
-import cz.gymtrebon.zaverecky.vjanecek.atlas.dto.TransportniPolozka;
-import cz.gymtrebon.zaverecky.vjanecek.atlas.dto.Zastupce;
+import cz.gymtrebon.zaverecky.vjanecek.atlas.dto.*;
 import cz.gymtrebon.zaverecky.vjanecek.atlas.entity.Obrazek;
 import cz.gymtrebon.zaverecky.vjanecek.atlas.entity.Polozka;
 import cz.gymtrebon.zaverecky.vjanecek.atlas.entity.Typ;
 import cz.gymtrebon.zaverecky.vjanecek.atlas.repository.ObrazekRepository;
 import cz.gymtrebon.zaverecky.vjanecek.atlas.repository.PolozkaRepository;
-import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.*;
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -49,7 +24,8 @@ public class AtlasService {
 	private final ObrazekRepository obrazekRepo;
 	
 	@Value("${images.path}")
-	private String cestaKObrazkum;
+	private String imagesFolder;
+	private static String cestaKObrazkum;
 
 	public Skupina najdiRootSkupinu() {
 		List<Polozka> polozky = polozkaRepo.findAllByTyp(Typ.ROOT);
@@ -256,6 +232,7 @@ public class AtlasService {
 		obrazekRepo.save(o);
 		log.info("Uploading file " + file.getOriginalFilename());
 		try {
+			cestaKObrazkum = new File(imagesFolder).getAbsolutePath();
 			File f = new File(cestaKObrazkum, String.valueOf(o.getId()));
 			FileOutputStream fos = new FileOutputStream(f);
 			fos.write(file.getBytes());
@@ -278,6 +255,7 @@ public class AtlasService {
 		obrazekRepo.save(o);
 		log.info("Importing file " + file.getAbsolutePath());
 		try {
+			cestaKObrazkum = new File(imagesFolder).getAbsolutePath();
 			File f = new File(cestaKObrazkum, String.valueOf(o.getId()));
 			InputStream in = new BufferedInputStream(new FileInputStream(file));
 			OutputStream out = new BufferedOutputStream(new FileOutputStream(f));
@@ -297,12 +275,13 @@ public class AtlasService {
 
 	public File souborObrazku(Integer obrazekId) {
 		Obrazek o = obrazekRepo.getById(obrazekId);
+		cestaKObrazkum = new File(imagesFolder).getAbsolutePath();
 		return new File(cestaKObrazkum, String.valueOf(o.getId()));
 	}
 
 	public void deleteObrazek(Integer id, Integer obrazekId) {
 		Obrazek o = obrazekRepo.getById(obrazekId);
-
+		cestaKObrazkum = new File(imagesFolder).getAbsolutePath();
 		File f = new File(cestaKObrazkum, String.valueOf(o.getId()));
 		f.delete();
 
@@ -363,6 +342,7 @@ public class AtlasService {
 
 	public InputStream inputStream(Integer obrazekId) throws FileNotFoundException {
 		Obrazek o = obrazekRepo.getById(obrazekId);
+		cestaKObrazkum = new File(imagesFolder).getAbsolutePath();
 		File f = new File(cestaKObrazkum, String.valueOf(o.getId()));
 		InputStream vysledek = new FileInputStream(f);
 		return vysledek;

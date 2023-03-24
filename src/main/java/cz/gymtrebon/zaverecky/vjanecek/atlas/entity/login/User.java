@@ -2,6 +2,8 @@ package cz.gymtrebon.zaverecky.vjanecek.atlas.entity.login;
 
 import lombok.*;
 import org.hibernate.Hibernate;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import javax.persistence.*;
 import java.util.Date;
@@ -19,7 +21,7 @@ public class User {
 	@Column(name="user_id")
 	private Long user_id;
 	@Column(name="name", nullable=true, length=250)
-	private String userName;
+	private String username;
 	@Column(name="password", nullable=true, length=250)
 	private String password;
     @Column(name="active", nullable=true)
@@ -31,6 +33,17 @@ public class User {
 	private Date firstLogin;
 	@Column(name="last_login", nullable=true)
 	private Date lastLogin;
+
+	@CreationTimestamp
+	@Temporal(TemporalType.TIMESTAMP)
+	@Column(name = "create_time")
+	private Date createDate;
+
+	@UpdateTimestamp
+	@Temporal(TemporalType.TIMESTAMP)
+	@Column(name = "update_time")
+	private Date modifyDate;
+
 
 	public boolean isActive() {
 		return active;
@@ -51,5 +64,19 @@ public class User {
 	@Override
 	public int hashCode() {
 		return getClass().hashCode();
+	}
+
+	public User(String username, String password) {
+		this.username = username;
+		this.password = password;
+	}
+	public void setUserName(String userName) {
+		this.username = username;
+	}
+	public String getPassword() {
+		return password;
+	}
+	public void setPassword(String password) {
+		this.password = password;
 	}
 }

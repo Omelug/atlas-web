@@ -1,57 +1,94 @@
 package cz.gymtrebon.zaverecky.vjanecek.atlas.controller;
 
-import cz.gymtrebon.zaverecky.vjanecek.atlas.form.UserDto;
+import cz.gymtrebon.zaverecky.vjanecek.atlas.security.JWTRequest;
+import cz.gymtrebon.zaverecky.vjanecek.atlas.security.JWTResponse;
+import cz.gymtrebon.zaverecky.vjanecek.atlas.security.JWTUtility;
+import cz.gymtrebon.zaverecky.vjanecek.atlas.security.JwtFilter;
 import cz.gymtrebon.zaverecky.vjanecek.atlas.service.CustomUserDetails;
 import cz.gymtrebon.zaverecky.vjanecek.atlas.service.CustomUserDetaisService;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.validation.BindingResult;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.security.oauth2.resource.OAuth2ResourceServerProperties;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.web.bind.annotation.*;
 
-import javax.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
-@Controller
-@RequestMapping("/")
+import java.util.Collection;
+
+@RestController
+@RequestMapping("/api")
+@RequiredArgsConstructor
+@Slf4j
 public class UserRegistrationController {
+
+    @Autowired
+    private JWTUtility jwtUtility;
+    @Autowired
+    private AuthenticationManager authenticationManager;
+    @Autowired
     private CustomUserDetaisService userService;
 
-    /*@PostMapping(value="/login-page/login", params="akce-register")
-    public String registerUserAccount(Model model,
-                                      @Valid @ModelAttribute("user") UserDto form,
-                                      BindingResult bindingResult){
-        if (bindingResult.hasErrors()) {
-            return "login-page";
+    @PostMapping("/login")
+    public JWTResponse loginUser(@RequestBody JWTRequest jwtRequest) throws Exception {
+
+        log.info("Login: " + jwtRequest.getUsername());
+        log.info("Password: " + jwtRequest.getPassword());
+
+        //netusim na co to je, ale asi je to dulezite, aby dal nebyly errory
+        try {
+            authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(
+                            jwtRequest.getUsername(),
+                            jwtRequest.getPassword()
+                    )
+            );
+
+        }catch (BadCredentialsException e){
+            return new JWTResponse();
+            //throw new Exception("AUTH FAILED",e);
         }
-        //userService.save(form);
 
-        return "redirect:/home";
+        final CustomUserDetails userDetails = userService.loadUserByUsername(jwtRequest.getUsername());
+
+        final String token =
+                jwtUtility.generateToken(userDetails);
+
+        return new JWTResponse(token);
+
     }
 
-    @GetMapping("/user")
-    public String user() {
-        return ("<h1>Welcome User</h1>");
+    @GetMapping("/userinfo")
+    public ResponseEntity userinfo(@RequestHeader (name="Authorization") String token) throws Exception {
+        CustomUserDetails userDetails = userService.loadUserByUsername(jwtUtility.getUsernameFromToken(token));
+       if (validate(token, userDetails, "EDITOR")){
+           ResponseEntity.ok("User has EDITOR role");
+       }
+       return noAuthError();
     }
-
-    @GetMapping(value = {"", "login-page"})
-    public String login(Model model) {
-
-        UserDto form = new UserDto();
-
-        model.addAttribute("user", new UserDto());
-
-        return "login-page";
+    private ResponseEntity noAuthError(){
+        return ResponseEntity.ok("User does not have EDITOR role");
     }
-
-    @PostMapping(value="/login", params="akce-login")
-    public String login(
-            Model model,
-            @Valid @ModelAttribute("user") UserDto form,
-            BindingResult bindingResult) {
-
-        if (bindingResult.hasErrors()) {
-            return "redirect:/login";
+    private boolean validate(String token, CustomUserDetails userDetails, String role) {
+        if (jwtUtility.validateToken(token, userDetails) ){
+            Collection<GrantedAuthority> authorities = (Collection<GrantedAuthority>) userDetails.getAuthorities();
+            // check if the user has the role authority
+            boolean hasEditorRole = authorities.stream()
+                    .anyMatch(auth -> auth.getAuthority().equals(role));
+            if (hasEditorRole) {
+                return true;
+            }
         }
-        //TODO prihlaseni s form
-        return "redirect:/home";
-    }*/
+    return false;
+    }
+    private boolean validate(String token, String role) {
+        CustomUserDetails userDetails = userService.loadUserByUsername(jwtUtility.getUsernameFromToken(token));
+       return validate(token, userDetails, role);
+    }
+
+
 }

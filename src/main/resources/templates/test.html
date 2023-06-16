@@ -23,42 +23,42 @@
 	<form th:action="@{/test2}" th:object="${text}" method="post">
 		<div class="form-group col-md-6">
 
-			<textarea id="celyText" class="form-control" name="celyText" th:text="${text.celyText}" field="*{celyText}">
+			<textarea id="text" class="" name="celyText" th:text="${text.celyText}" field="*{celyText}">
 			</textarea>
 		</div>
-		<button type="submit" class="btn btn-danger" name="akce-test">Test</button>
-	</form>
-	<script>
-			
-		ClassicEditor.create(document.getElementById("celyText"), {
-                // https://ckeditor.com/docs/ckeditor5/latest/features/toolbar/toolbar.html#extended-toolbar-configuration-format
-                toolbar: {
-                    items: [
-						'bold', 'italic', 'strikethrough', 'underline', 'subscript', 'superscript', '|', 'undo', 'redo'
-					],
-                    shouldNotGroupWhenFull: true
-                },
-                removePlugins: [
-                    'ExportPdf',
-                    'ExportWord',
-                    'CKBox',
-                    'CKFinder',
-                    'EasyImage',
-                    'RealTimeCollaborativeComments',
-                    'RealTimeCollaborativeTrackChanges',
-                    'RealTimeCollaborativeRevisionHistory',
-                    'PresenceList',
-                    'Comments',
-                    'TrackChanges',
-                    'TrackChangesData',
-                    'RevisionHistory',
-                    'Pagination',
-                    'WProofreader',
-                    'MathType'
-                ]
-            });
+		<button type="submit" class="btn btn-danger" name="action-test">Test</button>
+	</form><script>
 
-	</script>
+	ClassicEditor.create(document.getElementById("text"), {
+		// https://ckeditor.com/docs/ckeditor5/latest/features/toolbar/toolbar.html#extended-toolbar-configuration-format
+		toolbar: {
+			items: [
+				'bold', 'italic', 'strikethrough', 'underline', 'subscript', 'superscript', '|', 'undo', 'redo'
+			],
+			shouldNotGroupWhenFull: true
+		},
+		removePlugins: [
+			'ExportPdf',
+			'ExportWord',
+			'CKBox',
+			'CKFinder',
+			'EasyImage',
+			'RealTimeCollaborativeComments',
+			'RealTimeCollaborativeTrackChanges',
+			'RealTimeCollaborativeRevisionHistory',
+			'PresenceList',
+			'Comments',
+			'TrackChanges',
+			'TrackChangesData',
+			'RevisionHistory',
+			'Pagination',
+			'WProofreader',
+			'MathType'
+		]
+	});
+
+</script>
+
 
 
 	</form>

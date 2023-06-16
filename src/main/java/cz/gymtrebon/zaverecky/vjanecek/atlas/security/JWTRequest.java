@@ -9,8 +9,8 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class JWTRequest {
-    @SerializedName("username")
-    private String username;
+    @SerializedName("name")
+    private String name;
     @SerializedName("password")
     private String password;
 }

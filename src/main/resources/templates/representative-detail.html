@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="cs" th:replace="~{layouts/layout_info::layout( _ ,~{::#info} , _ , ~{::#buttons}, ~{::#breadcrumb} )}"
+	xmlns:th="http://www.thymeleaf.org">
+
+<div id="info">
+	<div class="row">
+		<div class="form-group col-md-6">
+			<i>
+				<h1 th:text="${representative.name}"></h1>
+			</i>
+
+			<p th:text="${representative.name2}"></p>
+			<p th:text="${representative.author}"></p>
+			<p th:text="${representative.color}"></p>
+			<p th:utext="${representative.text}"></p>
+
+		</div>
+		<hr>
+		<div class="form-group col-md-6">
+			<h2 th:if="${representative.images != null}">Image list</h2>
+			<h2 th:if="${representative.images == null}">Image list is Empty</h2>
+			<!-- https://stackoverflow.com/questions/39509689/combining-conditions-and-iterations-in-thymeleaf/39515137#39515137  -->
+			<div th:if="${representative.images != null}">
+				<th:block
+					th:with="partitions=${T(org.apache.commons.collections4.ListUtils).partition(representative.images, 2)}">
+					<div class="row" th:each="partition: ${partitions}">
+						<div class="col-sm-4" th:each="Photo: ${partition}">
+							<div class="Photo">
+								<a class="jmeaObrazku" th:href="${Photo.url}"><b th:text="${Photo.name}"></b></a>
+								<a th:if="${#authorization.expression('hasAuthority(''EDITOR'')')}" class="smazat" th:href="@{'/representative/'+${representative.id}+'/delete/'+${Photo.id}}">
+								<b th:if="${#authorization.expression('hasAuthority(''EDITOR'')')}" th:text="smazat"></b></a>
+								<br>
+								<a th:href="${Photo.url}"><img class="img-fluid" th:src="${Photo.url}"> </a>
+							</div>
+						</div>
+					</div>
+				</th:block>
+			</div>
+			<form
+					th:if="${#authorization.expression('hasAuthority(''EDITOR'')')}"
+				th:action="${newItem == true} ? @{'/representative/imageNoId/upload'} : @{'/representative/'+${representative.id}+'/upload'} "
+				method="post" enctype="multipart/form-data">
+				<table>
+					<tr>
+						<td><label path="file">Choose image:</label></td>
+					</tr>
+					<tr>
+						<td><input type="file" name="file" /></td>
+					</tr>
+					<tr>
+						<td><input type="submit" value="Save image" /></td>
+					</tr>
+				</table>
+			</form>
+			<br>
+		</div>
+	</div>
+</div>
+<hr>
+</div>
+<div th:if="${#authorization.expression('hasAuthority(''EDITOR'')')}" id="buttons">
+	<a class="btn btn-primary" th:href="@{'/representative/'+${representative.id}+'/edit'}">Edit</a>
+</div>
+
+<div id="breadcrumb">
+	<span th:each="breadcrumb : ${representative.path}">
+		> <a th:href="'/group/'+${breadcrumb.id}"><b th:text="${breadcrumb.name}"></b></a>
+	</span>
+	<hr th:if="${not#lists.isEmpty(representative.path)}" hr>
+</div>
+
+
+</html>

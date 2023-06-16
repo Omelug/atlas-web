@@ -1,45 +1,36 @@
 package cz.gymtrebon.zaverecky.vjanecek.atlas;
 
-import java.io.File;
-import java.io.FileReader;
-import java.io.Reader;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.function.Supplier;
-
-//import cz.gymtrebon.zaverecky.vjanecek.atlas.kos.UserRepository;
-import cz.gymtrebon.zaverecky.vjanecek.atlas.entity.Polozka;
-import cz.gymtrebon.zaverecky.vjanecek.atlas.entity.Typ;
+import com.opencsv.CSVReader;
+import cz.gymtrebon.zaverecky.vjanecek.atlas.repository.ImageRepository;
+import cz.gymtrebon.zaverecky.vjanecek.atlas.repository.ItemRepository;
 import cz.gymtrebon.zaverecky.vjanecek.atlas.repository.UserRepository;
+import cz.gymtrebon.zaverecky.vjanecek.atlas.service.AtlasService;
+import lombok.extern.java.Log;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.context.annotation.Bean;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
-import org.springframework.security.crypto.password.NoOpPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.util.ResourceUtils;
 import org.springframework.web.multipart.commons.CommonsMultipartResolver;
 
-import com.opencsv.CSVReader;
-
-import cz.gymtrebon.zaverecky.vjanecek.atlas.repository.ObrazekRepository;
-import cz.gymtrebon.zaverecky.vjanecek.atlas.repository.PolozkaRepository;
-import cz.gymtrebon.zaverecky.vjanecek.atlas.service.AtlasService;
-import lombok.extern.java.Log;
+import java.io.File;
+import java.io.FileReader;
+import java.io.Reader;
+import java.util.List;
 
 @SpringBootApplication
 @EnableJpaRepositories(basePackageClasses = UserRepository.class,basePackages="cz.gymtrebon.zaverecky.vjanecek.atlas.repository")
+@EntityScan({"cz.gymtrebon.zaverecky.vjanecek.atlas.entity"})
 @Log
 public class AtlasApplication implements CommandLineRunner {
 
 	@Autowired
-	private PolozkaRepository polozkaRepo;
+	private ItemRepository ItemRepo;
 	
 	@Autowired
-	private ObrazekRepository obrazekRepo;
+	private ImageRepository ImageRepo;
 
 	@Autowired
 	private AtlasService atlasService;
@@ -58,37 +49,37 @@ public class AtlasApplication implements CommandLineRunner {
 		Map<Integer, Integer> mapovaniimageId = new HashMap<>();
 		Map<Integer, Integer> mapovaniId = new HashMap<>();
 
-		Polozka p = new Polozka();
-		p.setNadrizenaSkupina(null);
-		p.setNazev("ATLAS");
+		Item p = new Item();
+		p.setParentGroup(null);
+		p.setName("ATLAS");
 		p.setTyp(Typ.ROOT);
-		polozkaRepo.save(p);
+		ItemRepo.save(p);
 
 		mapovaniId.put(0, p.getId());
-*/
-		/*File flowers = ResourceUtils.getFile("classpath:data/FLOWER.csv");
+
+		File flowers = ResourceUtils.getFile("classpath:data/FLOWER.csv");
 		List<String[]> flowerList = readAllLines(flowers);
 		for (int i = 1; i < flowerList.size();i++) {
-			String[] polozka = flowerList.get(i);
-			int idPolozky = Integer.valueOf(polozka[0]);
-			int idParenta = Integer.valueOf(polozka[1]);
+			String[] Item = flowerList.get(i);
+			int idPolozky = Integer.valueOf(Item[0]);
+			int idParenta = Integer.valueOf(Item[1]);
 
-			Polozka pol = new Polozka();
-			Polozka parent = polozkaRepo.getById(mapovaniId.get(idParenta));
-			pol.setNadrizenaSkupina(parent);
-			if (Integer.valueOf(polozka[2]) == 1) {
-				pol.setTyp(Typ.SKUPINA);
+			Item pol = new Item();
+			Item parent = ItemRepo.getById(mapovaniId.get(idParenta));
+			pol.setParentGroup(parent);
+			if (Integer.valueOf(Item[2]) == 1) {
+				pol.setTyp(Typ.GROUP);
 			}
-			if (Integer.valueOf(polozka[2]) == 0) {
-				pol.setTyp(Typ.ZASTUPCE);
+			if (Integer.valueOf(Item[2]) == 0) {
+				pol.setTyp(Typ.REPRESENTATIVE);
 			}
-			pol.setNazev(polozka[3]);
-			pol.setNazev2(polozka[4]);
-			pol.setAutor(polozka[5]);
-			pol.setText(polozka[6]);
-			pol.setBarvy(polozka[7]);
+			pol.setName(Item[3]);
+			pol.setName2(Item[4]);
+			pol.setAuthor(Item[5]);
+			pol.setText(Item[6]);
+			pol.setColor(Item[7]);
 			
-			polozkaRepo.save(pol);
+			ItemRepo.save(pol);
 			mapovaniId.put(idPolozky, pol.getId());
 		
 		}
@@ -98,18 +89,16 @@ public class AtlasApplication implements CommandLineRunner {
 		List<String[]> imageList = readAllLines(imagesCSV);
 		File imagesFolder = ResourceUtils.getFile("classpath:data/images/AppVitek2022");
 		for (int i = 1; i < imageList.size();i++) {
-			String[] polozka = imageList.get(i);
-			int idParenta = Integer.valueOf(polozka[1]);
+			String[] Item = imageList.get(i);
+			int idParenta = Integer.valueOf(Item[1]);
 		
-			String nameFromCsv = polozka[2];
+			String nameFromCsv = Item[2];
 			String[] parts = nameFromCsv.split("/");
 			String fileName = parts[parts.length - 1].replaceAll("%20", " ");
 			File imagesFile = new File(imagesFolder, fileName);	
 			log.info("ImageFiesFile:   " + imagesFile.getAbsolutePath());
-			atlasService.uploadObrazek(mapovaniId.get(idParenta), imagesFile);
-			
-		}
-		*/
+			atlasService.uploadImage(mapovaniId.get(idParenta), imagesFile);
+		}*/
 	}
 
 	//@Bean

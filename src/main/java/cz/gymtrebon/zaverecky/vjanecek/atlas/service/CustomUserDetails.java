@@ -1,14 +1,11 @@
 package cz.gymtrebon.zaverecky.vjanecek.atlas.service;
 
-import cz.gymtrebon.zaverecky.vjanecek.atlas.entity.login.User;
+import cz.gymtrebon.zaverecky.vjanecek.atlas.entity.User;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class CustomUserDetails implements UserDetails {
 
@@ -17,14 +14,11 @@ public class CustomUserDetails implements UserDetails {
     private boolean active;
     private List<GrantedAuthority> authorities;
 
-    public CustomUserDetails(User user) {
-        this.username = user.getUsername();
+    public CustomUserDetails(User user,UDRlinkService udrlinkService ) {
+        this.username = user.getName();
         this.password = user.getPassword();
         this.active = user.isActive();
-        this.authorities = Arrays.stream(
-                user.getRoles().split(",")).
-                map(SimpleGrantedAuthority::new)
-                .collect(Collectors.toList());
+        this.authorities = udrlinkService.getAuthorities(user);
     }
 
     @Override

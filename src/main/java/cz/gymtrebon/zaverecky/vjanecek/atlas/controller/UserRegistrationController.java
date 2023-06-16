@@ -3,20 +3,17 @@ package cz.gymtrebon.zaverecky.vjanecek.atlas.controller;
 import cz.gymtrebon.zaverecky.vjanecek.atlas.security.JWTRequest;
 import cz.gymtrebon.zaverecky.vjanecek.atlas.security.JWTResponse;
 import cz.gymtrebon.zaverecky.vjanecek.atlas.security.JWTUtility;
-import cz.gymtrebon.zaverecky.vjanecek.atlas.security.JwtFilter;
 import cz.gymtrebon.zaverecky.vjanecek.atlas.service.CustomUserDetails;
 import cz.gymtrebon.zaverecky.vjanecek.atlas.service.CustomUserDetaisService;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.security.oauth2.resource.OAuth2ResourceServerProperties;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.web.bind.annotation.*;
-
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 
 import java.util.Collection;
 
@@ -36,14 +33,14 @@ public class UserRegistrationController {
     @PostMapping("/login")
     public JWTResponse loginUser(@RequestBody JWTRequest jwtRequest) throws Exception {
 
-        log.info("Login: " + jwtRequest.getUsername());
+        log.info("Login: " + jwtRequest.getName());
         log.info("Password: " + jwtRequest.getPassword());
 
         //netusim na co to je, ale asi je to dulezite, aby dal nebyly errory
         try {
             authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(
-                            jwtRequest.getUsername(),
+                            jwtRequest.getName(),
                             jwtRequest.getPassword()
                     )
             );
@@ -53,7 +50,7 @@ public class UserRegistrationController {
             //throw new Exception("AUTH FAILED",e);
         }
 
-        final CustomUserDetails userDetails = userService.loadUserByUsername(jwtRequest.getUsername());
+        final CustomUserDetails userDetails = userService.loadUserByUsername(jwtRequest.getName());
 
         final String token =
                 jwtUtility.generateToken(userDetails);
@@ -89,6 +86,4 @@ public class UserRegistrationController {
         CustomUserDetails userDetails = userService.loadUserByUsername(jwtUtility.getUsernameFromToken(token));
        return validate(token, userDetails, role);
     }
-
-
 }

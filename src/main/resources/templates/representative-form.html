@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="cs" th:replace="~{layouts/layout_form::layout(_, ~{::#info} , ~{::#main} , _ ,  _ )}"
+	xmlns:th="http://www.thymeleaf.org">
+
+<div id="info">
+	<h1 th:if="${newItem == true}">New flower</h1>
+	<h1 th:if="${newItem == false}">Flower editor</h1>
+	<hr>
+</div>
+
+<div id="main">
+	<div class="row">
+		<div class="form-group col-md-6">
+			<form th:action="@{/representative/save}" th:object="${representative}" method="post">
+
+				<input type="hidden" id="inputId" th:field="*{id}">
+
+				<div class="form-row">
+					<label for="idParentGroup" class="cutomlabel">Parent group</label>
+					<select id="idParentGroup" class="form-control" th:field="*{idParentGroup}">
+						<option value=""></option>
+						<option th:each="s : ${groups}" th:value="${s.id}" th:text="${s.name}"
+							th:selected="${s.id==representative.idParentGroup}"></option>
+					</select>
+					<p th:if="${#fields.hasErrors('idParentGroup')}" th:errors="*{idParentGroup}"
+						class="invalid-feedback"></p>
+				</div>
+
+				<div class="form-row">
+					<label for="inputName" class="cutomlabel">Name</label>
+					<input type="text" class="form-control" id="inputName" placeholder="Name">
+					<p th:if="${#fields.hasErrors('name')}" th:errors="*{name}" class="invalid-feedback"></p>
+				</div>
+				<div class="form-row">
+					<label for="inputName" class="cutomlabel" >Other names</label>
+					<input type="text" class="form-control" id="inputName2" placeholder="Another name">
+					<p th:if="${#fields.hasErrors('name2')}" th:errors="*{name2}" class="invalid-feedback"></p>
+				</div>
+				<div class="form-row">
+					<label for="inputAuthor" class="cutomlabel">Author</label>
+					<input type="text" class="form-control" id="inputAuthor" placeholder="Author" th:field="*{author}">
+					<p th:if="${#fields.hasErrors('author')}" th:errors="*{author}" class="invalid-feedback"></p>
+				</div>
+				<div class="form-row">
+					<label for="inputColor" class="cutomlabel" >Color</label>
+					<input type="text" class="form-control" id="inputColor" placeholder="Color" th:field="*{color}">
+					<p th:if="${#fields.hasErrors('color')}" th:errors="*{color}" class="invalid-feedback"></p>
+				</div>
+				<div class="form-row">
+					<div class="form-group col-md-6">
+						<label for="inputText" class="cutomlabel">Text</label>
+						<textarea id="inputText" class="form-control"  name="text" th:text="${representative.text}"
+								  th:field="*{text}">
+				</textarea>
+						<p th:if="${#fields.hasErrors('text')}" th:errors="*{text}" class="invalid-feedback"></p>
+					</div>
+				</div>
+				<hr>
+				<!-- https://getbootstrap.com/docs/4.0/components/buttons/ -->
+
+				<button th:if="${newItem == false}" type="submit" class="btn btn-danger" name="action-delete">Delete</button>
+				<button type="submit" class="btn btn-primary" name="action-save">Save</button>
+				<button type="submit" class="btn btn-secondary" name="action-back">Back</button>
+			</form>
+		</div>
+</div>
+</div>
+
+</html>

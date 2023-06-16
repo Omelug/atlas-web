@@ -40,7 +40,8 @@
 <div class="container">
   <h1>Registration and Login with Spring Boot, Spring Security,
     Thymeleaf, Hibernate and MySQL</h1>
-  Welcome <span sec:authentication="principal.username"> User</span>
+  Welcome
+  <li sec:authorize="isAuthenticated()"><span sec:authentication="principal.username"> User</span></li>
 </div>
 </body>
 </html>

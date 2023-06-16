@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="robots" content="noindex,follow" />
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css">
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="/styly.css">
+</head>
+<body>
+    <div>
+
+        <!-- UDRlink Table -->
+        <form id="addUDRlinkForm" th:action="@{/admin/addUDRlink}" method="post">
+            <div>
+                <label for="user">User:</label>
+                <select name="user" id="user">
+                    <option th:each="user : ${userList}" th:value="${user.id}" th:text="${user.name}"></option>
+                </select>
+            </div>
+            <div>
+                <label for="database">Database:</label>
+                <select name="database" id="database">
+                    <option th:each="database : ${databaseList}" th:value="${database.id}" th:text="${database.name}"></option>
+                </select>
+            </div>
+            <div>
+                <label for="role">Role:</label>
+                <select name="role" id="role">
+                    <option th:each="role : ${roleList}" th:value="${role.id}" th:text="${role.name}"></option>
+                </select>
+            </div>
+            <button type="submit">Add UDRlink</button>
+            <br><br>
+        </form>
+
+        <form id="udrlinkIdForm" th:action="@{/admin/deleteUDR}" method="post">
+            <table>
+                <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>User</th>
+                    <th>Database</th>
+                    <th>Role</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="udrlink : ${udrlinkList}">
+                    <td th:text="${udrlink.id}"></td>
+                    <td th:text="${udrlink.user.name}"></td>
+                    <td th:text="${udrlink.database.name}"></td>
+                    <td th:text="${udrlink.role.name}"></td>
+                    <td>
+                        <button type="submit" name="udrlinkId" th:value="${udrlink.id}" th>X</button>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </form>
+
+        <br><span> Users:</span>
+        <table>
+            <thead>
+            <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Password</th>
+                <th>Active</th>
+                <th>First Login</th>
+                <th>Last Login</th>
+                <th>Create Date</th>
+                <th>Modify Date</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="user : ${userList}">
+                <td th:text="${user.id}"></td>
+                <td th:text="${user.name}"></td>
+                <td th:text="${user.password}"></td>
+                <td th:text="${user.active}"></td>
+                <td th:text="${user.firstLogin}"></td>
+                <td th:text="${user.lastLogin}"></td>
+                <td th:text="${user.createDate}"></td>
+                <td th:text="${user.modifyDate}"></td>
+            </tr>
+            </tbody>
+        </table>
+
+        <br><span> Database:</span>
+        <form id="addDatabaseForm" th:action="@{/admin/add}" method="post">
+            <input type="text" name="databaseName" placeholder="Database name" required />
+            <button type="submit">Add</button>
+        </form>
+        <br>
+        <form id="returnIdForm" th:action="@{/admin/delete}" method="post">
+            <table>
+                <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                </tr>
+                </thead>
+                    <tbody>
+                        <tr th:each="database : ${databaseList}">
+                            <td th:text="${database.id}"></td>
+                            <td th:text="${database.name}"></td>
+                            <td>
+                                <button type="submit" name="databaseId" th:value="${database.id}" th>X</button>
+                            </td>
+                        </tr>
+                    </tbody>
+            </table>
+        </form>
+
+        <br><span> Role:</span>
+        <table>
+            <thead>
+            <tr>
+                <th>ID</th>
+                <th>Name</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="role : ${roleList}">
+                <td th:text="${role.id}"></td>
+                <td th:text="${role.name}"></td>
+            </tr>
+            </tbody>
+        </table>
+
+    </div>
+</body>
+</html>

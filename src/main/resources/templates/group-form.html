@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en" th:replace="~{layouts/layout_form::layout(_ , ~{::#info} , ~{::#main} , _ , _ )}"
+	xmlns:th="http://www.thymeleaf.org">
+
+<div id="info">
+	<h1 th:if="${newItem == true}">New group</h1>
+	<h1 th:if="${newItem == false}">Group editor</h1>
+	<hr>
+</div>
+
+<div id="main">
+	<form th:action="@{/group/save}" th:object="${group}" method="post">
+
+		<input type="hidden" id="inputId" th:field="*{id}">
+
+		<div class="form-row">
+
+			<div class="form-group col-md-6">
+				<label for="idParentGroup">Parent group</label>
+				<select id="idParentGroup" class="" th:field="*{idParentGroup}">
+					<option value=""></option>
+					<option th:each="s : ${groups}" th:value="${s.id}" th:text="${s.name}"
+						th:selected="${s.id==group.idParentGroup}"></option>
+				</select>
+				<p th:if="${#fields.hasErrors('idParentGroup')}" th:errors="*{idParentGroup}"
+					class="invalid-feedback"></p>
+			</div>
+		</div>
+
+		<div class="form-row">
+			<div class="form-group col-md-6">
+				<label for="inputName">Name</label>
+				<input type="text" class="" id="inputName" placeholder="Group name" th:field="*{name}">
+				<p th:if="${#fields.hasErrors('name')}" th:errors="*{name}" class="invalid-feedback"></p>
+			</div>
+		</div>
+
+		<div class="form-row">
+			<div class="form-group col-md-6">
+				<label for="inputText" class="cutomlabel">Text</label>
+				<textarea id="inputText" class="" name="text" th:text="${group.text}"
+					th:field="*{text}">
+				</textarea>
+				<p th:if="${#fields.hasErrors('text')}" th:errors="*{text}" class="invalid-feedback"></p>
+			</div>
+		</div>
+
+		<button th:if="${newItem == false && group.idParentGroup != null}" type="submit" class="btn btn-danger"
+			name="action-delete">Delete</button>
+
+		<button type="submit" class="btn btn-primary" name="action-save">Save</button>
+
+		<button type="submit" class="btn btn-secondary" name="action-back">Back</button>
+
+	</form>
+</div>
+
+</html>

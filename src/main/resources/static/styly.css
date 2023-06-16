@@ -1,6 +1,7 @@
 body {
     margin: 2em auto;
-    max-width: 80%;	
+    max-width: 80%;
+	background-color: #d5e6e8;
 }
 h2{
 
@@ -60,8 +61,36 @@ font-size: 15px;
 	font-style: normal;
 	font-variant: normal;
 }
-.smazatObrazek{
+.smazatImage{
 	font-family: "Times New Roman", Times, serif;
 	color: rgb(255, 0, 0);
 	font-variant: normal;
+}
+.main-content {
+	padding: 20px;
+	background-color: #9ea0a2;
+}
+.sidebar {
+	background-color: #a3e5ee;
+	padding-top: 30px;
+	padding-left: 35px;
+	font-size: 20px;
+	margin-left:20px;
+}
+.upbar{
+	padding: 20px;
+	background-color: #9aa9ab;
+}
+img.icon{
+	width: 25px;
+	height: 25px;
+}
+table, th, td {
+	border: 1px solid;
+	text-align: center;
+}
+.cutomlabel{
+	margin-right: 10px;
+	margin-bottom: 0px;
+	margin-top: 10px;
 }

@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="cs" th:replace="~{layouts/layout_info::layout( _ , ~{::#info} , ~{::#main} , ~{::#buttons}, ~{::#breadcrumb} )}"
+	xmlns:th="http://www.thymeleaf.org">
+<div id="breadcrumb">
+	<span th:each="breadcrumb : ${group.path}">
+		> <a th:href="'/group/'+${breadcrumb.id}"><b th:text="${breadcrumb.name}"></b></a>
+	</span>
+</div>
+
+<div id="info">
+	<h1 th:text="${group.name}"></h1>
+	<p th:utext="${group.text}"></p>
+</div>
+
+<div th:if="${#authorization.expression('hasAuthority(''EDITOR'')')}" id="buttons">
+	<a  th:href="@{'/group/newItem?idParentGroup='+${group.id}}">Add group</a>
+	|
+	<a th:href="@{'/representative/newItem?idParentGroup='+${group.id}}">Add representative</a>
+	|
+	<a th:unless="${home == true}" th:href="@{'/group/'+${group.id}+'/edit'}">Edit</a>
+</div >
+
+<div id="main">
+	<h2 th:if="${not #lists.isEmpty(subgroups)}" th:text="${#lists.size(subgroups) == 1} ? 'Subgroup' : 'Subgroups'"></h2>
+
+	<ul>
+		<li th:each="subgroup : ${subgroups}"><a th:href="'/group/'+${subgroup.id}"
+				th:text="${subgroup.name}"></a></li>
+	</ul>
+
+	<h2 th:if="${not #lists.isEmpty(representatives)}" th:text="${#lists.size(representatives) == 1} ? 'Representative ' : 'Representatives'"></h2>
+
+	<ul>
+		<li th:each="representative : ${representatives}"><a th:href="'/representative/'+${representative.id}" th:text="${representative.name}"></a>
+		</li>
+	</ul>
+</div>
+</html>

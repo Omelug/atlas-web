@@ -1,11 +1,11 @@
 package cz.gymtrebon.zaverecky.vjanecek.atlas.service;
 
 import cz.gymtrebon.zaverecky.vjanecek.atlas.dto.*;
-import cz.gymtrebon.zaverecky.vjanecek.atlas.entity.Obrazek;
-import cz.gymtrebon.zaverecky.vjanecek.atlas.entity.Polozka;
+import cz.gymtrebon.zaverecky.vjanecek.atlas.entity.Image;
+import cz.gymtrebon.zaverecky.vjanecek.atlas.entity.Item;
 import cz.gymtrebon.zaverecky.vjanecek.atlas.entity.Typ;
-import cz.gymtrebon.zaverecky.vjanecek.atlas.repository.ObrazekRepository;
-import cz.gymtrebon.zaverecky.vjanecek.atlas.repository.PolozkaRepository;
+import cz.gymtrebon.zaverecky.vjanecek.atlas.repository.ImageRepository;
+import cz.gymtrebon.zaverecky.vjanecek.atlas.repository.ItemRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -20,216 +20,216 @@ import java.util.List;
 @RequiredArgsConstructor
 @Slf4j
 public class AtlasService {
-	private final PolozkaRepository polozkaRepo;
-	private final ObrazekRepository obrazekRepo;
+	private final ItemRepository ItemRepo;
+	private final ImageRepository ImageRepo;
 	
 	@Value("${images.path}")
 	private String imagesFolder;
 	private static String cestaKObrazkum;
 
-	public Skupina najdiRootSkupinu() {
-		List<Polozka> polozky = polozkaRepo.findAllByTyp(Typ.ROOT);
-		for (Polozka polozka : polozky) {
-			log.info("Polozka: " + polozka.getNazev());
+	public Group najdiRootSkupinu() {
+		List<Item> polozky = ItemRepo.findAllByTyp(Typ.ROOT);
+		for (Item Item : polozky) {
+			log.info("Item: " + Item.getName());
 		}
 
-		return polozkaToSkupina(polozkaRepo.findByTyp(Typ.ROOT));
+		return ItemToSkupina(ItemRepo.findByTyp(Typ.ROOT));
 	}
 
-	public List<Popisek> seznamSkupin() {
-		List<Popisek> skupiny = new ArrayList<>();
+	public List<Description> seznamSkupin() {
+		List<Description> skupiny = new ArrayList<>();
 
-		skupiny.add(polozkaToPopisek(polozkaRepo.findByTyp(Typ.ROOT)));
-		for (Polozka polozka : polozkaRepo.findAllByTyp(Typ.SKUPINA)) {
-			Popisek p = new Popisek();
-			p.setId(polozka.getId());
-			p.setNazev(polozka.getNazev());
+		skupiny.add(ItemToDescription(ItemRepo.findByTyp(Typ.ROOT)));
+		for (Item Item : ItemRepo.findAllByTyp(Typ.GROUP)) {
+			Description p = new Description();
+			p.setId(Item.getId());
+			p.setName(Item.getName());
 			skupiny.add(p);
 		}
 		return skupiny;
 	}
 
-	public List<Skupina> seznamPodskupin(Integer idNadrizene) {
-		Polozka nadrizena = polozkaRepo.getById(idNadrizene);
-		List<Skupina> skupiny = new ArrayList<>();
-		for (Polozka polozka : polozkaRepo.findByNadrizenaSkupinaAndTyp(nadrizena, Typ.SKUPINA)) {
-			skupiny.add(polozkaToSkupina(polozka));
+	public List<Group> seznamPodskupin(Integer idNadrizene) {
+		Item nadrizena = ItemRepo.getById(idNadrizene);
+		List<Group> skupiny = new ArrayList<>();
+		for (Item Item : ItemRepo.findByParentGroupAndTyp(nadrizena, Typ.GROUP)) {
+			skupiny.add(ItemToSkupina(Item));
 		}
 		return skupiny;
 	}
 
-	public List<Zastupce> seznamZastupcu(Integer idNadrizene) {
-		Polozka nadrizena = polozkaRepo.getById(idNadrizene);
-		List<Zastupce> zastupce = new ArrayList<>();
-		for (Polozka polozka : polozkaRepo.findByNadrizenaSkupinaAndTyp(nadrizena, Typ.ZASTUPCE)) {
-			zastupce.add(polozkaToZastupce(polozka));
+	public List<Representative> seznamZastupcu(Integer idNadrizene) {
+		Item nadrizena = ItemRepo.getById(idNadrizene);
+		List<Representative> representative = new ArrayList<>();
+		for (Item Item : ItemRepo.findByParentGroupAndTyp(nadrizena, Typ.REPRESENTATIVE)) {
+			representative.add(ItemToRepresentative(Item));
 		}
-		return zastupce;
+		return representative;
 	}
 
-	public Integer vytvoritSkupinu(Integer idNadrizeneSkupiny, String nazev, String text) {
+	public Integer vytvoritSkupinu(Integer idParentGroup, String nazev, String text) {
 
-		Polozka nadrizena = polozkaRepo.getById(idNadrizeneSkupiny);
+		Item nadrizena = ItemRepo.getById(idParentGroup);
 
-		Polozka p = new Polozka();
-		p.setNazev(nazev);
+		Item p = new Item();
+		p.setName(nazev);
 		p.setText(text);
-		p.setTyp(Typ.SKUPINA);
-		p.setNadrizenaSkupina(nadrizena);
-		polozkaRepo.save(p);
+		p.setTyp(Typ.GROUP);
+		p.setParentGroup(nadrizena);
+		ItemRepo.save(p);
 		return p.getId();
 	}
 
-	public Integer ulozSkupinu(Integer idNadrizeneSkupiny, Integer idSkupiny, String nazev, String text) {
+	public Integer ulozSkupinu(Integer idParentGroup, Integer idSkupiny, String nazev, String text) {
 
-		Polozka nadrizena = polozkaRepo.getById(idNadrizeneSkupiny);
-		Polozka skupina = polozkaRepo.getById(idSkupiny);
-		skupina.setNazev(nazev);
+		Item nadrizena = ItemRepo.getById(idParentGroup);
+		Item skupina = ItemRepo.getById(idSkupiny);
+		skupina.setName(nazev);
 		skupina.setText(text);
-		skupina.setTyp(Typ.SKUPINA);
-		skupina.setNadrizenaSkupina(nadrizena);
-		polozkaRepo.save(skupina);
+		skupina.setTyp(Typ.GROUP);
+		skupina.setParentGroup(nadrizena);
+		ItemRepo.save(skupina);
 		return skupina.getId();
 	}
 
 	public void smazatSkupinu(Integer skupinaId) {
-		List<Skupina> podskupiny = seznamPodskupin(skupinaId);
-		for (Skupina skupina : podskupiny) {
-			smazatSkupinu(skupina.getId());
+		List<Group> podskupiny = seznamPodskupin(skupinaId);
+		for (Group group : podskupiny) {
+			smazatSkupinu(group.getId());
 		}
-		List<Zastupce> zastupci = seznamZastupcu(skupinaId);
-		for (Zastupce zastupce : zastupci) {
-			smazatPolozku(zastupce.getId());
+		List<Representative> zastupci = seznamZastupcu(skupinaId);
+		for (Representative representative : zastupci) {
+			smazatPolozku(representative.getId());
 		}
 		smazatPolozku(skupinaId);
 	}
 
-	public void smazatPolozku(Integer zastupceId) {
-		if (!(polozkaRepo.getById(zastupceId).getTyp() == Typ.ROOT)) {
-			polozkaRepo.deleteById(zastupceId);
+	public void smazatPolozku(Integer representativeId) {
+		if (!(ItemRepo.getById(representativeId).getTyp() == Typ.ROOT)) {
+			ItemRepo.deleteById(representativeId);
 		}
 	}
 
-	public Integer vytvoritZastupce(Integer idNadrizeneSkupiny, String nazev, String nazev2, String autor, String barvy,
+	public Integer vytvoritRepresentative(Integer idParentGroup, String name, String name2, String author, String color,
 			String text) {
 
-		Polozka nadrizena = polozkaRepo.getById(idNadrizeneSkupiny);
+		Item nadrizena = ItemRepo.getById(idParentGroup);
 
-		Polozka zastupce = new Polozka();
-		zastupce.setNazev(nazev);
-		zastupce.setNazev2(nazev2);
-		zastupce.setAutor(autor);
-		zastupce.setBarvy(barvy);
-		zastupce.setText(text);
+		Item representative = new Item();
+		representative.setName(name);
+		representative.setName2(name2);
+		representative.setAuthor(author);
+		representative.setColor(color);
+		representative.setText(text);
 
-		zastupce.setTyp(Typ.ZASTUPCE);
-		zastupce.setNadrizenaSkupina(nadrizena);
-		polozkaRepo.save(zastupce);
-		return zastupce.getId();
+		representative.setTyp(Typ.REPRESENTATIVE);
+		representative.setParentGroup(nadrizena);
+		ItemRepo.save(representative);
+		return representative.getId();
 	}
 
-	public Integer ulozZastupce(Integer idNadrizeneSkupiny, Integer idSkupiny, String nazev, String nazev2,
-			String autor, String barvy, String text) {
+	public Integer ulozRepresentative(Integer idParentGroup, Integer groupId, String name, String name2,
+			String author, String color, String text) {
 
-		Polozka nadrizena = polozkaRepo.getById(idNadrizeneSkupiny);
-		Polozka zastupce = polozkaRepo.getById(idSkupiny);
-		zastupce.setNazev(nazev);
-		zastupce.setNazev2(nazev2);
-		zastupce.setAutor(autor);
-		zastupce.setBarvy(barvy);
-		zastupce.setText(text);
+		Item nadrizena = ItemRepo.getById(idParentGroup);
+		Item representative = ItemRepo.getById(groupId);
+		representative.setName(name);
+		representative.setName2(name2);
+		representative.setAuthor(author);
+		representative.setColor(color);
+		representative.setText(text);
 
-		zastupce.setTyp(Typ.ZASTUPCE);
-		zastupce.setNadrizenaSkupina(nadrizena);
-		polozkaRepo.save(zastupce);
-		return zastupce.getId();
+		representative.setTyp(Typ.REPRESENTATIVE);
+		representative.setParentGroup(nadrizena);
+		ItemRepo.save(representative);
+		return representative.getId();
 	}
 
-	public Skupina najdiSkupinuDleId(Integer idSkupiny) {
-		Polozka polozka = polozkaRepo.getById(idSkupiny);
-		return polozkaToSkupina(polozka);
+	public Group najdiSkupinuDleId(Integer idSkupiny) {
+		Item Item = ItemRepo.getById(idSkupiny);
+		return ItemToSkupina(Item);
 	}
 
-	public Zastupce najdiZastupceDleId(Integer idZastupce) {
-		Polozka polozka = polozkaRepo.getById(idZastupce);
-		return polozkaToZastupce(polozka);
+	public Representative najdiRepresentativeDleId(Integer idRepresentative) {
+		Item Item = ItemRepo.getById(idRepresentative);
+		return ItemToRepresentative(Item);
 	}
 
-	public Obrazek najdiObrazekDleId(Integer id) {
-		return obrazekRepo.getById(id);
+	public Image najdiImageDleId(Integer id) {
+		return ImageRepo.getById(id);
 	}
 
-	public Skupina polozkaToSkupina(Polozka polozka) {
-		Skupina s = new Skupina();
-		s.setId(polozka.getId());
-		s.setNazev(polozka.getNazev());
-		s.setTextSkupiny(polozka.getText());
-		if (polozka.getNadrizenaSkupina() != null) {
-			s.setIdNadrizeneSkupiny(polozka.getNadrizenaSkupina().getId());
+	public Group ItemToSkupina(Item Item) {
+		Group s = new Group();
+		s.setId(Item.getId());
+		s.setName(Item.getName());
+		s.setText(Item.getText());
+		if (Item.getParentGroup() != null) {
+			s.setIdParentGroup(Item.getParentGroup().getId());
 		}
 
-		Polozka pom = polozka.getNadrizenaSkupina();
+		Item pom = Item.getParentGroup();
 		while (pom != null && pom.getTyp() != Typ.ROOT) {
-			Popisek b = new Popisek();
+			Description b = new Description();
 			b.setId(pom.getId());
-			b.setNazev(pom.getNazev());
-			s.getCesta().add(0, b);
-			pom = pom.getNadrizenaSkupina();
+			b.setName(pom.getName());
+			s.getPath().add(0, b);
+			pom = pom.getParentGroup();
 		}
 
 		return s;
 	}
 
-	public Zastupce polozkaToZastupce(Polozka polozka) {
-		Zastupce zastupce = new Zastupce();
-		zastupce.setId(polozka.getId());
-		zastupce.setNazev(polozka.getNazev());
-		zastupce.setNazev2(polozka.getNazev2());
-		zastupce.setAutor(polozka.getAutor());
-		zastupce.setBarvy(polozka.getBarvy());
-		zastupce.setText(polozka.getText());
-		if (polozka.getNadrizenaSkupina() != null) {
-			zastupce.setIdNadrizeneSkupiny(polozka.getNadrizenaSkupina().getId());
+	public Representative ItemToRepresentative(Item Item) {
+		Representative representative = new Representative();
+		representative.setId(Item.getId());
+		representative.setName(Item.getName());
+		representative.setName2(Item.getName2());
+		representative.setAuthor(Item.getAuthor());
+		representative.setColor(Item.getColor());
+		representative.setText(Item.getText());
+		if (Item.getParentGroup() != null) {
+			representative.setIdParentGroup(Item.getParentGroup().getId());
 		}
-		if (polozka.getObrazky() != null) {
-			for (Obrazek obrazek : polozka.getObrazky()) {
-				zastupce.getFotky().add(fotkazObrazku(obrazek));
+		if (Item.getImages() != null) {
+			for (Image Image : Item.getImages()) {
+				representative.getImages().add(PhotoFromImage(Image));
 			}
 		}
-		Polozka pom = polozka.getNadrizenaSkupina();
+		Item pom = Item.getParentGroup();
 		while (pom != null && pom.getTyp() != Typ.ROOT) {
-			Popisek b = new Popisek();
+			Description b = new Description();
 			b.setId(pom.getId());
-			b.setNazev(pom.getNazev());
-			zastupce.getCesta().add(0, b);
-			pom = pom.getNadrizenaSkupina();
+			b.setName(pom.getName());
+			representative.getPath().add(0, b);
+			pom = pom.getParentGroup();
 		}
 
-		return zastupce;
+		return representative;
 	}
 
-	public Fotka fotkazObrazku(Obrazek obrazek) {
-		Fotka f = new Fotka();
-		f.setId(obrazek.getId());
-		f.setNazev(obrazek.getJmenoSouboru());
-		f.setUrl("/obrazek/" + obrazek.getId());
+	public Photo PhotoFromImage(Image Image) {
+		Photo f = new Photo();
+		f.setId(Image.getId());
+		f.setName(Image.getFileName());
+		f.setUrl("/image/" + Image.getId());
 		return f;
 	}
 
-	public Popisek polozkaToPopisek(Polozka polozka) {
-		Popisek p = new Popisek();
-		p.setId(polozka.getId());
-		p.setNazev(polozka.getNazev());
+	public Description ItemToDescription(Item Item) {
+		Description p = new Description();
+		p.setId(Item.getId());
+		p.setName(Item.getName());
 		return p;
 	}
 
-	public void uploadObrazek(Integer polozkaId, MultipartFile file) {
+	public void uploadImage(Integer ItemId, MultipartFile file) {
 
-		Obrazek o = new Obrazek();
-		o.setJmenoSouboru(file.getOriginalFilename());
-		Polozka p = polozkaRepo.getById(polozkaId);
-		o.setPolozka(p);
-		obrazekRepo.save(o);
+		Image o = new Image();
+		o.setFileName(file.getOriginalFilename());
+		Item p = ItemRepo.getById(ItemId);
+		o.setItem(p);
+		ImageRepo.save(o);
 		log.info("Uploading file " + file.getOriginalFilename());
 		try {
 			cestaKObrazkum = new File(imagesFolder).getAbsolutePath();
@@ -244,15 +244,15 @@ public class AtlasService {
 
 	}
 
-	public void uploadObrazek(Integer polozkaId, File file) {
+	public void uploadImage(Integer ItemId, File file) {
 
-		Polozka p = polozkaRepo.getById(polozkaId);
+		Item p = ItemRepo.getById(ItemId);
 
-		Obrazek o = new Obrazek();
-		o.setPolozka(p);
-		o.setJmenoSouboru(file.getName());
+		Image o = new Image();
+		o.setItem(p);
+		o.setFileName(file.getName());
 
-		obrazekRepo.save(o);
+		ImageRepo.save(o);
 		log.info("Importing file " + file.getAbsolutePath());
 		try {
 			cestaKObrazkum = new File(imagesFolder).getAbsolutePath();
@@ -273,75 +273,75 @@ public class AtlasService {
 		}
 	}
 
-	public File souborObrazku(Integer obrazekId) {
-		Obrazek o = obrazekRepo.getById(obrazekId);
+	public File souborObrazku(Integer ImageId) {
+		Image o = ImageRepo.getById(ImageId);
 		cestaKObrazkum = new File(imagesFolder).getAbsolutePath();
 		return new File(cestaKObrazkum, String.valueOf(o.getId()));
 	}
 
-	public void deleteObrazek(Integer id, Integer obrazekId) {
-		Obrazek o = obrazekRepo.getById(obrazekId);
+	public void deleteImage(Integer id, Integer ImageId) {
+		Image o = ImageRepo.getById(ImageId);
 		cestaKObrazkum = new File(imagesFolder).getAbsolutePath();
 		File f = new File(cestaKObrazkum, String.valueOf(o.getId()));
 		f.delete();
 
-		obrazekRepo.delete(o);
+		ImageRepo.delete(o);
 
 	}
 
 	// rekurzivni funkce pro zanoreni do podpolozek
-	public TransportniPolozka polozkaToTP(Integer idPolozky) {
-		TransportniPolozka tp = new TransportniPolozka();
-		Polozka polozka = polozkaRepo.getById(idPolozky);
+	public TransportItem ItemToTP(Integer idPolozky) {
+		TransportItem tp = new TransportItem();
+		Item Item = ItemRepo.getById(idPolozky);
 
-		tp.setNazev(polozka.getNazev());
-		tp.setText(polozka.getText());
-		tp.setTyp(polozka.getTyp());
+		tp.setName(Item.getName());
+		tp.setText(Item.getText());
+		tp.setTyp(Item.getTyp());
 		try {
-			tp.setNadrizenaSkupinaid(polozka.getNadrizenaSkupina().getId());
+			tp.setIdParentGroup(Item.getParentGroup().getId());
 		} catch (Exception e) {
-			tp.setNadrizenaSkupinaid(0); //TODO  Tady je id pro hlavni slozku
-			log.info("getNadrizenaSkupina je NULL");
+			tp.setIdParentGroup(0); //TODO  Tady je id pro hlavni slozku
+			log.info("getParentGroup je NULL");
 		}
 
-		tp.setId(polozka.getId());
-		tp.setAutor(polozka.getAutor());
-		tp.setBarvy(polozka.getBarvy());
-		tp.setNazev2(polozka.getNazev2());
+		tp.setId(Item.getId());
+		tp.setAuthor(Item.getAuthor());
+		tp.setColor(Item.getColor());
+		tp.setName2(Item.getName2());
 
 		return tp;
 	}
 
-	public void rekurzivniPridavaniPolozek(Integer idPolozky, List<TransportniPolozka> database) {
-		pridatDoTransportniPolozka(idPolozky, database);
-		for (Polozka podpolozka : polozkaRepo.getById(idPolozky).getPolozky()) {
-			rekurzivniPridavaniPolozek(podpolozka.getId(), database);
+	public void rekurzivniPridavaniPolozek(Integer idPolozky, List<TransportItem> database) {
+		pridatDoTransportItem(idPolozky, database);
+		for (Item podItem : ItemRepo.getById(idPolozky).getItems()) {
+			rekurzivniPridavaniPolozek(podItem.getId(), database);
 		}
 	}
 
-	public void pridatDoTransportniPolozka(Integer idPolozky, List<TransportniPolozka> listTP) {
-		TransportniPolozka tp = polozkaToTP(idPolozky);
+	public void pridatDoTransportItem(Integer idPolozky, List<TransportItem> listTP) {
+		TransportItem tp = ItemToTP(idPolozky);
 		listTP.add(tp);
 	}
 
-	public void pridavaniObrazku(List<TransportniObrazek> obrazky) {
-		List<Obrazek> obrazkyList = obrazekRepo.findAll();
-		for (Obrazek obrazek : obrazkyList) {
-			TransportniObrazek to = obrazekToTO(obrazek);
+	public void pridavaniObrazku(List<TransportImage> obrazky) {
+		List<Image> obrazkyList = ImageRepo.findAll();
+		for (Image Image : obrazkyList) {
+			TransportImage to = ImageToTO(Image);
 			obrazky.add(to);
 		}
 	}
 
-	private TransportniObrazek obrazekToTO(Obrazek obrazek) {
-		TransportniObrazek to = new TransportniObrazek();
-		to.setId(obrazek.getId());
-		to.setJmenoSouboru(obrazek.getJmenoSouboru());
-		to.setPolozkaid(obrazek.getPolozka().getId());
+	private TransportImage ImageToTO(Image Image) {
+		TransportImage to = new TransportImage();
+		to.setId(Image.getId());
+		to.setFileName(Image.getFileName());
+		to.setItemid(Image.getItem().getId());
 		return to;
 	}
 
-	public InputStream inputStream(Integer obrazekId) throws FileNotFoundException {
-		Obrazek o = obrazekRepo.getById(obrazekId);
+	public InputStream inputStream(Integer ImageId) throws FileNotFoundException {
+		Image o = ImageRepo.getById(ImageId);
 		cestaKObrazkum = new File(imagesFolder).getAbsolutePath();
 		File f = new File(cestaKObrazkum, String.valueOf(o.getId()));
 		InputStream vysledek = new FileInputStream(f);

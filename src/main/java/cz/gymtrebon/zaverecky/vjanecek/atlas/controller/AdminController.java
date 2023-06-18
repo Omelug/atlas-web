@@ -21,7 +21,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import java.util.List;
 
 @Controller
-@RequestMapping("/")
+@RequestMapping("/admin")
 @RequiredArgsConstructor
 @Slf4j
 @PreAuthorize("hasAuthority('" + User.ADMIN + "')")
@@ -31,7 +31,7 @@ public class AdminController {
     private final DatabaseRepository databaseRepository;
     private final RoleRepository roleRepository;
 
-    @GetMapping("admin")
+    @GetMapping("")
     public String adminTools(Model model) {
         List<User> userList = userRepository.findAll();
         model.addAttribute("userList", userList);
@@ -47,7 +47,8 @@ public class AdminController {
 
         return "admin";
     }
-    @PostMapping("/admin/delete")
+
+    @PostMapping("/delete")
     public String deleteDatabase(@RequestParam("databaseId") Long databaseId) {
         Database database = databaseRepository.findById(databaseId).orElse(null);
         log.info("database id"+databaseId);
@@ -55,17 +56,28 @@ public class AdminController {
             List<UDRlink> udrlinks = udRlinkRepository.findAllByDatabase(database);
             udRlinkRepository.deleteAll(udrlinks);
             databaseRepository.delete(database);
-        } databaseRepository.delete(database);
+            //TODO delete remove schema and directories from web and save confirm massage to admin (maybe email)
+        }
         return "redirect:/admin";
     }
-    @PostMapping("/admin/add")
+    @PostMapping("/add")
     public String addDatabase(@RequestParam("databaseName") String databaseName) {
+        if (databaseName.isBlank()) {
+            return "redirect:/admin";
+        }
+        if (databaseRepository.findByName(databaseName).isPresent()) {
+            //TODo error that databse already exist
+            return "redirect:/admin";
+        }
+        log.info("database name "+databaseName);
         Database database = new Database();
         database.setName(databaseName);
         databaseRepository.save(database);
+        //create schema for dataabase
+        //TODO create schema new SchamaCreateor().createSchema(databaseName);
         return "redirect:/admin";
     }
-    @PostMapping("/admin/addUDRlink")
+    @PostMapping("/addUDRlink")
     public String addUDRlink(@RequestParam("user") Long userId, @RequestParam("database") Long databaseId, @RequestParam("role") Long roleId) {
         User user = userRepository.findById(userId).orElseThrow();
         Database database = databaseRepository.findById(databaseId).orElseThrow();
@@ -80,9 +92,28 @@ public class AdminController {
 
         return "redirect:/admin";
     }
-    @PostMapping("/admin/deleteUDR")
+    @PostMapping("/deleteUDR")
     public String deleteUDR(@RequestParam("udrlinkId") Long udrlinkId) {
         udRlinkRepository.deleteById(udrlinkId);
         return "redirect:/admin";
     }
+    @PostMapping("/addUser")
+    public String addUser(@RequestParam("username") String username,
+                          @RequestParam("password") String password,
+                          @RequestParam(value = "active", defaultValue = "false") boolean active) {
+        User user = new User();
+        user.setName(username);
+        user.setPassword(password);
+        user.setCurrentDB_name("public");
+        user.setActive(active);
+        userRepository.save(user);
+
+        return "redirect:/admin";
+    }
+    @PostMapping("/deleteUser")
+    public String deleteUser(@RequestParam("userId") Long userId) {
+        userRepository.deleteById(userId);
+        return "redirect:/admin";
+    }
+
 }

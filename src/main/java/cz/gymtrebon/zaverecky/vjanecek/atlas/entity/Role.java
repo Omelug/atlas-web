@@ -2,12 +2,14 @@ package cz.gymtrebon.zaverecky.vjanecek.atlas.entity;
 
 
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 import java.util.List;
 
 @Entity
 @Data
+@NoArgsConstructor
 @Table(name = "role", schema = "config")
 public class Role {
 
@@ -21,4 +23,9 @@ public class Role {
 
     @OneToMany(mappedBy = "role")
     private List<UDRlink> UDRlinks;
+
+    public Role(String name) {
+        this.name = name;
+        this.UDRlinks = null;
+    }
 }

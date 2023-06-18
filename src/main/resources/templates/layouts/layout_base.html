@@ -50,14 +50,19 @@
 				<div class="image-container">
 					<img class="icon" src="/png/database.png" alt="DB">
 				</div>
-				<table>
-					<tbody>
-					<tr th:each="database : ${databaseList}">
-						<td> <a th:text="${database.name}" ></a></td>
-					</tr>
-					</tbody>
-				</table>
 			</div>
+				<ul  class="db_list" th:each="dbhelper : ${databaseList}">
+					<form class="" method="post" action="/changeDatabase">
+						<td th:unless="${currentDatabase == dbhelper.database}">
+							<button class="link-button" th:text="${dbhelper.database}" th:value="${dbhelper.database}" ></button>
+						</td>
+						<td th:if="${currentDatabase == dbhelper.database}">
+							<button class="link-button" style="font-weight: bold" th:text="${dbhelper.database}" th:value="${dbhelper.database}" ></button>
+						</td>
+						<td> <a class="smallText" th:text="${dbhelper.roles}" ></a></td>
+						<input type="hidden" name="databaseName" th:value="${dbhelper.database}" />
+					</form>
+				</ul>
 		</div>
 	</div>
 	<script>

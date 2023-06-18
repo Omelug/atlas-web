@@ -13,5 +13,6 @@ public interface UDRlinkRepository extends JpaRepository<UDRlink, Long> {
     List<UDRlink> findAllByUser(User user);
     List<UDRlink> findAllByDatabase(Database database);
     List<UDRlink> findAllByUserName(String userName);
+    List<UDRlink> findAllByUserNameAndDatabaseName(String userName, String databaseName);
     void deleteById(Long udrlinkId);
 }

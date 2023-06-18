@@ -5,6 +5,7 @@ import cz.gymtrebon.zaverecky.vjanecek.atlas.dto.Representative;
 import cz.gymtrebon.zaverecky.vjanecek.atlas.entity.User;
 import cz.gymtrebon.zaverecky.vjanecek.atlas.form.GroupForm;
 import cz.gymtrebon.zaverecky.vjanecek.atlas.form.RepresentativeForm;
+import cz.gymtrebon.zaverecky.vjanecek.atlas.repository.UDRlinkRepository;
 import cz.gymtrebon.zaverecky.vjanecek.atlas.service.AtlasService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -18,6 +19,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.Valid;
 import java.io.IOException;
+import java.security.Principal;
 import java.util.Optional;
 
 @Controller
@@ -27,11 +29,11 @@ import java.util.Optional;
 @PreAuthorize("hasAuthority('" + User.EDITOR + "') OR hasAuthority('" + User.ADMIN + "')")
 public class EditorController {
     private final AtlasService service;
+    private final UDRlinkRepository udrlinkRepository;
 
     @GetMapping("/group/newItem")
-    public String newSkupina(
-            @RequestParam("idParentGroup") Optional<Integer> idParentGroup,
-            Model model) {
+    public String newSkupina(Principal principal,Model model,
+            @RequestParam("idParentGroup") Optional<Integer> idParentGroup ) {
         GroupForm form = new GroupForm();
         if (idParentGroup.isPresent()) {
             form.setIdParentGroup(idParentGroup.get());
@@ -39,11 +41,13 @@ public class EditorController {
         model.addAttribute("groups", service.seznamSkupin());
         model.addAttribute("group", form);
         model.addAttribute("newItem", true);
+
+        AtlasController.addDatabaseList(principal, model, udrlinkRepository);
         return "group-form";
     }
 
     @GetMapping("/group/{id}/edit")
-    public String editGroup(
+    public String editGroup(Principal principal,
             @PathVariable("id") Integer id,
             Model model) {
 
@@ -57,6 +61,8 @@ public class EditorController {
         model.addAttribute("groups", service.seznamSkupin());
         model.addAttribute("group", form);
         model.addAttribute("newItem", false);
+
+        AtlasController.addDatabaseList(principal, model, udrlinkRepository);
         return "group-form";
     }
     //rekurzivni
@@ -95,7 +101,7 @@ public class EditorController {
         model.addAttribute("nadrizeneSkupiny", service.seznamSkupin());
 
         if (bindingResult.hasErrors()) {
-            return "group-form";
+            return "redirect:/group/newItem";
         }
 
         Integer idSkupiny = null;
@@ -115,7 +121,7 @@ public class EditorController {
         return "redirect:/group/" + idSkupiny;
     }
     @GetMapping("/representative/newItem")
-    public String newRepresentative(
+    public String newRepresentative(Principal principal,
             @RequestParam("idParentGroup") Optional<Integer> idParentGroup,
             Model model) {
 
@@ -127,13 +133,14 @@ public class EditorController {
         model.addAttribute("representative", form);
         model.addAttribute("newItem", true);
 
+        AtlasController.addDatabaseList(principal, model, udrlinkRepository);
         return "representative-form";
     }
 
     @GetMapping("/representative/{id}/edit")
-    public String editRepresentative(
+    public String editRepresentative(Principal principal,
             @PathVariable("id") Integer id,
-            Model model) {
+                                     Model model) {
 
         Representative representative = service.najdiRepresentativeDleId(id);
         RepresentativeForm form = new RepresentativeForm();
@@ -150,7 +157,8 @@ public class EditorController {
         model.addAttribute("representative", form);
         model.addAttribute("newItem", false);
 
-        return "representative-form";
+        AtlasController.addDatabaseList(principal, model, udrlinkRepository);
+        return "redirect:/representative-form";
     }
 
     @PostMapping(value="/representative/save", params="action-delete")
@@ -187,7 +195,7 @@ public class EditorController {
         model.addAttribute("nadrizeneSkupiny", service.seznamSkupin());
 
         if (bindingResult.hasErrors()) {
-            return "representative-form";
+            return "redirect:/representative-form";
         }
 
         Integer idRepresentative = null;

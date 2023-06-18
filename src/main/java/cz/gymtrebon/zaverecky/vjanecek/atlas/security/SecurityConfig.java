@@ -41,7 +41,9 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
                      .permitAll()
                         .and()
                      .logout()
-                     .permitAll();
+                     .permitAll().and().
+                    exceptionHandling()
+                    .accessDeniedPage("/error");
 
             http.addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
         }

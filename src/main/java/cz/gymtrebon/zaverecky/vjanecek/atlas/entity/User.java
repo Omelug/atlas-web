@@ -33,24 +33,33 @@ public class User {
 
     private boolean active;
 
-	private Date firstLogin;
-	private Date lastLogin;
-
 	@CreationTimestamp
 	@Temporal(TemporalType.TIMESTAMP)
-	@Column(name = "create_time")
-	private Date createDate;
+	private Date firstLogin;
+
+	//TODO pri prvnim prihlaseni
+	private Date lastLogin;
 
 	@UpdateTimestamp
 	@Temporal(TemporalType.TIMESTAMP)
-	@Column(name = "update_time")
 	private Date modifyDate;
-
 
 	private String currentDB_name;
 
 	@OneToMany(mappedBy = "user")
 	private List<UDRlink> udrLinks;
+
+	public User(String username, String password, String databaseName) {
+		this.name = username;
+        this.password = password;
+        this.active = true;
+        this.firstLogin = new Date();
+        this.lastLogin = new Date();
+        this.modifyDate = new Date();
+        this.currentDB_name = databaseName;
+        this.udrLinks = null;
+	}
+
 
 	public boolean isActive() {
 		return active;

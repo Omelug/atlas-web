@@ -1,9 +1,6 @@
 package cz.gymtrebon.zaverecky.vjanecek.atlas;
 
-import com.opencsv.CSVReader;
-import cz.gymtrebon.zaverecky.vjanecek.atlas.repository.ImageRepository;
-import cz.gymtrebon.zaverecky.vjanecek.atlas.repository.ItemRepository;
-import cz.gymtrebon.zaverecky.vjanecek.atlas.repository.UserRepository;
+import cz.gymtrebon.zaverecky.vjanecek.atlas.repository.*;
 import cz.gymtrebon.zaverecky.vjanecek.atlas.service.AtlasService;
 import lombok.extern.java.Log;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,14 +8,9 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
-import org.springframework.context.annotation.Bean;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
-import org.springframework.web.multipart.commons.CommonsMultipartResolver;
 
 import java.io.File;
-import java.io.FileReader;
-import java.io.Reader;
-import java.util.List;
 
 @SpringBootApplication
 @EnableJpaRepositories(basePackageClasses = UserRepository.class,basePackages="cz.gymtrebon.zaverecky.vjanecek.atlas.repository")
@@ -31,7 +23,14 @@ public class AtlasApplication implements CommandLineRunner {
 	
 	@Autowired
 	private ImageRepository ImageRepo;
-
+	@Autowired
+	private UDRlinkRepository udrLinkRepository;
+	@Autowired
+	private UserRepository userRepo;
+	@Autowired
+	private DatabaseRepository dataRepo;
+	@Autowired
+	private RoleRepository roleRepo;
 	@Autowired
 	private AtlasService atlasService;
 
@@ -45,8 +44,18 @@ public class AtlasApplication implements CommandLineRunner {
 		File directory = new File("../atlas-web/src/main/resources/pokusna_data/images");
 		System.out.println(directory.getAbsolutePath());
 
-/*
-		Map<Integer, Integer> mapovaniimageId = new HashMap<>();
+		//TODO spusteni poprve, potom to nějak oddelit
+		/*
+		Database publicdb = dataRepo.save(new Database("public"));
+		User admin = userRepo.save(new User("admin", "admin", publicdb.getName()));
+		Role adminrole = roleRepo.save(new Role("ADMIN"));
+		udrLinkRepository.save(new UDRlink(admin, publicdb, adminrole));
+
+		roleRepo.save(new Role("EDITOR"));
+		roleRepo.save(new Role("USER"));
+		*/
+
+		/*Map<Integer, Integer> mapovaniimageId = new HashMap<>();
 		Map<Integer, Integer> mapovaniId = new HashMap<>();
 
 		Item p = new Item();
@@ -98,7 +107,7 @@ public class AtlasApplication implements CommandLineRunner {
 			File imagesFile = new File(imagesFolder, fileName);	
 			log.info("ImageFiesFile:   " + imagesFile.getAbsolutePath());
 			atlasService.uploadImage(mapovaniId.get(idParenta), imagesFile);
-		}*/
+		}
 	}
 
 	//@Bean
@@ -117,7 +126,7 @@ public class AtlasApplication implements CommandLineRunner {
 	        try (CSVReader csvReader = new CSVReader(reader)) {
 	            return csvReader.readAll();
 	        }
-	    }
+	    }*/
 	}
 
 }

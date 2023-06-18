@@ -64,16 +64,24 @@
         </form>
 
         <br><span> Users:</span>
+        <form id="addUserForm" th:action="@{/admin/addUser}" method="post">
+            <input type="text" name="username" placeholder="Username" required />
+            <input type="password" name="password" placeholder="Password" required />
+            <input type="checkbox" name="active" /> Active
+            <button type="submit">Add User</button>
+        </form>
+
+        <form id="deleteUserForm" th:action="@{/admin/deleteUser}" method="post">
         <table>
             <thead>
             <tr>
                 <th>ID</th>
                 <th>Name</th>
                 <th>Password</th>
+                <th>Current database</th>
                 <th>Active</th>
                 <th>First Login</th>
                 <th>Last Login</th>
-                <th>Create Date</th>
                 <th>Modify Date</th>
             </tr>
             </thead>
@@ -82,14 +90,18 @@
                 <td th:text="${user.id}"></td>
                 <td th:text="${user.name}"></td>
                 <td th:text="${user.password}"></td>
+                <td th:text="${user.currentDB_name}"></td>
                 <td th:text="${user.active}"></td>
                 <td th:text="${user.firstLogin}"></td>
                 <td th:text="${user.lastLogin}"></td>
-                <td th:text="${user.createDate}"></td>
                 <td th:text="${user.modifyDate}"></td>
+                <td>
+                    <button type="submit" name="userId" th:value="${user.id}">Delete</button>
+                </td>
             </tr>
             </tbody>
         </table>
+        </form>
 
         <br><span> Database:</span>
         <form id="addDatabaseForm" th:action="@{/admin/add}" method="post">

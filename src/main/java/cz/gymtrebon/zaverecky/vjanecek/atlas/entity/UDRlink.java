@@ -12,8 +12,7 @@ import javax.persistence.*;
 public class UDRlink {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    @Column(name="id")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @ManyToOne

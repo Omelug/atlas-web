@@ -1,7 +1,6 @@
 package cz.gymtrebon.zaverecky.vjanecek.atlas.entity;
 
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -14,10 +13,12 @@ import java.util.List;
 @Entity
 @Table(name = "Item")
 @Getter @Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class Item {
 	
 	@Id
-	@GeneratedValue(strategy = GenerationType.AUTO, generator="native")
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@GenericGenerator(name="native", strategy = "native")
 	@Column(name="id")
 	private Integer id;
@@ -26,22 +27,22 @@ public class Item {
     @JoinColumn(name = "parent_group_id")
     private Item parentGroup;
     
-	@Column(name="typ", nullable=true)
+	@Column(name="typ", nullable=false)
 	private Typ typ;
 	
-	@Column(nullable=true, length=250)
+	@Column(nullable = false, length=250)
 	private String name;
 	
-	@Column(nullable=true, length=250)
+	@Column(length=250)
 	private String name2;
 	
-	@Column( nullable=true, length=250)
+	@Column( length=250)
 	private String author;
 	
-	@Column( nullable=true, length=250)
+	@Column( length=250)
 	private String color;
 	
-	@Column( nullable=true, length=2500)
+	@Column( length=2500)
 	private String text;
 
 	@CreationTimestamp
@@ -54,13 +55,23 @@ public class Item {
 	@Column(name = "update_time")
 	private Date modifyDate;
 	
-	@ManyToMany(mappedBy="parentGroup", cascade = CascadeType.REMOVE)
+	@OneToMany(mappedBy="parentGroup", cascade = CascadeType.REMOVE)
 	private List<Item> items = new ArrayList<>();
 	
 	@OneToMany(mappedBy="Item", cascade = CascadeType.REMOVE)
 	private List<Image> images = new ArrayList<>();
-	
-	
+
+	public Item(String name, String name2, String author, String color, String text, Typ typ, Item nadrizena) {
+		setName(name);
+		setName2(name2);
+		setAuthor(author);
+		setColor(color);
+		setText(text);
+		setTyp(typ);
+		setParentGroup(nadrizena);
+	}
+
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;
@@ -79,10 +90,7 @@ public class Item {
 			return false;
 		Item other = (Item) obj;
 		if (id == null) {
-			if (other.id != null)
-				return false;
-		} else if (!id.equals(other.id))
-			return false;
-		return true;
+			return other.id == null;
+		} else return id.equals(other.id);
 	}
 }

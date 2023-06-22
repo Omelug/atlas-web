@@ -2,6 +2,7 @@ package cz.gymtrebon.zaverecky.vjanecek.atlas;
 
 import cz.gymtrebon.zaverecky.vjanecek.atlas.repository.*;
 import cz.gymtrebon.zaverecky.vjanecek.atlas.service.AtlasService;
+import cz.gymtrebon.zaverecky.vjanecek.atlas.service.SchemaService;
 import lombok.extern.java.Log;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
@@ -33,6 +34,8 @@ public class AtlasApplication implements CommandLineRunner {
 	private RoleRepository roleRepo;
 	@Autowired
 	private AtlasService atlasService;
+	@Autowired
+	private SchemaService schemaService;
 
 	public static void main(String[] args) {
 		SpringApplication.run(AtlasApplication.class, args);
@@ -45,15 +48,15 @@ public class AtlasApplication implements CommandLineRunner {
 		System.out.println(directory.getAbsolutePath());
 
 		//TODO spusteni poprve, potom to nějak oddelit
-		/*
-		Database publicdb = dataRepo.save(new Database("public"));
+		/*schemaService.createSchema("config");
+		Database publicdb = dataRepo.save(new Database(CurrentDatabase.));
 		User admin = userRepo.save(new User("admin", "admin", publicdb.getName()));
 		Role adminrole = roleRepo.save(new Role("ADMIN"));
 		udrLinkRepository.save(new UDRlink(admin, publicdb, adminrole));
 
 		roleRepo.save(new Role("EDITOR"));
-		roleRepo.save(new Role("USER"));
-		*/
+		roleRepo.save(new Role("USER"));*/
+
 
 		/*Map<Integer, Integer> mapovaniimageId = new HashMap<>();
 		Map<Integer, Integer> mapovaniId = new HashMap<>();

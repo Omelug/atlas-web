@@ -74,7 +74,7 @@ public class AtlasController {
 	
 	@GetMapping(value = {"/home"})
 	public String home(Principal principal, Model model) {
-		Group group = service.najdiRootSkupinu();
+		Group group = service.findORcreateGroup();
 		model.addAttribute("home", true);
 		return groupDetail(principal,model, group.getId());
 	}

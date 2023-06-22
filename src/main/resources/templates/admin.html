@@ -56,7 +56,7 @@
                     <td th:text="${udrlink.database.name}"></td>
                     <td th:text="${udrlink.role.name}"></td>
                     <td>
-                        <button type="submit" name="udrlinkId" th:value="${udrlink.id}" th>X</button>
+                        <button type="submit" name="udrlinkId" th:value="${udrlink.id}" >X</button>
                     </td>
                 </tr>
                 </tbody>
@@ -65,9 +65,15 @@
 
         <br><span> Users:</span>
         <form id="addUserForm" th:action="@{/admin/addUser}" method="post">
-            <input type="text" name="username" placeholder="Username" required />
-            <input type="password" name="password" placeholder="Password" required />
-            <input type="checkbox" name="active" /> Active
+            <label>
+                <input type="text" name="username" placeholder="Username" required />
+            </label>
+            <label>
+                <input type="password" name="password" placeholder="Password" required />
+            </label>
+            <label>
+                <input type="checkbox" name="active" />
+            </label> Active
             <button type="submit">Add User</button>
         </form>
 
@@ -104,12 +110,14 @@
         </form>
 
         <br><span> Database:</span>
-        <form id="addDatabaseForm" th:action="@{/admin/add}" method="post">
-            <input type="text" name="databaseName" placeholder="Database name" required />
+        <form id="addDatabaseForm" th:action="@{/admin/addDatabase}" method="post">
+            <label>
+                <input type="text" name="databaseName" placeholder="Database name" required />
+            </label>
             <button type="submit">Add</button>
         </form>
         <br>
-        <form id="returnIdForm" th:action="@{/admin/delete}" method="post">
+        <form id="returnIdForm" th:action="@{/admin/deleteDatabase}" method="post">
             <table>
                 <thead>
                 <tr>
@@ -122,7 +130,7 @@
                             <td th:text="${database.id}"></td>
                             <td th:text="${database.name}"></td>
                             <td>
-                                <button type="submit" name="databaseId" th:value="${database.id}" th>X</button>
+                                <button type="submit" name="databaseId" th:value="${database.id}" >X</button>
                             </td>
                         </tr>
                     </tbody>

@@ -6,10 +6,11 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface ItemRepository extends JpaRepository<Item, Integer> {
-	Item findByTyp(Typ typ);
+	Optional<Item> findByTyp(Typ typ);
 	List<Item> findAllByTyp(Typ typ);
 	//List<Item> findByNadrizenaSkupinaAndTyp(Item Item, Typ typ);
 	List<Item> findByParentGroupAndTyp(Item Item, Typ typ);

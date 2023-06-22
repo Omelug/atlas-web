@@ -1,4 +1,4 @@
-<html xmlns:th="http://www.thymeleaf.org" xmlns:tiles="http://www.thymeleaf.org" xmlns:sec="http://www.w3.org/1999/xhtml">
+<html xmlns:th="http://www.thymeleaf.org" xmlns:tiles="http://www.thymeleaf.org" xmlns:sec="http://www.w3.org/1999/xhtml" lang="en">
 <head>
   <title tiles:fragment="title">Messages : Create</title>
   <link rel="stylesheet" href="/styly.css">
@@ -12,12 +12,16 @@
       <br>
       <div class="loginDiv">
         <p>Username</p>
-        <input type="text" id="username" name="username"/>
+        <label for="username">
+          <input id="username" name="username" type="text"/>
+        </label>
       </div>
       <br>
       <div class="loginDiv">
         <p >Password </p>
-        <input type="password" id="password" name="password"/>
+        <label for="password">
+          <input type="password" id="password" name="password"/>
+        </label>
       </div>
 
       <br/>

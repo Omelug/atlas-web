@@ -1,6 +1,7 @@
 package cz.gymtrebon.zaverecky.vjanecek.atlas.repository;
 
 import cz.gymtrebon.zaverecky.vjanecek.atlas.entity.Database;
+import cz.gymtrebon.zaverecky.vjanecek.atlas.entity.Role;
 import cz.gymtrebon.zaverecky.vjanecek.atlas.entity.UDRlink;
 import cz.gymtrebon.zaverecky.vjanecek.atlas.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -14,5 +15,6 @@ public interface UDRlinkRepository extends JpaRepository<UDRlink, Long> {
     List<UDRlink> findAllByDatabase(Database database);
     List<UDRlink> findAllByUserName(String userName);
     List<UDRlink> findAllByUserNameAndDatabaseName(String userName, String databaseName);
+    UDRlink findByUserAndDatabaseAndRole(User user,Database database, Role role);
     void deleteById(Long udrlinkId);
 }

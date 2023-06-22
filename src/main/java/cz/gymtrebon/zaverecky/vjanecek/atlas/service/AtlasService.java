@@ -1,5 +1,6 @@
 package cz.gymtrebon.zaverecky.vjanecek.atlas.service;
 
+import cz.gymtrebon.zaverecky.vjanecek.atlas.currentdb.CurrentDatabase;
 import cz.gymtrebon.zaverecky.vjanecek.atlas.dto.*;
 import cz.gymtrebon.zaverecky.vjanecek.atlas.entity.Image;
 import cz.gymtrebon.zaverecky.vjanecek.atlas.entity.Item;
@@ -15,6 +16,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -33,13 +35,25 @@ public class AtlasService {
 			log.info("Item: " + Item.getName());
 		}
 
-		return ItemToSkupina(ItemRepo.findByTyp(Typ.ROOT));
+		return ItemToSkupina(ItemRepo.findByTyp(Typ.ROOT).get());
 	}
+	public Group findORcreateGroup() {
+		Optional<Item> polozka = ItemRepo.findByTyp(Typ.ROOT);
+		if(polozka.isEmpty()) {
+			Item p = new Item();
+			p.setParentGroup(null);
+			p.setName(CurrentDatabase.getCurrentDatabase());
+			p.setTyp(Typ.ROOT);
+			ItemRepo.save(p);
+			polozka = ItemRepo.findByTyp(Typ.ROOT);
+		}
+        return ItemToSkupina(polozka.get());
+    }
 
 	public List<Description> seznamSkupin() {
 		List<Description> skupiny = new ArrayList<>();
 
-		skupiny.add(ItemToDescription(ItemRepo.findByTyp(Typ.ROOT)));
+		skupiny.add(ItemToDescription(ItemRepo.findByTyp(Typ.ROOT).get()));
 		for (Item Item : ItemRepo.findAllByTyp(Typ.GROUP)) {
 			Description p = new Description();
 			p.setId(Item.getId());
@@ -114,16 +128,8 @@ public class AtlasService {
 			String text) {
 
 		Item nadrizena = ItemRepo.getById(idParentGroup);
+		Item representative = new Item(name, name2, author, color, text, Typ.REPRESENTATIVE, nadrizena);
 
-		Item representative = new Item();
-		representative.setName(name);
-		representative.setName2(name2);
-		representative.setAuthor(author);
-		representative.setColor(color);
-		representative.setText(text);
-
-		representative.setTyp(Typ.REPRESENTATIVE);
-		representative.setParentGroup(nadrizena);
 		ItemRepo.save(representative);
 		return representative.getId();
 	}
@@ -232,7 +238,7 @@ public class AtlasService {
 		ImageRepo.save(o);
 		log.info("Uploading file " + file.getOriginalFilename());
 		try {
-			cestaKObrazkum = new File(imagesFolder).getAbsolutePath();
+			cestaKObrazkum = new File(imagesFolder+CurrentDatabase.getCurrentDatabase()+"/images").getAbsolutePath();
 			File f = new File(cestaKObrazkum, String.valueOf(o.getId()));
 			FileOutputStream fos = new FileOutputStream(f);
 			fos.write(file.getBytes());
@@ -255,7 +261,7 @@ public class AtlasService {
 		ImageRepo.save(o);
 		log.info("Importing file " + file.getAbsolutePath());
 		try {
-			cestaKObrazkum = new File(imagesFolder).getAbsolutePath();
+			cestaKObrazkum = new File(imagesFolder+CurrentDatabase.getCurrentDatabase()+"/images").getAbsolutePath();
 			File f = new File(cestaKObrazkum, String.valueOf(o.getId()));
 			InputStream in = new BufferedInputStream(new FileInputStream(file));
 			OutputStream out = new BufferedOutputStream(new FileOutputStream(f));
@@ -275,13 +281,13 @@ public class AtlasService {
 
 	public File souborObrazku(Integer ImageId) {
 		Image o = ImageRepo.getById(ImageId);
-		cestaKObrazkum = new File(imagesFolder).getAbsolutePath();
+		cestaKObrazkum = new File(imagesFolder+CurrentDatabase.getCurrentDatabase()+"/images").getAbsolutePath();
 		return new File(cestaKObrazkum, String.valueOf(o.getId()));
 	}
 
 	public void deleteImage(Integer id, Integer ImageId) {
 		Image o = ImageRepo.getById(ImageId);
-		cestaKObrazkum = new File(imagesFolder).getAbsolutePath();
+		cestaKObrazkum = new File(imagesFolder+CurrentDatabase.getCurrentDatabase()+"/images").getAbsolutePath();
 		File f = new File(cestaKObrazkum, String.valueOf(o.getId()));
 		f.delete();
 
@@ -342,7 +348,7 @@ public class AtlasService {
 
 	public InputStream inputStream(Integer ImageId) throws FileNotFoundException {
 		Image o = ImageRepo.getById(ImageId);
-		cestaKObrazkum = new File(imagesFolder).getAbsolutePath();
+		cestaKObrazkum = new File(imagesFolder+CurrentDatabase.getCurrentDatabase()+"/images").getAbsolutePath();
 		File f = new File(cestaKObrazkum, String.valueOf(o.getId()));
 		InputStream vysledek = new FileInputStream(f);
 		return vysledek;

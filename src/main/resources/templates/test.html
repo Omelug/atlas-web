@@ -23,7 +23,7 @@
 	<form th:action="@{/test2}" th:object="${text}" method="post">
 		<div class="form-group col-md-6">
 
-			<textarea id="text" class="" name="celyText" th:text="${text.celyText}" field="*{celyText}">
+			<label for="text"></label><textarea id="text" class="" name="celyText" th:text="${text.celyText}" field="*{celyText}">
 			</textarea>
 		</div>
 		<button type="submit" class="btn btn-danger" name="action-test">Test</button>
@@ -58,10 +58,6 @@
 	});
 
 </script>
-
-
-
-	</form>
 </div>
 
 </html>

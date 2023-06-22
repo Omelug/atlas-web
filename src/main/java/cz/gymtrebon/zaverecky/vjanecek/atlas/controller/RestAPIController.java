@@ -38,7 +38,7 @@ public class RestAPIController {
 	@GetMapping("/flowersList")
 	public ResponseEntity<List<TransportItem>> odeslatDatabazi() {
 		List<TransportItem> database = new ArrayList<>();
-		Group rootItem = service.najdiRootSkupinu();
+		Group rootItem = service.findORcreateGroup();
 		service.rekurzivniPridavaniPolozek(rootItem.getId(), database);
 		return new ResponseEntity<List<TransportItem>>(database, HttpStatus.OK);
 	}

@@ -6,6 +6,7 @@ import org.springframework.stereotype.Component;
 @Component
 @Data
 public class CurrentDatabase{
+    public static final String DEFAULT_DATABASE = "public";
     private static String currentDatabase;
 
     public static String getCurrentDatabase() {

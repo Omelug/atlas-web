@@ -1,5 +1,6 @@
 package cz.gymtrebon.zaverecky.vjanecek.atlas.controller;
 
+import cz.gymtrebon.zaverecky.vjanecek.atlas.currentdb.CurrentDatabase;
 import cz.gymtrebon.zaverecky.vjanecek.atlas.entity.Database;
 import cz.gymtrebon.zaverecky.vjanecek.atlas.entity.Role;
 import cz.gymtrebon.zaverecky.vjanecek.atlas.entity.UDRlink;
@@ -8,6 +9,7 @@ import cz.gymtrebon.zaverecky.vjanecek.atlas.repository.DatabaseRepository;
 import cz.gymtrebon.zaverecky.vjanecek.atlas.repository.RoleRepository;
 import cz.gymtrebon.zaverecky.vjanecek.atlas.repository.UDRlinkRepository;
 import cz.gymtrebon.zaverecky.vjanecek.atlas.repository.UserRepository;
+import cz.gymtrebon.zaverecky.vjanecek.atlas.service.SchemaService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -30,6 +32,7 @@ public class AdminController {
     private final UserRepository userRepository;
     private final DatabaseRepository databaseRepository;
     private final RoleRepository roleRepository;
+    private final SchemaService schemaService;
 
     @GetMapping("")
     public String adminTools(Model model) {
@@ -48,7 +51,7 @@ public class AdminController {
         return "admin";
     }
 
-    @PostMapping("/delete")
+    @PostMapping("/deleteDatabase")
     public String deleteDatabase(@RequestParam("databaseId") Long databaseId) {
         Database database = databaseRepository.findById(databaseId).orElse(null);
         log.info("database id"+databaseId);
@@ -57,10 +60,13 @@ public class AdminController {
             udRlinkRepository.deleteAll(udrlinks);
             databaseRepository.delete(database);
             //TODO delete remove schema and directories from web and save confirm massage to admin (maybe email)
+            schemaService.deleteSchema(database.getName());
+            //projde spoje na databazi a nastavi default databazi
+            userRepository.updateDatabaseColumnToDefault(database.getName(), CurrentDatabase.DEFAULT_DATABASE);
         }
         return "redirect:/admin";
     }
-    @PostMapping("/add")
+    @PostMapping("/addDatabase")
     public String addDatabase(@RequestParam("databaseName") String databaseName) {
         if (databaseName.isBlank()) {
             return "redirect:/admin";
@@ -74,6 +80,8 @@ public class AdminController {
         database.setName(databaseName);
         databaseRepository.save(database);
         //create schema for dataabase
+        schemaService.createSchema(databaseName);
+        schemaService.createTablesInSchema(databaseName);
         //TODO create schema new SchamaCreateor().createSchema(databaseName);
         return "redirect:/admin";
     }
@@ -82,6 +90,11 @@ public class AdminController {
         User user = userRepository.findById(userId).orElseThrow();
         Database database = databaseRepository.findById(databaseId).orElseThrow();
         Role role = roleRepository.findById(roleId).orElseThrow();
+
+        if (udRlinkRepository.findByUserAndDatabaseAndRole(user, database, role) != null) {
+            //TODO error that UDRlink already exists
+            return "redirect:/admin";
+        }
 
         UDRlink udrlink = new UDRlink();
         udrlink.setUser(user);
@@ -101,10 +114,15 @@ public class AdminController {
     public String addUser(@RequestParam("username") String username,
                           @RequestParam("password") String password,
                           @RequestParam(value = "active", defaultValue = "false") boolean active) {
+        //user aready exists?
+        if (userRepository.findByName(username).isPresent()) {
+            //TODO error that user already exists
+            return "redirect:/admin";
+        }
         User user = new User();
         user.setName(username);
         user.setPassword(password);
-        user.setCurrentDB_name("public");
+        user.setCurrentDB_name(CurrentDatabase.DEFAULT_DATABASE);
         user.setActive(active);
         userRepository.save(user);
 

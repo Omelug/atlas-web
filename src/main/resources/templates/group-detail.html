@@ -8,7 +8,7 @@
 	<p th:utext="${group.text}"></p>
 </div>
 
-<div th:if="${#authorization.expression('hasAuthority(''EDITOR'')')}" id="buttons">
+<div th:if="${#authorization.expression('hasAnyAuthority(''EDITOR'', ''ADMIN'')')}" id="buttons">
 	<a  th:href="@{'/group/newItem?idParentGroup='+${group.id}}">Add group</a>
 	|
 	<a th:href="@{'/representative/newItem?idParentGroup='+${group.id}}">Add representative</a>

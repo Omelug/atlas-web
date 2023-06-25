@@ -9,6 +9,7 @@ import cz.gymtrebon.zaverecky.vjanecek.atlas.repository.CustomLoggerRepository;
 import cz.gymtrebon.zaverecky.vjanecek.atlas.repository.ItemRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.io.FileUtils;
 import org.hibernate.Session;
 import org.hibernate.boot.Metadata;
 import org.hibernate.boot.MetadataSources;
@@ -23,6 +24,7 @@ import org.springframework.stereotype.Service;
 
 import javax.persistence.EntityManager;
 import java.io.File;
+import java.io.IOException;
 import java.sql.Statement;
 import java.util.EnumSet;
 
@@ -64,7 +66,7 @@ public class SchemaService {
         if (!folder.exists()) {
             boolean folderCreated = folder.mkdirs();
             if (folderCreated) {
-                customLoggerRepository.save(new LoggerLine(LogTyp.ERROR, "databasecreation", "Folder for  "+schemaName+" created"));
+                customLoggerRepository.save(new LoggerLine(LogTyp.INFO, "databasecreation", "Folder for  "+schemaName+" created"));
             } else {
                 customLoggerRepository.save(new LoggerLine(LogTyp.ERROR, "databasecreation", "Failed to create the folder "+ folder.getAbsolutePath()));
             }
@@ -108,9 +110,11 @@ public class SchemaService {
                 statement.executeUpdate("DROP SCHEMA IF EXISTS " + schemaName + " CASCADE");
             }
         });
-
-        File folder = new File(imagesFolder+schemaName+"/images");
-
+        try {
+            FileUtils.deleteDirectory(new File(imagesFolder+schemaName));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
         log.info("Schema deleted: " + schemaName);
         entityManager.close();
     }

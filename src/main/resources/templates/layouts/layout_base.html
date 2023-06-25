@@ -153,7 +153,7 @@
 					<img class="icon" src="/png/user.png" alt="AT">
 				</div>
 			</div>
-			<div class="row">
+			<div class="row" th:if="${#authorization.expression('hasAnyAuthority(''ADMIN'')')}" >
 				<a href="/admin" style="margin-right: 10px;"> Admin tools</a>
 				<div class="image-container">
 					<img class="icon" src="/png/settings.png" alt="AT">

@@ -1,5 +1,6 @@
 package cz.gymtrebon.zaverecky.vjanecek.atlas.security;
 
+import cz.gymtrebon.zaverecky.vjanecek.atlas.CustomAccessDeniedHandler;
 import cz.gymtrebon.zaverecky.vjanecek.atlas.service.CustomUserDetaisService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -32,7 +33,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
         @Override
         protected void configure(HttpSecurity http) throws Exception {
             http.cors().and().csrf().disable().authorizeRequests()
-                     .antMatchers("/api/userinfo","/api/login","/styly.css").permitAll()
+                     .antMatchers("/api/userinfo","/api/login","/styly.css", "/error/403").permitAll()
                      .anyRequest().authenticated()
                     .and()
                      .formLogin()
@@ -44,7 +45,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
                      .permitAll()
                     .and()
                         .exceptionHandling()
-                        .accessDeniedPage("/error");
+                        .accessDeniedHandler(new CustomAccessDeniedHandler());
 
             http.addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
         }

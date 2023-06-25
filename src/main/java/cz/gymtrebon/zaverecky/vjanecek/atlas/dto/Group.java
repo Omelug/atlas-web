@@ -2,9 +2,6 @@ package cz.gymtrebon.zaverecky.vjanecek.atlas.dto;
 
 import lombok.Data;
 
-import java.util.ArrayList;
-import java.util.List;
-
 @Data
 public class Group {
 
@@ -15,5 +12,4 @@ public class Group {
 	private String name;
 	private String text;
 
-	List<Description> path = new ArrayList<>();
 }

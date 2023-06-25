@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="en" th:replace="~{layouts/layout_base::content( _ , ~{::#all})}"
-	th:fragment="layout(start ,info, main, buttons, breadcrumb)" xmlns:th="http://www.thymeleaf.org">
+	th:fragment="layout(start ,info, main, buttons)" xmlns:th="http://www.thymeleaf.org">
 
 
 <div id="headdiv">
@@ -9,8 +9,6 @@
 
 <div id="all">
 	<main>
-		<div th:replace="${breadcrumb}"></div>
-
 		<div th:replace="${info}"></div>
 		<div th:replace="${main}"></div>
 		<div th:replace="${buttons}"></div>

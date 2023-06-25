@@ -6,9 +6,11 @@ import cz.gymtrebon.zaverecky.vjanecek.atlas.entity.User;
 import cz.gymtrebon.zaverecky.vjanecek.atlas.form.GroupForm;
 import cz.gymtrebon.zaverecky.vjanecek.atlas.form.RepresentativeForm;
 import cz.gymtrebon.zaverecky.vjanecek.atlas.repository.UDRlinkRepository;
+import cz.gymtrebon.zaverecky.vjanecek.atlas.repository.UserFindRepository;
 import cz.gymtrebon.zaverecky.vjanecek.atlas.service.AtlasService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -30,6 +32,10 @@ import java.util.Optional;
 public class EditorController {
     private final AtlasService service;
     private final UDRlinkRepository udrlinkRepository;
+    private final UserFindRepository userFindRepository;
+
+    @Autowired
+    private AtlasController atlasController;
 
     @GetMapping("/group/newItem")
     public String newSkupina(Principal principal,Model model,
@@ -37,14 +43,57 @@ public class EditorController {
         GroupForm form = new GroupForm();
         if (idParentGroup.isPresent()) {
             form.setIdParentGroup(idParentGroup.get());
+            model.addAttribute("origianlParentId", idParentGroup.get());
+            model.addAttribute("breadcrumbs", service.getBreadCrumbs(idParentGroup.get()));
         }
         model.addAttribute("groups", service.seznamSkupin());
         model.addAttribute("group", form);
         model.addAttribute("newItem", true);
 
-        AtlasController.addDatabaseList(principal, model, udrlinkRepository);
+        atlasController.addBase(principal, model);
         return "group-form";
     }
+    @PostMapping(value="/group/save", params="action-save")
+    public String editaceSkupinyUlozit(Principal principal, Model model, @Valid @ModelAttribute("group") GroupForm form, BindingResult bindingResult) {
+
+        boolean newGroup = form.getId() == null;
+        model.addAttribute("groups", service.seznamSkupin());
+
+        if (bindingResult.hasErrors()) {
+            breadCrumbsCorrection(model, form.getIdParentGroup());
+            atlasController.addBase(principal, model);
+            return "group-form";
+        }
+
+        Integer idSkupiny;
+        if (newGroup) {
+            idSkupiny = service.vytvoritSkupinu(
+                    form.getIdParentGroup(),
+                    form.getName(),
+                    form.getText());
+
+        } else {
+            idSkupiny = service.ulozSkupinu(
+                    form.getIdParentGroup(),
+                    form.getId(),
+                    form.getName(),
+                    form.getText());
+        }
+        return "redirect:/group/" + idSkupiny;
+    }
+
+    private void breadCrumbsCorrection(Model model, Integer idParentGroup) {
+        if (idParentGroup == null) {
+            Integer origianlParentId = (Integer) model.getAttribute("origianlParentId");
+            if(origianlParentId != null) {
+                model.addAttribute("breadcrumbs", service.getBreadCrumbs(origianlParentId));
+                return;
+            }
+        }
+        model.addAttribute("breadcrumbs", service.getBreadCrumbs(idParentGroup));
+
+    }
+
 
     @GetMapping("/group/{id}/edit")
     public String editGroup(Principal principal,
@@ -62,7 +111,7 @@ public class EditorController {
         model.addAttribute("group", form);
         model.addAttribute("newItem", false);
 
-        AtlasController.addDatabaseList(principal, model, udrlinkRepository);
+        atlasController.addBase(principal, model);
         return "group-form";
     }
     //rekurzivni
@@ -87,38 +136,11 @@ public class EditorController {
             BindingResult bindingResult) {
         boolean novaSkupina = form.getId() == null;
         if (novaSkupina) {
-            return "redirect:/group/" + form.getIdParentGroup();
+            Integer origianlParentId = (Integer) model.getAttribute("origianlParentId");
+            if (origianlParentId == null) {return "redirect:/home";}
+            return "redirect:/group/" + origianlParentId;
         }
         return "redirect:/group/" + form.getId();
-    }
-    @PostMapping(value="/group/save", params="action-save")
-    public String editaceSkupinyUlozit(
-            Model model,
-            @Valid @ModelAttribute("group") GroupForm form,
-            BindingResult bindingResult) {
-
-        boolean novaSkupina = form.getId() == null;
-        model.addAttribute("nadrizeneSkupiny", service.seznamSkupin());
-
-        if (bindingResult.hasErrors()) {
-            return "redirect:/group/newItem";
-        }
-
-        Integer idSkupiny = null;
-        if (novaSkupina) {
-            idSkupiny = service.vytvoritSkupinu(
-                    form.getIdParentGroup(),
-                    form.getName(),
-                    form.getText());
-
-        } else {
-            idSkupiny = service.ulozSkupinu(
-                    form.getIdParentGroup(),
-                    form.getId(),
-                    form.getName(),
-                    form.getText());
-        }
-        return "redirect:/group/" + idSkupiny;
     }
     @GetMapping("/representative/newItem")
     public String newRepresentative(Principal principal,
@@ -128,12 +150,13 @@ public class EditorController {
         RepresentativeForm form = new RepresentativeForm();
         if (idParentGroup.isPresent()) {
             form.setIdParentGroup(idParentGroup.get());
+            model.addAttribute("origianlParentId", idParentGroup.get());
         }
         model.addAttribute("groups", service.seznamSkupin());
         model.addAttribute("representative", form);
         model.addAttribute("newItem", true);
 
-        AtlasController.addDatabaseList(principal, model, udrlinkRepository);
+        atlasController.addBase(principal, model);
         return "representative-form";
     }
 
@@ -157,8 +180,8 @@ public class EditorController {
         model.addAttribute("representative", form);
         model.addAttribute("newItem", false);
 
-        AtlasController.addDatabaseList(principal, model, udrlinkRepository);
-        return "redirect:/representative-form";
+        atlasController.addBase(principal, model);
+        return "representative-form";
     }
 
     @PostMapping(value="/representative/save", params="action-delete")
@@ -180,25 +203,28 @@ public class EditorController {
             BindingResult bindingResult) {
         boolean newRepresentative = form.getId() == null;
         if (newRepresentative) {
+            Integer origianlParentId = (Integer) model.getAttribute("origianlParentId");
+            if (origianlParentId == null) {return "redirect:/home";}
             return "redirect:/"+ form.getIdParentGroup();
         }
         return "redirect:/representative/" + form.getId();
     }
 
     @PostMapping(value="/representative/save", params="action-save")
-    public String editaceRepresentativeUlozit(
+    public String editaceRepresentativeUlozit(Principal principal,
             Model model,
             @Valid @ModelAttribute("representative") RepresentativeForm form,
             BindingResult bindingResult) {
 
         boolean newRepresentative = form.getId() == null;
-        model.addAttribute("nadrizeneSkupiny", service.seznamSkupin());
+        model.addAttribute("groups", service.seznamSkupin());
 
         if (bindingResult.hasErrors()) {
-            return "redirect:/representative-form";
+            atlasController.addBase(principal, model);
+            return "representative-form";
         }
 
-        Integer idRepresentative = null;
+        Integer idRepresentative;
         if (newRepresentative) {
             idRepresentative = service.vytvoritRepresentative(
                     form.getIdParentGroup(),

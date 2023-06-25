@@ -1,14 +1,9 @@
 package cz.gymtrebon.zaverecky.vjanecek.atlas.controller;
 
 import cz.gymtrebon.zaverecky.vjanecek.atlas.currentdb.CurrentDatabase;
-import cz.gymtrebon.zaverecky.vjanecek.atlas.entity.Database;
-import cz.gymtrebon.zaverecky.vjanecek.atlas.entity.Role;
-import cz.gymtrebon.zaverecky.vjanecek.atlas.entity.UDRlink;
-import cz.gymtrebon.zaverecky.vjanecek.atlas.entity.User;
-import cz.gymtrebon.zaverecky.vjanecek.atlas.repository.DatabaseRepository;
-import cz.gymtrebon.zaverecky.vjanecek.atlas.repository.RoleRepository;
-import cz.gymtrebon.zaverecky.vjanecek.atlas.repository.UDRlinkRepository;
-import cz.gymtrebon.zaverecky.vjanecek.atlas.repository.UserRepository;
+import cz.gymtrebon.zaverecky.vjanecek.atlas.entity.*;
+import cz.gymtrebon.zaverecky.vjanecek.atlas.log.LogTyp;
+import cz.gymtrebon.zaverecky.vjanecek.atlas.repository.*;
 import cz.gymtrebon.zaverecky.vjanecek.atlas.service.SchemaService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -20,8 +15,10 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import java.security.Principal;
 import java.util.List;
 
+@SuppressWarnings("SameReturnValue")
 @Controller
 @RequestMapping("/admin")
 @RequiredArgsConstructor
@@ -33,6 +30,7 @@ public class AdminController {
     private final DatabaseRepository databaseRepository;
     private final RoleRepository roleRepository;
     private final SchemaService schemaService;
+    private final CustomLoggerRepository customLoggerRepository;
 
     @GetMapping("")
     public String adminTools(Model model) {
@@ -47,6 +45,9 @@ public class AdminController {
 
         List<UDRlink> udrlinkList = udRlinkRepository.findAll();
         model.addAttribute("udrlinkList", udrlinkList);
+
+        List<LoggerLine> logList = customLoggerRepository.findAllByOrderByTimeDesc();
+        model.addAttribute("logList", logList);
 
         return "admin";
     }
@@ -67,12 +68,15 @@ public class AdminController {
         return "redirect:/admin";
     }
     @PostMapping("/addDatabase")
-    public String addDatabase(@RequestParam("databaseName") String databaseName) {
+    public String addDatabase(Principal principal, Model model, @RequestParam("databaseName") String databaseName) {
         if (databaseName.isBlank()) {
             return "redirect:/admin";
         }
         if (databaseRepository.findByName(databaseName).isPresent()) {
-            //TODo error that databse already exist
+            customLoggerRepository.save(
+                    new LoggerLine(LogTyp.ERROR,
+                            "adminTools",
+                            "Database "+databaseName+" already exists"));
             return "redirect:/admin";
         }
         log.info("database name "+databaseName);
@@ -82,7 +86,6 @@ public class AdminController {
         //create schema for dataabase
         schemaService.createSchema(databaseName);
         schemaService.createTablesInSchema(databaseName);
-        //TODO create schema new SchamaCreateor().createSchema(databaseName);
         return "redirect:/admin";
     }
     @PostMapping("/addUDRlink")
@@ -90,9 +93,12 @@ public class AdminController {
         User user = userRepository.findById(userId).orElseThrow();
         Database database = databaseRepository.findById(databaseId).orElseThrow();
         Role role = roleRepository.findById(roleId).orElseThrow();
-
-        if (udRlinkRepository.findByUserAndDatabaseAndRole(user, database, role) != null) {
-            //TODO error that UDRlink already exists
+        UDRlink udRlink = udRlinkRepository.findByUserAndDatabaseAndRole(user, database, role);
+        if (udRlink != null) {
+            customLoggerRepository.save(
+                    new LoggerLine(LogTyp.ERROR,
+                            "adminTools",
+                            udRlink + " already exists"));
             return "redirect:/admin";
         }
 

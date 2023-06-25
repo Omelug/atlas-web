@@ -18,7 +18,7 @@ import java.util.function.Function;
 public class JWTUtility implements Serializable {
     private static final long serialVersionUID = 234234523523L;
 
-    public static long JWT_TOKEN_VALIDITY = 3600000;
+    public static final long JWT_TOKEN_VALIDITY = 3600000;
 
     @Value("${jwt.secret}")
     private String secretKey;

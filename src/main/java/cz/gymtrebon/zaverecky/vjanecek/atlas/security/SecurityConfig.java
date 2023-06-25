@@ -34,16 +34,17 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
             http.cors().and().csrf().disable().authorizeRequests()
                      .antMatchers("/api/userinfo","/api/login","/styly.css").permitAll()
                      .anyRequest().authenticated()
-                        .and()
+                    .and()
                      .formLogin()
                      .loginPage("/login")
                      .defaultSuccessUrl("/home", true)
                      .permitAll()
-                        .and()
+                    .and()
                      .logout()
-                     .permitAll().and().
-                    exceptionHandling()
-                    .accessDeniedPage("/error");
+                     .permitAll()
+                    .and()
+                        .exceptionHandling()
+                        .accessDeniedPage("/error");
 
             http.addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
         }

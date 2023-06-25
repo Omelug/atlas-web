@@ -60,14 +60,14 @@ public class UserRegistrationController {
     }
 
     @GetMapping("/userinfo")
-    public ResponseEntity userinfo(@RequestHeader (name="Authorization") String token) throws Exception {
+    public ResponseEntity<String> userinfo(@RequestHeader (name="Authorization") String token) throws Exception {
         CustomUserDetails userDetails = userService.loadUserByUsername(jwtUtility.getUsernameFromToken(token));
        if (validate(token, userDetails, "EDITOR")){
            ResponseEntity.ok("User has EDITOR role");
        }
        return noAuthError();
     }
-    private ResponseEntity noAuthError(){
+    private ResponseEntity<String> noAuthError(){
         return ResponseEntity.ok("User does not have EDITOR role");
     }
     private boolean validate(String token, CustomUserDetails userDetails, String role) {
@@ -76,9 +76,7 @@ public class UserRegistrationController {
             // check if the user has the role authority
             boolean hasEditorRole = authorities.stream()
                     .anyMatch(auth -> auth.getAuthority().equals(role));
-            if (hasEditorRole) {
-                return true;
-            }
+            return hasEditorRole;
         }
     return false;
     }

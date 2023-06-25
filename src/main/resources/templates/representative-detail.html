@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="cs" th:replace="~{layouts/layout_info::layout( _ ,~{::#info} , _ , ~{::#buttons}, ~{::#breadcrumb} )}"
+<html lang="cs" th:replace="~{layouts/layout_info::layout( _ ,~{::#info} , _ , ~{::#buttons})}"
 	xmlns:th="http://www.thymeleaf.org">
 
 <div id="info">
@@ -40,17 +40,12 @@
 					th:if="${#authorization.expression('hasAuthority(''EDITOR'')')}"
 				th:action="${newItem == true} ? @{'/representative/imageNoId/upload'} : @{'/representative/'+${representative.id}+'/upload'} "
 				method="post" enctype="multipart/form-data">
-				<table>
-					<tr>
-						<td><label path="file">Choose image:</label></td>
-					</tr>
-					<tr>
+
+					<label path="file">Add image:
 						<td><input type="file" name="file" /></td>
-					</tr>
-					<tr>
 						<td><input type="submit" value="Save image" /></td>
-					</tr>
-				</table>
+					</label>
+
 			</form>
 			<br>
 		</div>
@@ -60,13 +55,4 @@
 <div th:if="${#authorization.expression('hasAuthority(''EDITOR'')')}" id="buttons">
 	<a class="btn btn-primary" th:href="@{'/representative/'+${representative.id}+'/edit'}">Edit</a>
 </div>
-
-<div id="breadcrumb">
-	<span th:each="breadcrumb : ${representative.path}">
-		> <a th:href="'/group/'+${breadcrumb.id}"><b th:text="${breadcrumb.name}"></b></a>
-	</span>
-	<hr th:if="${not#lists.isEmpty(representative.path)}" hr>
-</div>
-
-
 </html>

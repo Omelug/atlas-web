@@ -1,11 +1,7 @@
 <!doctype html>
-<html lang="cs" th:replace="~{layouts/layout_info::layout( _ , ~{::#info} , ~{::#main} , ~{::#buttons}, ~{::#breadcrumb} )}"
+<html lang="cs" th:replace="~{layouts/layout_info::layout( _ , ~{::#info} , ~{::#main} , ~{::#buttons})}"
 	xmlns:th="http://www.thymeleaf.org">
-<div id="breadcrumb">
-	<span th:each="breadcrumb : ${group.path}">
-		> <a th:href="'/group/'+${breadcrumb.id}"><b th:text="${breadcrumb.name}"></b></a>
-	</span>
-</div>
+
 
 <div id="info">
 	<h1 th:text="${group.name}"></h1>

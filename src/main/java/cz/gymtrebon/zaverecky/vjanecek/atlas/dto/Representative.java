@@ -13,8 +13,6 @@ public class Representative {
 	private Integer idParentGroup;
 	
 	private String name, name2, author, color, text;
-	
-	List<Description> path = new ArrayList<>();
-	
+
 	List<Photo> images = new ArrayList<>();
 }

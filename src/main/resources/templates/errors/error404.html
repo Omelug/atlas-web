@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="cs" th:replace="~{errors/error_layout::layout( ~{::#custom_head} , ~{::#error_title}, ~{::#error_text} , ~{::#err_image})}"
+      xmlns:th="http://www.thymeleaf.org">
+<head>
+    <div id="custom_head">
+        <meta charset="UTF-8">
+        <title>Error404</title>
+    </div>
+</head>
+<body>
+    <div id="error_title">
+            Error 404
+    </div>
+    <div id="error_text">
+        The page was not found, try looking in the drawer.
+    </div>
+    <div id="err_image">
+        <img src="/error/404.png" alt="Image error">
+    </div>
+</body>
+</html>

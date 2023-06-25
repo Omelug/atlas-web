@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en" th:fragment="layout(custom_head ,error_title, error_text, err_image)" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/styly.css">
+    <div th:replace="${custom_head}"></div>
+</head>
+<body class="text-center" style=" background-color: rgba(57,97,125,0.52)">
+<div>
+    <div class="text-left" style="font-size: 40pt; padding: 10px" >
+        <a th:href="@{/home}">
+            <div class="image-container">
+                <img class="icon" src="/png/home.png" alt="AT">
+            </div>
+        </a>
+    </div>
+    <div style="font-size: 40pt; background-color: rgba(34,127,142,0.52); width: 100%">
+        <div th:replace="${error_title}"></div>
+    </div>
+    <div style="font-size: 17pt; margin: 30px">
+        <div th:replace="${error_text}"></div>
+    </div>
+    <div>
+        <div th:replace="${err_image}"></div>
+    </div>
+</div>
+</body>
+</html>

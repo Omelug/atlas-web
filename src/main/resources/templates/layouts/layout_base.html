@@ -16,33 +16,147 @@
 	<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"></script>
 	<script type="text/javascript" th:src="@{/ckeditor5-35.3.1/build/ckeditor.js}"></script>
 	<link rel="stylesheet" href="/styly.css">
-	
+
+	<script>
+		function togglefindDiv() {
+			var findDiv = document.getElementById("findDiv");
+			var open = document.getElementById("open");
+			if (findDiv.style.display === "none") {
+				findDiv.style.display = "block";
+				open.value = "true";
+				updateURLsWithOpenParameter()
+			} else {
+				findDiv.style.display = "none";
+				open.value = "false";
+				updateURLsWithOpenParameter()
+			}
+		}
+		function updateURLsWithOpenParameter() {
+			var openValue = document.getElementById("open").value;
+			var elements = document.querySelectorAll("button, a");
+
+			elements.forEach(function(element) {
+				var href = element.getAttribute("href");
+
+				if (href) {
+					if (href.includes("open=")) {
+						var updatedHref = href.replace(/open=[^&]+/, "open=" + encodeURIComponent(openValue));
+
+						element.setAttribute("href", updatedHref);
+					} else {
+						var separator = href.includes("?") ? "&" : "?";
+						var newHref = href + separator + "open=" + encodeURIComponent(openValue);
+
+						element.setAttribute("href", newHref);
+					}
+				}
+			});
+		}
+
+		//When page is loaded
+		document.addEventListener("DOMContentLoaded", function() {
+			updateURLsWithOpenParameter();
+		});
+	</script>
 </head>
 
 <body>
 <div th:replace="${start}"></div>
 	<div class="row">
-		<div class=" upbar">
-			<div class="d-flex flex-row-reverse col-sm" style="justify-content: left">
-				<a th:href="@{'/home'}" th:align="left">Atlas</a>
+		<div class="upbar col-md-8 order-md-1">
+
+			<div class=" ml-auto d-flex justify-content-end">
+				<div class="find image-container" onclick="togglefindDiv()">
+					<img class="icon" src="/png/find.png" alt="DB">
+				</div>
 			</div>
 		</div>
-	</div>
 
-	<div class="row">
-		<div class="col-md-8 order-md-1 main-content">
-			<div th:replace="${content}"></div>
+		<div class="col-md-8 order-md-1 nopadding">
+			<div id="findDiv" th:style="${item.open ? 'display: block' : 'display: none'}" class=" upbar findDiv">
+				<form th:action="@{/find}" th:object="${item}" method="post">
+
+					 <input type="hidden" id="open" name="open" th:value="${item.open ? 'true' : 'false'}">
+
+					<label for="name">Name:
+						<input type="text" id="name" name="name" th:value="${item.name}">
+					</label>
+					<label for="name2">Name 2:
+						<input type="text" id="name2" name="name2" th:value="${item.name2}">
+					</label>
+					<label for="typ">Type:
+						<select id="typ" name="typ">
+							<option></option>
+							<option value="ROOT" th:selected="${item.typ == T(cz.gymtrebon.zaverecky.vjanecek.atlas.entity.Typ).ROOT}">ROOT</option>
+							<option value="GROUP" th:selected="${item.typ == T(cz.gymtrebon.zaverecky.vjanecek.atlas.entity.Typ).GROUP}">GROUP</option>
+							<option value="REPRESENTATIVE" th:selected="${item.typ == T(cz.gymtrebon.zaverecky.vjanecek.atlas.entity.Typ).REPRESENTATIVE}">REPRESENTATIVE</option>
+						</select>
+					</label>
+
+					<label for="parentGroup">Parent Group:
+						<input type="text" id="parentGroup" name="parentGroup" th:value="${item.parentGroup}">
+					</label>
+					<label for="author">Author:
+						<input type="text" id="author" name="author" th:value="${item.author}">
+					</label>
+					<label for="color">Color:
+						<input type="text" id="color" name="color" th:value="${item.color}">
+					</label>
+					<button type="submit">Find</button>
+				</form>
+				<div>
+					<table>
+						<thead>
+						<tr>
+							<th>Type</th>
+							<th>Name</th>
+							<th>Name 2</th>
+							<th>Author</th>
+							<th>Color</th>
+						</tr>
+						</thead>
+						<tbody>
+						<tr th:each="founditem : ${founditems}">
+							<td th:text="${founditem.typ}"></td>
+							<td th:text="${founditem.name}"></td>
+							<td th:text="${founditem.name2}"></td>
+							<td th:text="${founditem.author}"></td>
+							<td th:text="${founditem.color}"></td>
+						</tr>
+						</tbody>
+					</table>
+				</div>
+			</div>
+
+			<div class="breadcrumb" id="breadcrumb">
+				<span th:each="breadcrumb, iterStat : ${breadcrumbs}">
+					<span th:if="${iterStat.first}" th:class="${iterStat.first} ? 'firstbreadcrumb' : ''">
+						<a th:href="'/group/' + ${breadcrumb.id}" th:text="${breadcrumb.name}"></a>
+					</span>
+					<span th:unless="${iterStat.first}">
+						<a th:if="${breadcrumb.typ == T(cz.gymtrebon.zaverecky.vjanecek.atlas.entity.Typ).REPRESENTATIVE}" th:href="'/representative/' + ${breadcrumb.id}" th:text="'>' + ${breadcrumb.name}"></a>
+						<a th:if="${breadcrumb.typ == T(cz.gymtrebon.zaverecky.vjanecek.atlas.entity.Typ).GROUP}" th:href="'/group/' + ${breadcrumb.id}" th:text="'>' + ${breadcrumb.name}"></a>
+					</span>
+				</span>
+			</div>
+
+			<div class="main-content">
+				<div th:replace="${content}"></div>
+			</div>
 		</div>
 		<div class="col-md-3 order-md-2 sidebar ">
 			<div class="row">
 				<span style="margin-right: 10px;" > Login: </span>
 				<a sec:authorize="isAuthenticated()" th:href="@{/login}" class=" d-flex flex-row-revers" role="button" th:text="${#authentication.getPrincipal().getUsername()}" ></a>
 				<a th:href="@{/login}" class=" d-flex flex-row-revers" role="button" sec:authorize="isAnonymous()" >Login</a>
+				<div class="image-container">
+					<img class="icon" src="/png/user.png" alt="AT">
+				</div>
 			</div>
 			<div class="row">
 				<a href="/admin" style="margin-right: 10px;"> Admin tools</a>
 				<div class="image-container">
-					<img class="icon" src="/png/admintools.png" alt="AT">
+					<img class="icon" src="/png/settings.png" alt="AT">
 				</div>
 			</div>
 			<div class="row">

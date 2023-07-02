@@ -1,6 +1,5 @@
 package cz.gymtrebon.zaverecky.vjanecek.atlas.security;
 
-import cz.gymtrebon.zaverecky.vjanecek.atlas.CustomAccessDeniedHandler;
 import cz.gymtrebon.zaverecky.vjanecek.atlas.service.CustomUserDetaisService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -24,30 +23,44 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
         @Autowired
         private JwtFilter jwtFilter;
+        //private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
 
         @Override
         protected void configure(AuthenticationManagerBuilder auth) throws Exception {
             auth.userDetailsService(userDetailsService);
         }
+        /*@Bean
+        SecurityFilterChain apiSecurityFilter(HttpSecurity http) throws Exception {
+            SecurityFilterChain httpsecurity =
+                    http.requestMatcher("/api/**", "/app/**")
+                            .authorizeRequests(auth ->{
+                        auth.anyRequest().authenticated();
+                    })
+                    .sessionManagement(session ->{
+                        session.sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+                    })
+                    .httpBasic(Customizer.withDefaults())
+                    .build();
+
+            return httpsecurity;
+        }*/
 
         @Override
         protected void configure(HttpSecurity http) throws Exception {
-            http.cors().and().csrf().disable().authorizeRequests()
-                     .antMatchers("/api/userinfo","/api/login","/styly.css", "/error/403").permitAll()
-                     .anyRequest().authenticated()
-                    .and()
-                     .formLogin()
-                     .loginPage("/login")
-                     .defaultSuccessUrl("/home", true)
-                     .permitAll()
-                    .and()
-                     .logout()
-                     .permitAll()
-                    .and()
-                        .exceptionHandling()
-                        .accessDeniedHandler(new CustomAccessDeniedHandler());
-
             http.addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
+
+            http.cors().and().csrf().disable()
+                    .authorizeRequests()
+                    .antMatchers("/api/userinfo", "/api/login", "/styly.css", "/error/403").permitAll()
+                    .and()
+                    .formLogin()
+                    .loginPage("/login")
+                    .defaultSuccessUrl("/home", true)
+                    .permitAll()
+                    .and()
+                    .logout()
+                    .permitAll();
+
         }
         @Override
         @Bean
@@ -58,5 +71,6 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
         public PasswordEncoder passwordEncoder(){
         	return NoOpPasswordEncoder.getInstance();
         }
+
     }
 

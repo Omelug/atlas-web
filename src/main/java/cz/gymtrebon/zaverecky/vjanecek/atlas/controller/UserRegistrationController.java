@@ -1,5 +1,8 @@
 package cz.gymtrebon.zaverecky.vjanecek.atlas.controller;
 
+import cz.gymtrebon.zaverecky.vjanecek.atlas.entity.LoggerLine;
+import cz.gymtrebon.zaverecky.vjanecek.atlas.log.LogTyp;
+import cz.gymtrebon.zaverecky.vjanecek.atlas.repository.CustomLoggerRepository;
 import cz.gymtrebon.zaverecky.vjanecek.atlas.security.JWTRequest;
 import cz.gymtrebon.zaverecky.vjanecek.atlas.security.JWTResponse;
 import cz.gymtrebon.zaverecky.vjanecek.atlas.security.JWTUtility;
@@ -29,14 +32,14 @@ public class UserRegistrationController {
     private AuthenticationManager authenticationManager;
     @Autowired
     private CustomUserDetaisService userService;
+    @Autowired
+    private CustomLoggerRepository customLoggerRepository;
 
     @PostMapping("/login")
     public JWTResponse loginUser(@RequestBody JWTRequest jwtRequest) throws Exception {
-
         log.info("Login: " + jwtRequest.getName());
         log.info("Password: " + jwtRequest.getPassword());
 
-        //netusim na co to je, ale asi je to dulezite, aby dal nebyly errory
         try {
             authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(
@@ -46,15 +49,13 @@ public class UserRegistrationController {
             );
 
         }catch (BadCredentialsException e){
+            customLoggerRepository.save(new LoggerLine(LogTyp.ERROR, jwtRequest.getName(), "User failed to login with password " + jwtRequest.getPassword()));
+            e.printStackTrace();
             return new JWTResponse();
-            //throw new Exception("AUTH FAILED",e);
         }
 
         final CustomUserDetails userDetails = userService.loadUserByUsername(jwtRequest.getName());
-
-        final String token =
-                jwtUtility.generateToken(userDetails);
-
+        final String token = jwtUtility.generateToken(userDetails);
         return new JWTResponse(token);
 
     }
@@ -73,7 +74,6 @@ public class UserRegistrationController {
     private boolean validate(String token, CustomUserDetails userDetails, String role) {
         if (jwtUtility.validateToken(token, userDetails) ){
             Collection<GrantedAuthority> authorities = (Collection<GrantedAuthority>) userDetails.getAuthorities();
-            // check if the user has the role authority
             boolean hasEditorRole = authorities.stream()
                     .anyMatch(auth -> auth.getAuthority().equals(role));
             return hasEditorRole;

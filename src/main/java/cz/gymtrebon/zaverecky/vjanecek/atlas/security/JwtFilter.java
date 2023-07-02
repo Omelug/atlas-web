@@ -23,35 +23,70 @@ public class JwtFilter extends OncePerRequestFilter {
 
     @Autowired
     private CustomUserDetaisService userService;
-
     @Override
-    protected void doFilterInternal(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, FilterChain filterChain) throws ServletException, IOException {
-        String authorization = httpServletRequest.getHeader("Authorization");
+    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain) throws ServletException, IOException {
+        logger.info("Request: " + request);
+        String authorization = request.getHeader("Authorization");
+        logger.info("Authorization: " + authorization);
+
+        if (authorization != null && authorization.startsWith("Bearer ")) {
+            String token = authorization.substring(7);
+            String username = jwtUtility.getUsernameFromToken(token);
+            logger.info("Try authenticate user: " + username);
+
+            CustomUserDetails userDetails = userService.loadUserByUsername(username);
+
+            if (username != null && jwtUtility.validateToken(token, userDetails)) {
+                UsernamePasswordAuthenticationToken authenticationToken =
+                        new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+
+                authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                SecurityContextHolder.getContext().setAuthentication(authenticationToken);
+            }else{
+                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                response.getWriter().write("Access denied");;
+                return;
+            }
+        }
+
+        chain.doFilter(request, response);
+        /*String authorization = httpServletRequest.getHeader("Authorization");
+        logger.info("Authorization: " + authorization);
         String token = null;
         String username = null;
 
         if(null != authorization && authorization.startsWith("Bearer ")) {
             token = authorization.substring(7);
             username = jwtUtility.getUsernameFromToken(token);
-        }
+            logger.info("Authenticated user: " + username);
 
-        if(null != username && SecurityContextHolder.getContext().getAuthentication() == null) {
-            CustomUserDetails userDetails
-                    = userService.loadUserByUsername(username);
+            if(null != username) {
+                CustomUserDetails userDetails = userService.loadUserByUsername(username);
 
-            if(jwtUtility.validateToken(token,userDetails)) {
-                UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken
-                        = new UsernamePasswordAuthenticationToken(userDetails,
-                        null, userDetails.getAuthorities());
+                if(jwtUtility.validateToken(token,userDetails)) {
+                    logger.info("Authenticated user: " + username);
 
-                usernamePasswordAuthenticationToken.setDetails(
-                        new WebAuthenticationDetailsSource().buildDetails(httpServletRequest)
-                );
+                    UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken
+                            = new UsernamePasswordAuthenticationToken(userDetails,
+                            null, userDetails.getAuthorities());
 
-                SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken);
+                    usernamePasswordAuthenticationToken.setDetails(
+                            new WebAuthenticationDetailsSource().buildDetails(httpServletRequest)
+                    );
+                    SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken);
+                    filterChain.doFilter(httpServletRequest, httpServletResponse);
+                    return;
+                }
             }
-
+            handleUnauthorizedRequest(httpServletResponse);
+            return;
         }
-        filterChain.doFilter(httpServletRequest, httpServletResponse);
+        filterChain.doFilter(httpServletRequest, httpServletResponse);*/
+    }
+
+    private void handleUnauthorizedRequest(HttpServletResponse response) throws IOException {
+        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+        response.getWriter().write("Unauthorized");
+        // You can customize the response further, such as setting headers or returning JSON error message
     }
 }

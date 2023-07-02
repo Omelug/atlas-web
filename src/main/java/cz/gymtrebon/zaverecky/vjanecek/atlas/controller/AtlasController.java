@@ -73,8 +73,8 @@ public class AtlasController {
 			@ModelAttribute("test") TestForm form) {
 		text = form.getCelyText();
 		return "redirect:/test";
-	} 
-	
+	}
+	@PreAuthorize("hasAuthority('" + User.USER + "') OR hasAuthority('" + User.EDITOR + "') OR hasAuthority('" + User.ADMIN + "')")
 	@GetMapping(value = {"/home"})
 	public String home(Principal principal, Model model) {
 		Group group = service.findORcreateGroup();

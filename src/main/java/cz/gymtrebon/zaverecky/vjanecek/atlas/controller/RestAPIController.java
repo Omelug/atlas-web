@@ -3,6 +3,7 @@ package cz.gymtrebon.zaverecky.vjanecek.atlas.controller;
 import cz.gymtrebon.zaverecky.vjanecek.atlas.dto.Group;
 import cz.gymtrebon.zaverecky.vjanecek.atlas.dto.TransportImage;
 import cz.gymtrebon.zaverecky.vjanecek.atlas.dto.TransportItem;
+import cz.gymtrebon.zaverecky.vjanecek.atlas.entity.User;
 import cz.gymtrebon.zaverecky.vjanecek.atlas.service.AtlasService;
 import cz.gymtrebon.zaverecky.vjanecek.atlas.service.CustomUserDetaisService;
 import lombok.RequiredArgsConstructor;
@@ -12,6 +13,7 @@ import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -26,6 +28,7 @@ import java.util.List;
 @RequestMapping("/api")
 @RequiredArgsConstructor
 @Slf4j
+@PreAuthorize("hasAuthority('" + User.USER + "') OR hasAuthority('" + User.EDITOR + "') OR hasAuthority('" + User.ADMIN + "')")
 public class RestAPIController {
 	private final AtlasService service;
 
@@ -35,7 +38,7 @@ public class RestAPIController {
 		return ResponseEntity.ok(tp);
 	}
 
-	@GetMapping("/flowersList")
+	@GetMapping("/itemList")
 	public ResponseEntity<List<TransportItem>> odeslatDatabazi() {
 		List<TransportItem> database = new ArrayList<>();
 		Group rootItem = service.findORcreateGroup();
@@ -45,7 +48,7 @@ public class RestAPIController {
 	@Autowired
 	private CustomUserDetaisService userService;
 
-	@GetMapping("/imagesList")
+	@GetMapping("/imageList")
 	public ResponseEntity<List<TransportImage>> odeslatObrazky() {
 		List<TransportImage> obrazky = new ArrayList<>();
 		service.pridavaniObrazku(obrazky);

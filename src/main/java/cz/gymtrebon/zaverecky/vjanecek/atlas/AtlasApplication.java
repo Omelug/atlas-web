@@ -3,8 +3,8 @@ package cz.gymtrebon.zaverecky.vjanecek.atlas;
 import cz.gymtrebon.zaverecky.vjanecek.atlas.repository.*;
 import cz.gymtrebon.zaverecky.vjanecek.atlas.service.AtlasService;
 import cz.gymtrebon.zaverecky.vjanecek.atlas.service.SchemaService;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.java.Log;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -14,28 +14,20 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import java.io.File;
 
 @SpringBootApplication
+@RequiredArgsConstructor
 @EnableJpaRepositories(basePackageClasses = UserRepository.class,basePackages="cz.gymtrebon.zaverecky.vjanecek.atlas.repository")
 @EntityScan({"cz.gymtrebon.zaverecky.vjanecek.atlas.entity"})
 @Log
 public class AtlasApplication implements CommandLineRunner {
 
-	@Autowired
-	private ItemRepository ItemRepo;
-	
-	@Autowired
-	private ImageRepository ImageRepo;
-	@Autowired
-	private UDRlinkRepository udrLinkRepository;
-	@Autowired
-	private UserRepository userRepo;
-	@Autowired
-	private DatabaseRepository dataRepo;
-	@Autowired
-	private RoleRepository roleRepo;
-	@Autowired
-	private AtlasService atlasService;
-	@Autowired
-	private SchemaService schemaService;
+	private final ItemRepository ItemRepo;
+	private final ImageRepository ImageRepo;
+	private final UDRlinkRepository udrLinkRepository;
+	private final UserRepository userRepo;
+	private final DatabaseRepository dataRepo;
+	private final RoleRepository roleRepo;
+	private final AtlasService atlasService;
+	private final SchemaService schemaService;
 
 	public static void main(String[] args) {
 		SpringApplication.run(AtlasApplication.class, args);
@@ -73,7 +65,7 @@ public class AtlasApplication implements CommandLineRunner {
 		List<String[]> flowerList = readAllLines(flowers);
 		for (int i = 1; i < flowerList.size();i++) {
 			String[] Item = flowerList.get(i);
-			int idPolozky = Integer.valueOf(Item[0]);
+			int itemId = Integer.valueOf(Item[0]);
 			int idParenta = Integer.valueOf(Item[1]);
 
 			Item pol = new Item();
@@ -92,7 +84,7 @@ public class AtlasApplication implements CommandLineRunner {
 			pol.setColor(Item[7]);
 			
 			ItemRepo.save(pol);
-			mapovaniId.put(idPolozky, pol.getId());
+			mapovaniId.put(itemId, pol.getId());
 		
 		}
 

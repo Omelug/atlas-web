@@ -6,7 +6,6 @@ import cz.gymtrebon.zaverecky.vjanecek.atlas.entity.Item;
 import cz.gymtrebon.zaverecky.vjanecek.atlas.entity.LoggerLine;
 import cz.gymtrebon.zaverecky.vjanecek.atlas.log.LogTyp;
 import cz.gymtrebon.zaverecky.vjanecek.atlas.repository.CustomLoggerRepository;
-import cz.gymtrebon.zaverecky.vjanecek.atlas.repository.ItemRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
@@ -17,7 +16,6 @@ import org.hibernate.boot.registry.StandardServiceRegistry;
 import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
 import org.hibernate.tool.hbm2ddl.SchemaExport;
 import org.hibernate.tool.schema.TargetType;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.stereotype.Service;
@@ -32,8 +30,6 @@ import java.util.EnumSet;
 @Slf4j
 @RequiredArgsConstructor
 public class SchemaService {
-    @Autowired
-    private ItemRepository ItemRepo;
     private final LocalContainerEntityManagerFactoryBean entityManagerFactory;
     @Value("${images.path}")
     private String imagesFolder;
@@ -66,12 +62,12 @@ public class SchemaService {
         if (!folder.exists()) {
             boolean folderCreated = folder.mkdirs();
             if (folderCreated) {
-                customLoggerRepository.save(new LoggerLine(LogTyp.INFO, "databasecreation", "Folder for  "+schemaName+" created"));
+                customLoggerRepository.save(new LoggerLine(LogTyp.INFO, "databaseCreation", "Folder for  "+schemaName+" created"));
             } else {
-                customLoggerRepository.save(new LoggerLine(LogTyp.ERROR, "databasecreation", "Failed to create the folder "+ folder.getAbsolutePath()));
+                customLoggerRepository.save(new LoggerLine(LogTyp.ERROR, "databaseCreation", "Failed to create the folder "+ folder.getAbsolutePath()));
             }
         } else {
-            customLoggerRepository.save(new LoggerLine(LogTyp.ERROR, "databasecreation", "Folder for  "+schemaName+" already exists"));
+            customLoggerRepository.save(new LoggerLine(LogTyp.ERROR, "databaseCreation", "Folder for  "+schemaName+" already exists"));
         }
 
         log.info("Schema created: " + schemaName);

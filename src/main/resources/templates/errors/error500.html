@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="cs" th:replace="~{errors/error_layout::layout( ~{::#custom_head} , ~{::#error_title}, ~{::#error_text} , ~{::#err_image})}"
+      xmlns:th="http://www.thymeleaf.org">
+<head>
+    <div id="custom_head">
+        <meta charset="UTF-8">
+        <title>Error 500</title>
+    </div>
+</head>
+<body>
+    <div id="error_title">
+            Error 500
+    </div>
+    <div id="error_text">
+        Internal server error
+    </div>
+    <div id="err_image">
+        <img src="/error/500.jpg" alt="Image error">
+    </div>
+</body>
+</html>

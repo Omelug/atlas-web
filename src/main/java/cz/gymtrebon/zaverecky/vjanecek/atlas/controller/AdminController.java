@@ -4,6 +4,7 @@ import cz.gymtrebon.zaverecky.vjanecek.atlas.currentdb.CurrentDatabase;
 import cz.gymtrebon.zaverecky.vjanecek.atlas.entity.*;
 import cz.gymtrebon.zaverecky.vjanecek.atlas.log.LogTyp;
 import cz.gymtrebon.zaverecky.vjanecek.atlas.repository.*;
+import cz.gymtrebon.zaverecky.vjanecek.atlas.service.CustomUserDetailsService;
 import cz.gymtrebon.zaverecky.vjanecek.atlas.service.SchemaService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -27,10 +28,12 @@ import java.util.List;
 public class AdminController {
     private final UDRlinkRepository udRlinkRepository;
     private final UserRepository userRepository;
+    private final UDRlinkRepository udrlinkRepository;
     private final DatabaseRepository databaseRepository;
     private final RoleRepository roleRepository;
     private final SchemaService schemaService;
     private final CustomLoggerRepository customLoggerRepository;
+    private final CustomUserDetailsService userDetailsService;
 
     @GetMapping("")
     public String adminTools(Model model) {
@@ -68,7 +71,7 @@ public class AdminController {
         return "redirect:/admin";
     }
     @PostMapping("/addDatabase")
-    public String addDatabase(Principal principal, Model model, @RequestParam("databaseName") String databaseName) {
+    public String addDatabase( @RequestParam("databaseName") String databaseName) {
         if (databaseName.isBlank()) {
             return "redirect:/admin";
         }
@@ -88,6 +91,19 @@ public class AdminController {
         schemaService.createTablesInSchema(databaseName);
         return "redirect:/admin";
     }
+    @PostMapping("/changeUserDatabase")
+    public String changeUserDatabase(Principal principal, @RequestParam("changeDBUserId") Long userId, @RequestParam("databaseName") String databaseName) {
+        User user = userRepository.findById(userId).orElse(null);
+        if (user != null && !udrlinkRepository.findAllByUserNameAndDatabaseName(user.getName(), databaseName).isEmpty()) {
+            user.setCurrentDB_name(databaseName);
+            userRepository.save(user);
+            userDetailsService.updateCustomUserDetails(user.getName());
+        }else{
+            customLoggerRepository.save(new LoggerLine(LogTyp.ERROR, principal.getName(), "User "+user.getName()+" have not access to " + databaseName));
+        }
+        return "redirect:/admin";
+    }
+
     @PostMapping("/addUDRlink")
     public String addUDRlink(@RequestParam("user") Long userId, @RequestParam("database") Long databaseId, @RequestParam("role") Long roleId) {
         User user = userRepository.findById(userId).orElseThrow();

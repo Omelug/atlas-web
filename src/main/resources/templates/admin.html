@@ -77,7 +77,6 @@
             <button type="submit">Add User</button>
         </form>
 
-        <form id="deleteUserForm" th:action="@{/admin/deleteUser}" method="post">
         <table>
             <thead>
             <tr>
@@ -97,17 +96,32 @@
                 <td th:text="${user.name}"></td>
                 <td th:text="${user.password}"></td>
                 <td th:text="${user.currentDB_name}"></td>
+                <td>
+                    <form id="changeUserDatabase" th:action="@{/admin/changeUserDatabase}" method="post">
+                        <input type="hidden" name="changeDBUserId" th:value="${user.id}" />
+                        <select name="databaseName" onchange="submitForm(this)">
+                            <option th:each="database : ${databaseList}" th:value="${database.name}" th:text="${database.name}" th:selected="${user.currentDB_name == database.name}"></option>
+                        </select>
+                    </form>
+                </td>
                 <td th:text="${user.active}"></td>
                 <td th:text="${user.firstLogin}"></td>
                 <td th:text="${user.lastLogin}"></td>
                 <td th:text="${user.modifyDate}"></td>
                 <td>
-                    <button type="submit" name="userId" th:value="${user.id}">Delete</button>
+                    <form id="deleteUserForm" th:action="@{/admin/deleteUser}" method="post">
+                        <button type="submit" name="userId" th:value="${user.id}">Delete</button>
+                    </form>
                 </td>
             </tr>
             </tbody>
         </table>
-        </form>
+        <script>
+            function submitForm(selectElement) {
+                const form = selectElement.closest('form');
+                form.submit();
+            }
+        </script>
 
         <br><span> Database:</span>
         <form id="addDatabaseForm" th:action="@{/admin/addDatabase}" method="post">

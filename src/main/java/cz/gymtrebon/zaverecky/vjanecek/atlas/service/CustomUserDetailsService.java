@@ -2,7 +2,7 @@ package cz.gymtrebon.zaverecky.vjanecek.atlas.service;
 
 import cz.gymtrebon.zaverecky.vjanecek.atlas.entity.User;
 import cz.gymtrebon.zaverecky.vjanecek.atlas.repository.UserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -12,12 +12,10 @@ import org.springframework.stereotype.Service;
 import java.util.Optional;
 
 @Service
-public class CustomUserDetaisService implements UserDetailsService{
-    @Autowired
-    UserRepository userRepository;
-
-    @Autowired
-    UDRlinkService udrlinkService;
+@RequiredArgsConstructor
+public class CustomUserDetailsService implements UserDetailsService{
+    private final UserRepository userRepository;
+    private final UDRLinkService udrlinkService;
 
     @Override
     public CustomUserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
@@ -25,7 +23,7 @@ public class CustomUserDetaisService implements UserDetailsService{
         return user.map(u -> new CustomUserDetails(u, udrlinkService)).orElseThrow(() -> new UsernameNotFoundException("Not found: " + username));
     }
     public void updateCustomUserDetails(String username) {
-        CustomUserDetails userDetails = (CustomUserDetails) loadUserByUsername(username);
+        CustomUserDetails userDetails = loadUserByUsername(username);
         SecurityContextHolder.getContext().setAuthentication(new UsernamePasswordAuthenticationToken(userDetails, userDetails.getPassword(), userDetails.getAuthorities()));
     }
 

@@ -20,13 +20,9 @@ public class RepresentativeForm {
 	private String name;
 
 	private String name2;
-	
 	private String author;
-	
 	private String text;
-	
 	private String color;
-	
 	List<Photo> images = new ArrayList<>();
 	
 	

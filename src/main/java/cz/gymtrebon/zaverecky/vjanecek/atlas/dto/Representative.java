@@ -9,10 +9,7 @@ import java.util.List;
 public class Representative {
 
 	private Integer id;
-	
 	private Integer idParentGroup;
-	
 	private String name, name2, author, color, text;
-
 	List<Photo> images = new ArrayList<>();
 }

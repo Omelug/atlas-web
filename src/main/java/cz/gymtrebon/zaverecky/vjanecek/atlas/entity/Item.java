@@ -1,5 +1,6 @@
 package cz.gymtrebon.zaverecky.vjanecek.atlas.entity;
 
+import cz.gymtrebon.zaverecky.vjanecek.atlas.entity.enums.Typ;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.GenericGenerator;
@@ -20,7 +21,6 @@ public class Item {
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO, generator = "native")
 	@GenericGenerator(name="native", strategy = "native")
-	@Column(name="id")
 	private Integer id;
 	
     @ManyToOne(fetch = FetchType.LAZY)
@@ -61,14 +61,14 @@ public class Item {
 	@OneToMany(mappedBy="Item", cascade = CascadeType.REMOVE)
 	private List<Image> images = new ArrayList<>();
 
-	public Item(String name, String name2, String author, String color, String text, Typ typ, Item nadrizena) {
+	public Item(String name, String name2, String author, String color, String text, Typ typ, Item parent) {
 		setName(name);
 		setName2(name2);
 		setAuthor(author);
 		setColor(color);
 		setText(text);
 		setTyp(typ);
-		setParentGroup(nadrizena);
+		setParentGroup(parent);
 	}
 
 

@@ -1,8 +1,11 @@
 package cz.gymtrebon.zaverecky.vjanecek.atlas.security;
 
+import cz.gymtrebon.zaverecky.vjanecek.atlas.entity.User;
+import cz.gymtrebon.zaverecky.vjanecek.atlas.repository.UDRlinkRepository;
+import cz.gymtrebon.zaverecky.vjanecek.atlas.repository.UserRepository;
 import cz.gymtrebon.zaverecky.vjanecek.atlas.service.CustomUserDetails;
-import cz.gymtrebon.zaverecky.vjanecek.atlas.service.CustomUserDetaisService;
-import org.springframework.beans.factory.annotation.Autowired;
+import cz.gymtrebon.zaverecky.vjanecek.atlas.service.CustomUserDetailsService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
@@ -16,13 +19,15 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 @Component
+@RequiredArgsConstructor
 public class JwtFilter extends OncePerRequestFilter {
 
-    @Autowired
-    private JWTUtility jwtUtility;
+    private final JWTUtility jwtUtility;
 
-    @Autowired
-    private CustomUserDetaisService userService;
+    private final UserRepository userRepository;
+    private final UDRlinkRepository udrlinkRepository;
+    private final CustomUserDetailsService userDetailsService;
+    private final CustomUserDetailsService userService;
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain) throws ServletException, IOException {
         logger.info("Request: " + request);
@@ -37,6 +42,16 @@ public class JwtFilter extends OncePerRequestFilter {
             CustomUserDetails userDetails = userService.loadUserByUsername(username);
 
             if (username != null && jwtUtility.validateToken(token, userDetails)) {
+                String databaseName = request.getParameter("database");
+                logger.info("Attempting to use database " + databaseName);
+
+                User user = userRepository.findByName(username).orElse(null);
+                if (user != null && !udrlinkRepository.findAllByUserNameAndDatabaseName(username, databaseName).isEmpty()) {
+                    user.setCurrentDB_name(databaseName);
+                    userRepository.save(user);
+                    userDetailsService.updateCustomUserDetails(user.getName());
+                }
+
                 UsernamePasswordAuthenticationToken authenticationToken =
                         new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
 
@@ -44,49 +59,13 @@ public class JwtFilter extends OncePerRequestFilter {
                 SecurityContextHolder.getContext().setAuthentication(authenticationToken);
             }else{
                 response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                response.getWriter().write("Access denied");;
+                response.getWriter().write("Access denied");
                 return;
             }
         }
 
         chain.doFilter(request, response);
-        /*String authorization = httpServletRequest.getHeader("Authorization");
-        logger.info("Authorization: " + authorization);
-        String token = null;
-        String username = null;
 
-        if(null != authorization && authorization.startsWith("Bearer ")) {
-            token = authorization.substring(7);
-            username = jwtUtility.getUsernameFromToken(token);
-            logger.info("Authenticated user: " + username);
-
-            if(null != username) {
-                CustomUserDetails userDetails = userService.loadUserByUsername(username);
-
-                if(jwtUtility.validateToken(token,userDetails)) {
-                    logger.info("Authenticated user: " + username);
-
-                    UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken
-                            = new UsernamePasswordAuthenticationToken(userDetails,
-                            null, userDetails.getAuthorities());
-
-                    usernamePasswordAuthenticationToken.setDetails(
-                            new WebAuthenticationDetailsSource().buildDetails(httpServletRequest)
-                    );
-                    SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken);
-                    filterChain.doFilter(httpServletRequest, httpServletResponse);
-                    return;
-                }
-            }
-            handleUnauthorizedRequest(httpServletResponse);
-            return;
-        }
-        filterChain.doFilter(httpServletRequest, httpServletResponse);*/
     }
 
-    private void handleUnauthorizedRequest(HttpServletResponse response) throws IOException {
-        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-        response.getWriter().write("Unauthorized");
-        // You can customize the response further, such as setting headers or returning JSON error message
-    }
 }

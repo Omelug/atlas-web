@@ -1,6 +1,7 @@
 package cz.gymtrebon.zaverecky.vjanecek.atlas.entity;
 
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.GenericGenerator;
@@ -12,19 +13,19 @@ import java.util.Date;
 @Entity
 @Table(name = "image")
 @Getter @Setter
+@NoArgsConstructor
 public class Image {
 	
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO, generator="native")
 	@GenericGenerator(name="native", strategy = "native")
-	@Column(name="id")
 	private Integer id;
 	
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "Item_id")
     private Item Item;
     
-	@Column(name="file", nullable=true)
+	@Column(name="file")
 	private String FileName;
 
 	@CreationTimestamp
@@ -36,8 +37,9 @@ public class Image {
 	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "update_time")
 	private Date modifyDate;
-	
-	@Override
+
+
+    @Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;

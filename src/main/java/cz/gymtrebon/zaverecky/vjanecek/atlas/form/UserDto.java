@@ -7,7 +7,7 @@ import java.util.Date;
 
 @Data
 public class UserDto {
-//TODO prihlaseni vlastni stranka
+
  	@NotBlank(message = "Řekněte jméno!")
 	private String name;
 	@NotBlank(message = "Password!")

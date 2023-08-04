@@ -24,11 +24,10 @@ public class User {
 
     @Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	@Column(name="id")
 	private Long id;
-	@Column(name="name", nullable=true, length=250)
+	@Column(length=250)
 	private String name;
-	@Column(name="password", nullable=true, length=250)
+	@Column(length=250)
 	private String password;
 
     private boolean active;
@@ -37,7 +36,7 @@ public class User {
 	@Temporal(TemporalType.TIMESTAMP)
 	private Date firstLogin;
 
-	//TODO pri prvnim prihlaseni
+	//TODO dont work with first login
 	private Date lastLogin;
 
 	@UpdateTimestamp
@@ -59,7 +58,6 @@ public class User {
         this.currentDB_name = databaseName;
         this.udrLinks = null;
 	}
-
 
 	public boolean isActive() {
 		return active;

@@ -14,7 +14,7 @@ public class CustomUserDetails implements UserDetails {
     private final boolean active;
     private final List<GrantedAuthority> authorities;
 
-    public CustomUserDetails(User user,UDRlinkService udrlinkService ) {
+    public CustomUserDetails(User user,UDRLinkService udrlinkService ) {
         this.username = user.getName();
         this.password = user.getPassword();
         this.active = user.isActive();

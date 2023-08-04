@@ -87,9 +87,9 @@
 					<label for="typ">Type:
 						<select id="typ" name="typ">
 							<option></option>
-							<option value="ROOT" th:selected="${item.typ == T(cz.gymtrebon.zaverecky.vjanecek.atlas.entity.Typ).ROOT}">ROOT</option>
-							<option value="GROUP" th:selected="${item.typ == T(cz.gymtrebon.zaverecky.vjanecek.atlas.entity.Typ).GROUP}">GROUP</option>
-							<option value="REPRESENTATIVE" th:selected="${item.typ == T(cz.gymtrebon.zaverecky.vjanecek.atlas.entity.Typ).REPRESENTATIVE}">REPRESENTATIVE</option>
+							<option value="ROOT" th:selected="${item.typ == T(cz.gymtrebon.zaverecky.vjanecek.atlas.entity.enums.Typ).ROOT}">ROOT</option>
+							<option value="GROUP" th:selected="${item.typ == T(cz.gymtrebon.zaverecky.vjanecek.atlas.entity.enums.Typ).GROUP}">GROUP</option>
+							<option value="REPRESENTATIVE" th:selected="${item.typ == T(cz.gymtrebon.zaverecky.vjanecek.atlas.entity.enums.Typ).REPRESENTATIVE}">REPRESENTATIVE</option>
 						</select>
 					</label>
 
@@ -116,7 +116,7 @@
 						</tr>
 						</thead>
 						<tbody>
-						<tr th:each="founditem : ${founditems}">
+						<tr th:each="founditem : ${foundItems}">
 							<td th:text="${founditem.typ}"></td>
 							<td th:text="${founditem.name}"></td>
 							<td th:text="${founditem.name2}"></td>
@@ -134,8 +134,8 @@
 						<a th:href="'/group/' + ${breadcrumb.id}" th:text="${breadcrumb.name}"></a>
 					</span>
 					<span th:unless="${iterStat.first}">
-						<a th:if="${breadcrumb.typ == T(cz.gymtrebon.zaverecky.vjanecek.atlas.entity.Typ).REPRESENTATIVE}" th:href="'/representative/' + ${breadcrumb.id}" th:text="'>' + ${breadcrumb.name}"></a>
-						<a th:if="${breadcrumb.typ == T(cz.gymtrebon.zaverecky.vjanecek.atlas.entity.Typ).GROUP}" th:href="'/group/' + ${breadcrumb.id}" th:text="'>' + ${breadcrumb.name}"></a>
+						<a th:if="${breadcrumb.typ == T(cz.gymtrebon.zaverecky.vjanecek.atlas.entity.enums.Typ).REPRESENTATIVE}" th:href="'/representative/' + ${breadcrumb.id}" th:text="'>' + ${breadcrumb.name}"></a>
+						<a th:if="${breadcrumb.typ == T(cz.gymtrebon.zaverecky.vjanecek.atlas.entity.enums.Typ).GROUP}" th:href="'/group/' + ${breadcrumb.id}" th:text="'>' + ${breadcrumb.name}"></a>
 					</span>
 				</span>
 			</div>
@@ -150,19 +150,25 @@
 				<a sec:authorize="isAuthenticated()" th:href="@{/login}" class=" d-flex flex-row-revers" role="button" th:text="${#authentication.getPrincipal().getUsername()}" ></a>
 				<a th:href="@{/login}" class=" d-flex flex-row-revers" role="button" sec:authorize="isAnonymous()" >Login</a>
 				<div class="image-container">
-					<img class="icon" src="/png/user.png" alt="AT">
+					<img class="icon" src="/png/user.png" alt="">
 				</div>
 			</div>
 			<div class="row" th:if="${#authorization.expression('hasAnyAuthority(''ADMIN'')')}" >
 				<a href="/admin" style="margin-right: 10px;"> Admin tools</a>
 				<div class="image-container">
-					<img class="icon" src="/png/settings.png" alt="AT">
+					<img class="icon" src="/png/settings.png" alt="">
+				</div>
+			</div>
+			<div class="row" th:if="${#authorization.expression('hasAnyAuthority(''EDITOR'')')}" >
+				<a href="/requests" style="margin-right: 10px;"> Editor tools</a>
+				<div class="image-container">
+					<img class="icon" src="/png/editor_paper.png" alt="">
 				</div>
 			</div>
 			<div class="row">
 				<span style="margin-right: 10px;"> Database </span>
 				<div class="image-container">
-					<img class="icon" src="/png/database.png" alt="DB">
+					<img class="icon" src="/png/database.png" alt="">
 				</div>
 			</div>
 				<ul  class="db_list" th:each="dbhelper : ${databaseList}">

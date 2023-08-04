@@ -10,7 +10,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 import javax.servlet.RequestDispatcher;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
 @Controller
 @Slf4j
@@ -22,14 +21,16 @@ public class CustomErrorController implements ErrorController {
         Object status = request.getAttribute(RequestDispatcher.ERROR_STATUS_CODE);
 
         if (status != null) {
-            Integer statusCode = Integer.valueOf(status.toString());
+            int statusCode = Integer.parseInt(status.toString());
 
             if (statusCode == HttpStatus.NOT_FOUND.value()) {
                 return "errors/error404";
-            } else if (statusCode == HttpStatus.FORBIDDEN.value() || statusCode == HttpServletResponse.SC_FORBIDDEN) {
-                return "error/error403";
+            } else if (statusCode == HttpStatus.FORBIDDEN.value()) {
+                return "errors/error403";
+            } else if (statusCode == HttpStatus.INTERNAL_SERVER_ERROR.value()) {
+                return "errors/error500";
             }else{
-                model.addAttribute("code", statusCode.toString());
+                model.addAttribute("code", Integer.toString(statusCode));
                 return "errors/undefined_error";
             }
 
@@ -45,7 +46,7 @@ public class CustomErrorController implements ErrorController {
     }
 
     @RequestMapping(value = ERROR_PATH+"/403")
-    public String Accessdenied403(Model model, HttpServletRequest request) {
-        return "error/error403";
+    public String accessDenied403() {
+        return "errors/error403";
     }
 }

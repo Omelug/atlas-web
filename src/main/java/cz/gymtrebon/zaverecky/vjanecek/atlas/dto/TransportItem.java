@@ -1,5 +1,5 @@
 package cz.gymtrebon.zaverecky.vjanecek.atlas.dto;
-import cz.gymtrebon.zaverecky.vjanecek.atlas.entity.Typ;
+import cz.gymtrebon.zaverecky.vjanecek.atlas.entity.enums.Typ;
 import lombok.Data;
 
 @Data

@@ -1,5 +1,6 @@
 package cz.gymtrebon.zaverecky.vjanecek.atlas.entity;
 
+import cz.gymtrebon.zaverecky.vjanecek.atlas.entity.enums.Typ;
 import lombok.*;
 
 import javax.persistence.*;
@@ -15,7 +16,6 @@ public class UserFind {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    @Column(name="id")
     private Integer id;
 
     @OneToOne
@@ -23,7 +23,7 @@ public class UserFind {
     private User user;
 
     private boolean open;
-    //item variables for search
+
     private String parentGroup;
     private Typ typ;
     @Column( length=250)

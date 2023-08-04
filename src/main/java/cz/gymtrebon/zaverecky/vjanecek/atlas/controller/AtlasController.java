@@ -5,16 +5,17 @@ import cz.gymtrebon.zaverecky.vjanecek.atlas.dto.Group;
 import cz.gymtrebon.zaverecky.vjanecek.atlas.dto.Representative;
 import cz.gymtrebon.zaverecky.vjanecek.atlas.dto.helpobjects.DatabaseListHelper;
 import cz.gymtrebon.zaverecky.vjanecek.atlas.entity.*;
+import cz.gymtrebon.zaverecky.vjanecek.atlas.entity.enums.Typ;
 import cz.gymtrebon.zaverecky.vjanecek.atlas.form.FindForm;
 import cz.gymtrebon.zaverecky.vjanecek.atlas.form.TestForm;
-import cz.gymtrebon.zaverecky.vjanecek.atlas.repository.*;
+import cz.gymtrebon.zaverecky.vjanecek.atlas.repository.UDRlinkRepository;
+import cz.gymtrebon.zaverecky.vjanecek.atlas.repository.UserFindRepository;
+import cz.gymtrebon.zaverecky.vjanecek.atlas.repository.UserRepository;
 import cz.gymtrebon.zaverecky.vjanecek.atlas.service.AtlasService;
-import cz.gymtrebon.zaverecky.vjanecek.atlas.service.CustomUserDetaisService;
+import cz.gymtrebon.zaverecky.vjanecek.atlas.service.CustomUserDetailsService;
 import cz.gymtrebon.zaverecky.vjanecek.atlas.service.FindService;
-import cz.gymtrebon.zaverecky.vjanecek.atlas.service.SchemaService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -23,8 +24,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import java.io.File;
@@ -46,17 +45,9 @@ public class AtlasController {
 	private static String text = "";
 	private final UDRlinkRepository udrlinkRepository;
 	private final UserRepository userRepository;
-	private final DatabaseRepository databaseRepository;
-	private final RoleRepository roleRepository;
-	private final SchemaService schemaService;
 	private final FindService findService;
 	private final UserFindRepository userFindRepository;
-
-	@Autowired
-	CustomUserDetaisService userDetailsService;
-
-	@PersistenceContext
-	private EntityManager entityManager;
+	private final CustomUserDetailsService userDetailsService;
 
 	@SuppressWarnings("SameReturnValue")
 	@GetMapping(value = { "","test"})
@@ -92,10 +83,10 @@ public class AtlasController {
 	@GetMapping("/group/{id}")
 	public String groupDetail(Principal principal,Model model,
 								@PathVariable("id") Integer groupId) {
-		Group group = service.najdiSkupinuDleId(groupId);
+		Group group = service.findGroupById(groupId);
 		model.addAttribute("group", group);
-		model.addAttribute("subgroups", service.seznamPodskupin(group.getId()));
-		model.addAttribute("representatives", service.seznamZastupcu(group.getId()));
+		model.addAttribute("subgroups", service.subgroupList(group.getId()));
+		model.addAttribute("representatives", service.representativeList(group.getId()));
 
 		model.addAttribute("breadcrumbs", service.getBreadCrumbs(groupId));
 
@@ -107,7 +98,7 @@ public class AtlasController {
 	@PreAuthorize("hasAuthority('" + User.USER + "') OR hasAuthority('" + User.EDITOR + "') OR hasAuthority('" + User.ADMIN + "')")
 	@GetMapping("/representative/{id}")
 	public String detailRepresentative(Principal principal,Model model, @PathVariable("id") Integer representativeId) {
-		Representative representative = service.najdiRepresentativeDleId(representativeId);
+		Representative representative = service.findRepresentativeById(representativeId);
 		model.addAttribute("representative", representative);
 
 		model.addAttribute("breadcrumbs", service.getBreadCrumbs(representativeId));
@@ -119,8 +110,8 @@ public class AtlasController {
 	@PreAuthorize("hasAuthority('" + User.USER + "') OR hasAuthority('" + User.EDITOR + "') OR hasAuthority('" + User.ADMIN + "')")
 	@GetMapping("/image/{id}")
 	public ResponseEntity<InputStreamResource> Image(@PathVariable("id") Integer id) throws IOException {
-		Image obr = service.najdiImageDleId(id);
-		File file = service.souborObrazku(id);
+		Image obr = service.findImageById(id);
+		File file = service.imageFile(id);
 		MediaType contentType = MediaType.IMAGE_PNG;
 		String imageName = obr.getFileName();
 		if (imageName.endsWith(".jpg") || imageName.endsWith(".jpeg") ) {
@@ -130,30 +121,28 @@ public class AtlasController {
     		.contentType(contentType)
     		.body(new InputStreamResource(new FileInputStream(file)));
 	}
-	@SuppressWarnings("SameReturnValue")
+
 	@PreAuthorize("hasAuthority('" + User.USER + "') OR hasAuthority('" + User.EDITOR + "') OR hasAuthority('" + User.ADMIN + "')")
 	@PostMapping("/changeDatabase")
-	public String changeDatabase(Principal principal, HttpServletRequest request, @RequestParam("databaseName") String databaseName) {
+	public String changeDatabase(Principal principal, @RequestParam("databaseName") String databaseName) {
 		User user = userRepository.findByName(principal.getName()).orElse(null);
 		if (user != null && !udrlinkRepository.findAllByUserNameAndDatabaseName(principal.getName(), databaseName).isEmpty()) {
 			user.setCurrentDB_name(databaseName);
 			userRepository.save(user);
-			userDetailsService.updateCustomUserDetails(user.getName()); //TODO ykontrolovat
-			log.info("Vše by mělo pracovat s " + CurrentDatabase.getCurrentDatabase());
+			userDetailsService.updateCustomUserDetails(user.getName());
+			log.info("Everything should work with " + CurrentDatabase.getCurrentDatabase());
 		}
 		return "redirect:/home";
-		//String referer = request.getHeader("Referer");
-		//return "redirect:" + referer;
 	}
 	public void addDatabaseList(Principal principal, Model model) {
 		String username = principal.getName();
 		List<UDRlink> list = udrlinkRepository.findAllByUserName(username);
-		List<DatabaseListHelper> databaseList = new ArrayList<DatabaseListHelper>();
+		List<DatabaseListHelper> databaseList = new ArrayList<>();
 		for (UDRlink udrlink : list) {
 			boolean found = false;
-			for (DatabaseListHelper dbhelper: databaseList ) {
-				if (dbhelper.getDatabase().equals(udrlink.getDatabase().getName())) {
-					dbhelper.addRole(udrlink.getRole().getName());
+			for (DatabaseListHelper databaseListHelper: databaseList ) {
+				if (databaseListHelper.getDatabase().equals(udrlink.getDatabase().getName())) {
+					databaseListHelper.addRole(udrlink.getRole().getName());
 					found = true;
 				}
 			}
@@ -167,16 +156,16 @@ public class AtlasController {
 	public void addBase(Principal principal, Model model) {
 		addDatabaseList(principal, model);
 		Optional<UserFind> u = userFindRepository.findByUserName(principal.getName());
-		if (!u.isPresent()) {
+		if (u.isEmpty()) {
 			UserFind userFind = new UserFind(userRepository.findByName(principal.getName()));
 			userFindRepository.save(userFind);
 		}
 		model.addAttribute("item", userFindRepository.findByUserName(principal.getName()).orElse(new UserFind()));
-		model.addAttribute("founditems", findService.findItems(userFindRepository.findByUserName(principal.getName()).orElse(new UserFind())));
+		model.addAttribute("foundItems", findService.findItems(userFindRepository.findByUserName(principal.getName()).orElse(new UserFind())));
 	}
 
 	@PostMapping(value="/find")
-	public String find(Principal principal, Model model, @Valid @ModelAttribute("item") FindForm form, HttpServletRequest request) {
+	public String find(Principal principal, @Valid @ModelAttribute("item") FindForm form, HttpServletRequest request) {
 
 		// Access the search criteria from the form object
 		boolean open = form.isOpen();
@@ -189,11 +178,12 @@ public class AtlasController {
 		String text = form.getText();
 
 
-		//ulozeni nastaveni
+		//save settings
 		Optional<UserFind> existingUserFind = userFindRepository.findByUserName(principal.getName());
+		UserFind userFind;
 		if (existingUserFind.isPresent()) {
 
-			UserFind userFind = existingUserFind.get();
+			userFind = existingUserFind.get();
 			userFind.setOpen(open);
 			userFind.setName(name);
 			userFind.setName2(name2);
@@ -202,12 +192,11 @@ public class AtlasController {
 			userFind.setAuthor(author);
 			userFind.setColor(color);
 			userFind.setText(text);
-			userFindRepository.save(userFind);
 		}else{
-			UserFind userFind = new UserFind(userRepository.findByName(principal.getName()),name, name2, typ, parentGroup, author, color, text, open);
-			userFindRepository.save(userFind);
+			userFind = new UserFind(userRepository.findByName(principal.getName()), name, name2, typ, parentGroup, author, color, text, open);
 		}
-		//TODO hledani
+		userFindRepository.save(userFind);
+		//TODO searching
 
 		String referer = request.getHeader("Referer");
 		return "redirect:" + referer;

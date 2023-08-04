@@ -1,7 +1,7 @@
 package cz.gymtrebon.zaverecky.vjanecek.atlas.repository;
 
 import cz.gymtrebon.zaverecky.vjanecek.atlas.entity.Item;
-import cz.gymtrebon.zaverecky.vjanecek.atlas.entity.Typ;
+import cz.gymtrebon.zaverecky.vjanecek.atlas.entity.enums.Typ;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;

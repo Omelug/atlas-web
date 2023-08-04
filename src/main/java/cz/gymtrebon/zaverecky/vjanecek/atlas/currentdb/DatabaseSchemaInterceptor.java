@@ -2,11 +2,8 @@ package cz.gymtrebon.zaverecky.vjanecek.atlas.currentdb;
 
 import cz.gymtrebon.zaverecky.vjanecek.atlas.entity.User;
 import cz.gymtrebon.zaverecky.vjanecek.atlas.entity.UserFind;
-import cz.gymtrebon.zaverecky.vjanecek.atlas.repository.UDRlinkRepository;
 import cz.gymtrebon.zaverecky.vjanecek.atlas.repository.UserFindRepository;
 import cz.gymtrebon.zaverecky.vjanecek.atlas.repository.UserRepository;
-import cz.gymtrebon.zaverecky.vjanecek.atlas.service.CustomUserDetaisService;
-import cz.gymtrebon.zaverecky.vjanecek.atlas.service.FindService;
 import cz.gymtrebon.zaverecky.vjanecek.atlas.service.SchemaService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -23,18 +20,12 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class DatabaseSchemaInterceptor implements HandlerInterceptor {
 
-    private final CurrentDatabase currentDatabase;
-    private final CustomUserDetaisService customUserDetailsService;
     private final SchemaService schemaService;
     private final UserRepository userRepository;
-    private final UDRlinkRepository udrlinkRepository;
-    private final FindService findService;
     private final UserFindRepository userFindRepository;
-
-
+    
     @Override
-    public boolean preHandle(HttpServletRequest request,  HttpServletResponse response, Object handler)
-            throws Exception {
+    public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler){
         Principal principal = request.getUserPrincipal();
         log.info("Principal is "+ principal);
         if (principal != null) {

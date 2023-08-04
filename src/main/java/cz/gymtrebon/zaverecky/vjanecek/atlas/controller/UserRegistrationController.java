@@ -7,10 +7,9 @@ import cz.gymtrebon.zaverecky.vjanecek.atlas.security.JWTRequest;
 import cz.gymtrebon.zaverecky.vjanecek.atlas.security.JWTResponse;
 import cz.gymtrebon.zaverecky.vjanecek.atlas.security.JWTUtility;
 import cz.gymtrebon.zaverecky.vjanecek.atlas.service.CustomUserDetails;
-import cz.gymtrebon.zaverecky.vjanecek.atlas.service.CustomUserDetaisService;
+import cz.gymtrebon.zaverecky.vjanecek.atlas.service.CustomUserDetailsService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -26,17 +25,13 @@ import java.util.Collection;
 @Slf4j
 public class UserRegistrationController {
 
-    @Autowired
-    private JWTUtility jwtUtility;
-    @Autowired
-    private AuthenticationManager authenticationManager;
-    @Autowired
-    private CustomUserDetaisService userService;
-    @Autowired
-    private CustomLoggerRepository customLoggerRepository;
+    private final JWTUtility jwtUtility;
+    private final AuthenticationManager authenticationManager;
+    private final CustomUserDetailsService userService;
+    private final CustomLoggerRepository customLoggerRepository;
 
     @PostMapping("/login")
-    public JWTResponse loginUser(@RequestBody JWTRequest jwtRequest) throws Exception {
+    public JWTResponse loginUser(@RequestBody JWTRequest jwtRequest) {
         log.info("Login: " + jwtRequest.getName());
         log.info("Password: " + jwtRequest.getPassword());
 
@@ -61,7 +56,7 @@ public class UserRegistrationController {
     }
 
     @GetMapping("/userinfo")
-    public ResponseEntity<String> userinfo(@RequestHeader (name="Authorization") String token) throws Exception {
+    public ResponseEntity<String> userinfo(@RequestHeader (name="Authorization") String token) {
         CustomUserDetails userDetails = userService.loadUserByUsername(jwtUtility.getUsernameFromToken(token));
        if (validate(token, userDetails, "EDITOR")){
            ResponseEntity.ok("User has EDITOR role");
@@ -73,15 +68,9 @@ public class UserRegistrationController {
     }
     private boolean validate(String token, CustomUserDetails userDetails, String role) {
         if (jwtUtility.validateToken(token, userDetails) ){
-            Collection<GrantedAuthority> authorities = (Collection<GrantedAuthority>) userDetails.getAuthorities();
-            boolean hasEditorRole = authorities.stream()
-                    .anyMatch(auth -> auth.getAuthority().equals(role));
-            return hasEditorRole;
+            Collection<? extends GrantedAuthority> authorities = userDetails.getAuthorities();
+            return authorities.stream().anyMatch(auth -> auth.getAuthority().equals(role));
         }
     return false;
-    }
-    private boolean validate(String token, String role) {
-        CustomUserDetails userDetails = userService.loadUserByUsername(jwtUtility.getUsernameFromToken(token));
-       return validate(token, userDetails, role);
     }
 }

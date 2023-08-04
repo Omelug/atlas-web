@@ -7,6 +7,7 @@ import org.hibernate.annotations.CreationTimestamp;
 
 import javax.persistence.*;
 import java.util.Date;
+import java.util.Objects;
 
 @Entity
 @Data
@@ -17,7 +18,6 @@ public class LoggerLine {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name="id")
     private Long id;
 
     @CreationTimestamp
@@ -25,18 +25,12 @@ public class LoggerLine {
     private Date time;
 
     private LogTyp typ;
-
     private String title;
-
     private String message;
 
     public LoggerLine(LogTyp typ, String user, String message) {
         this.typ = typ;
-        if (user == null) {
-            this.title = "";
-        }else {
-            this.title = user;
-        }
+        this.title = Objects.requireNonNullElse(user, "");
         this.message = message;
     }
 }

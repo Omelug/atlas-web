@@ -1,10 +1,9 @@
 package cz.gymtrebon.zaverecky.vjanecek.atlas.service;
 
 import cz.gymtrebon.zaverecky.vjanecek.atlas.entity.Item;
-import cz.gymtrebon.zaverecky.vjanecek.atlas.entity.Typ;
+import cz.gymtrebon.zaverecky.vjanecek.atlas.entity.enums.Typ;
 import cz.gymtrebon.zaverecky.vjanecek.atlas.entity.UserFind;
 import cz.gymtrebon.zaverecky.vjanecek.atlas.repository.ItemRepository;
-import cz.gymtrebon.zaverecky.vjanecek.atlas.repository.UserFindRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -19,7 +18,6 @@ import java.util.List;
 @Slf4j
 public class FindService {
 
-    private final UserFindRepository userFindRepository;
     private final ItemRepository itemRepository;
 
    /* public List<Item> findItems(UserFind userFind) {
@@ -46,7 +44,7 @@ public class FindService {
         String text = userFind.getText();
         String parentGroup = userFind.getParentGroup();
         log.info("UserFind "+name);
-        // Use the repository to execute the dynamically generated query
+
         return itemRepository.findAll((root, query, criteriaBuilder) -> {
             List<Predicate> predicates = new ArrayList<>();
 

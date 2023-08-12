@@ -20,10 +20,10 @@ public class Role {
     private String name;
 
     @OneToMany(mappedBy = "role")
-    private List<UDRlink> UDRlinks;
+    private List<UDRLink> UDRLinks;
 
     public Role(String name) {
         this.name = name;
-        this.UDRlinks = null;
+        this.UDRLinks = null;
     }
 }

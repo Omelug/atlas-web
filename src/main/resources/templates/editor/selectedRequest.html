@@ -1,0 +1,16 @@
+
+  <div th:if="${selectedRequest != null}" class="card-body">
+    <div class="d-flex justify-content-center">
+      <p class="card-text text-white p-2" style="width:100%;background-color: #809ea9"><span th:text="${selectedRequest.requestMark}"></span></p>
+    </div>
+    <div class="d-flex justify-content-center">
+      <h5 class="card-title" th:text="${selectedRequest.name}"></h5>
+    </div>
+
+    <p class="card-text">Request Type: <span th:text="${selectedRequest.request_typ}"></span></p>
+    <p class="card-text">Request Status: <span th:text="${selectedRequest.request_status}"></span></p>
+    <p class="card-text">Request Message: <span th:text="${selectedRequest.request_message}"></span></p>
+    <p class="card-text">Create Date: <span th:text="${#dates.format(selectedRequest.createDate, 'yyyy-MM-dd HH:mm:ss')}"></span></p>
+    <p class="card-text">Modify Date: <span th:text="${#dates.format(selectedRequest.modifyDate, 'yyyy-MM-dd HH:mm:ss')}"></span></p>
+  </div>
+

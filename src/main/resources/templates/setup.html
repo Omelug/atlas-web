@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>App Setup</title>
+</head>
+<body>
+<h1>Welcome to App Setup</h1>
+<form th:action="@{/admin/setup}" method="post">
+  <!-- Add input fields for the settings you want to configure -->
+  <label>Title: <input type="text" name="title" /></label>
+  <!-- Add more settings as needed -->
+  <button type="submit">Save Settings</button>
+</form>
+</body>
+</html>

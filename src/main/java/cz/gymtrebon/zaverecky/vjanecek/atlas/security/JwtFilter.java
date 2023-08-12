@@ -1,7 +1,7 @@
 package cz.gymtrebon.zaverecky.vjanecek.atlas.security;
 
 import cz.gymtrebon.zaverecky.vjanecek.atlas.entity.User;
-import cz.gymtrebon.zaverecky.vjanecek.atlas.repository.UDRlinkRepository;
+import cz.gymtrebon.zaverecky.vjanecek.atlas.repository.UDRLinkRepository;
 import cz.gymtrebon.zaverecky.vjanecek.atlas.repository.UserRepository;
 import cz.gymtrebon.zaverecky.vjanecek.atlas.service.CustomUserDetails;
 import cz.gymtrebon.zaverecky.vjanecek.atlas.service.CustomUserDetailsService;
@@ -25,7 +25,7 @@ public class JwtFilter extends OncePerRequestFilter {
     private final JWTUtility jwtUtility;
 
     private final UserRepository userRepository;
-    private final UDRlinkRepository udrlinkRepository;
+    private final UDRLinkRepository udrlinkRepository;
     private final CustomUserDetailsService userDetailsService;
     private final CustomUserDetailsService userService;
     @Override

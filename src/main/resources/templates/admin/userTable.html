@@ -1,0 +1,67 @@
+
+<tr th:each="user : ${userList}">
+    <td th:text="${user.id}"></td>
+    <td th:text="${user.name}"></td>
+    <td class="password blur" th:text="${user.password}"></td>
+    <td>
+      <form id="changeUserDatabase" th:action="@{/admin/changeUserDatabase}" method="post">
+        <input type="hidden" name="changeDBUserId" th:value="${user.id}" />
+        <select name="databaseName" id="databaseSelect">
+          <option th:each="database : ${databaseList}" th:value="${database.name}" th:text="${database.name}" th:selected="${user.currentDB_name == database.name}"></option>
+        </select>
+      </form>
+    </td>
+    <td th:text="${user.active}"></td>
+    <td th:text="${user.firstLogin}"></td>
+    <td th:text="${user.lastLogin}"></td>
+    <td th:text="${user.modifyDate}"></td>
+    <td>
+      <form class="deleteUserForm" th:action="@{/admin/deleteUser}" method="post">
+        <input type="hidden" name="userId" th:value="${user.id}" />
+        <button type="submit">X</button>
+      </form>
+    </td>
+  </tr>
+
+  <script>
+    $(document).ready(function () {
+      var passwordElements = document.querySelectorAll('.password');
+
+      passwordElements.forEach(function(element) {
+        element.addEventListener('click', function() {
+          this.classList.toggle('unblur');
+        });
+      });
+
+
+      $(document).on("submit", ".deleteUserForm", function (event) {
+        event.preventDefault();
+
+        var form = $(this);
+        var formData = form.serialize();
+
+        $.ajax({
+          type: "POST",
+          url: form.attr("action"),
+          data: formData,
+          success: function (response) {
+            form.closest("tr").remove();
+            console.log(response);
+          },
+          error: function (xhr, textStatus, errorThrown) {
+            console.error("Error deleting user:", textStatus, errorThrown);
+          },
+        });
+      });
+    });
+  </script>
+<style>
+  .blur {
+    filter: blur(8px);
+    cursor: pointer;
+    transition: filter 0.3s;
+  }
+  .unblur {
+    filter: none;
+  }
+</style>

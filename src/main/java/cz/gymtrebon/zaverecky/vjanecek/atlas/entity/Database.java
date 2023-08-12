@@ -19,11 +19,14 @@ public class Database {
     private String name;
 
     @OneToMany(mappedBy = "database")
-    private List<UDRlink> UDRlinks;
+    private List<UDRLink> UDRLinks;
 
     public Database(String name) {
        this.name = name;
-       this.UDRlinks = null;
+       this.UDRLinks = null;
     }
-
+    @Override
+    public String toString(){
+        return "Database:" + name;
+    }
 }

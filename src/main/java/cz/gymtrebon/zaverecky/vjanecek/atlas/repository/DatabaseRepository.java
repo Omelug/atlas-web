@@ -8,4 +8,6 @@ import java.util.Optional;
 @Repository
 public interface DatabaseRepository extends JpaRepository<Database, Long> {
     Optional<Database> findByName(String name);
+    @Override
+    long count();
 }

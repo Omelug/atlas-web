@@ -2,6 +2,7 @@ package cz.gymtrebon.zaverecky.vjanecek.atlas.controller;
 
 import cz.gymtrebon.zaverecky.vjanecek.atlas.dto.Group;
 import cz.gymtrebon.zaverecky.vjanecek.atlas.dto.Representative;
+import cz.gymtrebon.zaverecky.vjanecek.atlas.entity.Request;
 import cz.gymtrebon.zaverecky.vjanecek.atlas.entity.User;
 import cz.gymtrebon.zaverecky.vjanecek.atlas.form.GroupForm;
 import cz.gymtrebon.zaverecky.vjanecek.atlas.form.RepresentativeForm;
@@ -15,7 +16,11 @@ import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.thymeleaf.context.WebContext;
+import org.thymeleaf.spring5.SpringTemplateEngine;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import java.security.Principal;
 import java.util.Optional;
@@ -29,23 +34,24 @@ public class EditorController {
     private final AtlasService service;
     private final AtlasController atlasController;
     private final RequestRepository requestRepository;
+    private final SpringTemplateEngine templateEngine;
 
     @GetMapping("/requests")
     public String requests(Principal principal,Model model) {
 
         model.addAttribute("requestList", requestRepository.findAll());
-
+        model.addAttribute("selectedRequest", null);
         atlasController.addBase(principal, model);
-        return "requests";
+        return "editor/requests";
     }
 
     @GetMapping("/group/newItem")
-    public String newSkupina(Principal principal,Model model,
+    public String newGroup(Principal principal,Model model,
             @RequestParam("idParentGroup") Optional<Integer> idParentGroup ) {
         GroupForm form = new GroupForm();
         if (idParentGroup.isPresent()) {
             form.setIdParentGroup(idParentGroup.get());
-            model.addAttribute("origianlParentId", idParentGroup.get());
+            model.addAttribute("originalParentId", idParentGroup.get());
             model.addAttribute("breadcrumbs", service.getBreadCrumbs(idParentGroup.get()));
         }
         model.addAttribute("groups", service.breadCrumbList());
@@ -56,7 +62,7 @@ public class EditorController {
         return "group-form";
     }
     @PostMapping(value="/group/save", params="action-save")
-    public String editaceSkupinyUlozit(Principal principal, Model model, @Valid @ModelAttribute("group") GroupForm form, BindingResult bindingResult) {
+    public String groupEditSave(Principal principal, Model model, @Valid @ModelAttribute("group") GroupForm form, BindingResult bindingResult) {
 
         boolean newGroup = form.getId() == null;
         model.addAttribute("groups", service.breadCrumbList());
@@ -86,9 +92,9 @@ public class EditorController {
 
     private void breadCrumbsCorrection(Model model, Integer idParentGroup) {
         if (idParentGroup == null) {
-            Integer origianlParentId = (Integer) model.getAttribute("origianlParentId");
-            if(origianlParentId != null) {
-                model.addAttribute("breadcrumbs", service.getBreadCrumbs(origianlParentId));
+            Integer originalParentId = (Integer) model.getAttribute("originalParentId");
+            if(originalParentId != null) {
+                model.addAttribute("breadcrumbs", service.getBreadCrumbs(originalParentId));
                 return;
             }
         }
@@ -116,9 +122,9 @@ public class EditorController {
         atlasController.addBase(principal, model);
         return "group-form";
     }
-    //rekurzivni
+    //recursive
     @PostMapping(value="/group/save", params="action-delete")
-    public String smazaniSkupiny(
+    public String groupDelete(
             @ModelAttribute("group") GroupForm form) {
         log.info("form id  is " + form.getId() );
         if (!(form.getId() == null)) {
@@ -130,14 +136,14 @@ public class EditorController {
         return "redirect:/group/" + form.getIdParentGroup();
     }
     @PostMapping(value="/group/save", params="action-back")
-    public String editaceSkupinyZpet(
+    public String groupEditBack(
             Model model,
             @ModelAttribute("group") GroupForm form) {
-        boolean novaSkupina = form.getId() == null;
-        if (novaSkupina) {
-            Integer origianlParentId = (Integer) model.getAttribute("origianlParentId");
-            if (origianlParentId == null) {return "redirect:/home";}
-            return "redirect:/group/" + origianlParentId;
+        boolean newGroup = form.getId() == null;
+        if (newGroup) {
+            Integer originalParentId = (Integer) model.getAttribute("originalParentId");
+            if (originalParentId == null) {return "redirect:/home";}
+            return "redirect:/group/" + originalParentId;
         }
         return "redirect:/group/" + form.getId();
     }
@@ -149,7 +155,7 @@ public class EditorController {
         RepresentativeForm form = new RepresentativeForm();
         if (idParentGroup.isPresent()) {
             form.setIdParentGroup(idParentGroup.get());
-            model.addAttribute("origianlParentId", idParentGroup.get());
+            model.addAttribute("originalParentId", idParentGroup.get());
         }
         model.addAttribute("groups", service.breadCrumbList());
         model.addAttribute("representative", form);
@@ -184,7 +190,7 @@ public class EditorController {
     }
 
     @PostMapping(value="/representative/save", params="action-delete")
-    public String smazaniRepresentative(
+    public String representativeDelete(
             @ModelAttribute("representative") RepresentativeForm form) {
         if (!(form.getId() == null)) {
             service.removeItem(form.getId());
@@ -194,20 +200,20 @@ public class EditorController {
     }
 
     @PostMapping(value="/representative/save", params="action-back")
-    public String editaceRepresentativeZpet(
+    public String representativeEditBack(
             Model model,
             @ModelAttribute("representative") RepresentativeForm form) {
         boolean newRepresentative = form.getId() == null;
         if (newRepresentative) {
-            Integer origianlParentId = (Integer) model.getAttribute("origianlParentId");
-            if (origianlParentId == null) {return "redirect:/home";}
+            Integer originalParentId = (Integer) model.getAttribute("originalParentId");
+            if (originalParentId == null) {return "redirect:/home";}
             return "redirect:/"+ form.getIdParentGroup();
         }
         return "redirect:/representative/" + form.getId();
     }
 
     @PostMapping(value="/representative/save", params="action-save")
-    public String editaceRepresentativeUlozit(Principal principal,
+    public String representativeEditSave(Principal principal,
             Model model,
             @Valid @ModelAttribute("representative") RepresentativeForm form,
             BindingResult bindingResult) {
@@ -251,13 +257,26 @@ public class EditorController {
         return "redirect:/representative/" + ItemId;
     }
 
-    @GetMapping("/representative/{id}/delete/{Imageid}")
+    @GetMapping("/representative/{id}/delete/{imageId}")
     public String deleteImage(
             @PathVariable("id") Integer id,
-            @PathVariable("Imageid") Integer Imageid) {
+            @PathVariable("imageId") Integer imageId) {
 
-        service.deleteImage(Imageid);
+        service.deleteImage(imageId);
 
         return "redirect:/representative/" + id;
+    }
+
+    @PostMapping(value="/editor/selectRequest")
+    @ResponseBody
+    public String selectRequest(HttpServletRequest request, HttpServletResponse response, @RequestParam("requestMark") String requestMark) {
+        WebContext context = new WebContext(request, response, request.getServletContext());
+        Optional<Request> selectedRequest = requestRepository.findByRequestMark(requestMark);
+        context.setVariable("selectedRequest", selectedRequest.orElse(null));
+        log.info("Sent request: " + selectedRequest.get().getRequestMark());
+        String text = templateEngine.process("editor/selectedRequest.html", context);
+        log.info(text);
+        return templateEngine.process("editor/selectedRequest.html", context);
+        //return "test";
     }
 }

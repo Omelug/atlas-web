@@ -11,13 +11,15 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
+import org.thymeleaf.context.WebContext;
+import org.thymeleaf.spring5.SpringTemplateEngine;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.security.Principal;
 import java.util.List;
+
 
 @SuppressWarnings("SameReturnValue")
 @Controller
@@ -26,52 +28,31 @@ import java.util.List;
 @Slf4j
 @PreAuthorize("hasAuthority('" + User.ADMIN + "')")
 public class AdminController {
-    private final UDRlinkRepository udRlinkRepository;
     private final UserRepository userRepository;
-    private final UDRlinkRepository udrlinkRepository;
+    private final UDRLinkRepository udrLinkRepository;
     private final DatabaseRepository databaseRepository;
     private final RoleRepository roleRepository;
     private final SchemaService schemaService;
     private final CustomLoggerRepository customLoggerRepository;
     private final CustomUserDetailsService userDetailsService;
+    private final UserFindRepository userFindRepository;
+    private final SpringTemplateEngine templateEngine;
+    private final RequestRepository requestRepository;
 
     @GetMapping("")
     public String adminTools(Model model) {
-        List<User> userList = userRepository.findAll();
-        model.addAttribute("userList", userList);
 
-        List<Database> databaseList = databaseRepository.findAll();
-        model.addAttribute("databaseList", databaseList);
+        model.addAttribute("userList", userRepository.findAll());
+        model.addAttribute("databaseList", databaseRepository.findAll());
+        model.addAttribute("roleList", roleRepository.findAll());
+        model.addAttribute("UDRLinkList", udrLinkRepository.findAll());
+        model.addAttribute("logList", customLoggerRepository.findAllByOrderByTimeDesc());
 
-        List<Role> roleList = roleRepository.findAll();
-        model.addAttribute("roleList", roleList);
-
-        List<UDRlink> udrlinkList = udRlinkRepository.findAll();
-        model.addAttribute("udrlinkList", udrlinkList);
-
-        List<LoggerLine> logList = customLoggerRepository.findAllByOrderByTimeDesc();
-        model.addAttribute("logList", logList);
-
-        return "admin";
-    }
-
-    @PostMapping("/deleteDatabase")
-    public String deleteDatabase(@RequestParam("databaseId") Long databaseId) {
-        Database database = databaseRepository.findById(databaseId).orElse(null);
-        log.info("database id"+databaseId);
-        if (database != null) {
-            List<UDRlink> udrlinks = udRlinkRepository.findAllByDatabase(database);
-            udRlinkRepository.deleteAll(udrlinks);
-            databaseRepository.delete(database);
-            //TODO delete remove schema and directories from web and save confirm massage to admin (maybe email)
-            schemaService.deleteSchema(database.getName());
-            //projde spoje na databazi a nastavi default databazi
-            userRepository.updateDatabaseColumnToDefault(database.getName(), CurrentDatabase.DEFAULT_DATABASE);
-        }
-        return "redirect:/admin";
+        return "admin/admin";
     }
     @PostMapping("/addDatabase")
-    public String addDatabase( @RequestParam("databaseName") String databaseName) {
+    @ResponseBody
+    public String addDatabase(HttpServletRequest request, HttpServletResponse response, @RequestParam("databaseName") String databaseName) {
         if (databaseName.isBlank()) {
             return "redirect:/admin";
         }
@@ -80,62 +61,119 @@ public class AdminController {
                     new LoggerLine(LogTyp.ERROR,
                             "adminTools",
                             "Database "+databaseName+" already exists"));
-            return "redirect:/admin";
+            return generateTableFragmentHtml(request, response, databaseRepository.findAll());
         }
         log.info("database name "+databaseName);
         Database database = new Database();
         database.setName(databaseName);
         databaseRepository.save(database);
+
         //create schema for dataabase
-        schemaService.createSchema(databaseName);
+        schemaService.createUserSchema(databaseName);
         schemaService.createTablesInSchema(databaseName);
-        return "redirect:/admin";
+        String text = generateTableFragmentHtml(request, response, databaseRepository.findAll());
+        return text;
     }
+    @PostMapping("/deleteDatabase")
+    @ResponseBody
+    public String deleteDatabase(Principal principal, @RequestParam("databaseId") Long databaseId) {
+        Database database = databaseRepository.findById(databaseId).orElse(null);
+        log.info("database id"+databaseId);
+        if (databaseRepository.count() != 1){
+            customLoggerRepository.save(new LoggerLine(LogTyp.ERROR, principal.getName(), "Database "+database+"is the last database on server, cant be deleted "));
+            return "Database " + database+ " was NOT deleted";
+        }
+        if (database != null) {
+            List<UDRLink> UDRLinklist = udrLinkRepository.findAllByDatabase(database);
+            udrLinkRepository.deleteAll(UDRLinklist);
+            databaseRepository.deleteById(database.getId());
+            //TODO delete remove schema and directories from web and save confirm massage to admin (maybe email)
+            schemaService.deleteSchema(database.getName());
+            //projde spoje na databazi a nastavi default databazi
+            userRepository.updateDatabaseColumnToDefault(database.getName(), CurrentDatabase.DEFAULT_DATABASE);
+        }
+        return "Database " + database+ " deleted";
+    }
+    private String generateTableFragmentHtml(HttpServletRequest request, HttpServletResponse response, List<Database> databaseList) {
+        System.out.println("HOH2" + databaseList);
+        WebContext context = new WebContext(request, response, request.getServletContext());
+        context.setVariable("databaseList", databaseList);
+        return templateEngine.process("admin/databaseTable.html", context);
+    }
+
     @PostMapping("/changeUserDatabase")
+    @ResponseBody
     public String changeUserDatabase(Principal principal, @RequestParam("changeDBUserId") Long userId, @RequestParam("databaseName") String databaseName) {
         User user = userRepository.findById(userId).orElse(null);
-        if (user != null && !udrlinkRepository.findAllByUserNameAndDatabaseName(user.getName(), databaseName).isEmpty()) {
+        if (user != null && !udrLinkRepository.findAllByUserNameAndDatabaseName(user.getName(), databaseName).isEmpty()) {
             user.setCurrentDB_name(databaseName);
             userRepository.save(user);
             userDetailsService.updateCustomUserDetails(user.getName());
+            return "Database for user " +user.getName()+ " has been changed to " + databaseName;
         }else{
             customLoggerRepository.save(new LoggerLine(LogTyp.ERROR, principal.getName(), "User "+user.getName()+" have not access to " + databaseName));
+            return "User does not have access to the selected database";
         }
-        return "redirect:/admin";
     }
 
-    @PostMapping("/addUDRlink")
-    public String addUDRlink(@RequestParam("user") Long userId, @RequestParam("database") Long databaseId, @RequestParam("role") Long roleId) {
+    @PostMapping("/addUDRLink")
+    @ResponseBody
+    public String addUDRLink(HttpServletRequest request,
+                             HttpServletResponse response,
+                             @RequestParam("user") Long userId,
+                             @RequestParam("database") Long databaseId,
+                             @RequestParam("role") Long roleId) {
         User user = userRepository.findById(userId).orElseThrow();
         Database database = databaseRepository.findById(databaseId).orElseThrow();
         Role role = roleRepository.findById(roleId).orElseThrow();
-        UDRlink udRlink = udRlinkRepository.findByUserAndDatabaseAndRole(user, database, role);
+        UDRLink udRlink = udrLinkRepository.findByUserAndDatabaseAndRole(user, database, role);
         if (udRlink != null) {
             customLoggerRepository.save(
                     new LoggerLine(LogTyp.ERROR,
                             "adminTools",
                             udRlink + " already exists"));
-            return "redirect:/admin";
+            return generateUDRLinkTable(request, response);
         }
 
-        UDRlink udrlink = new UDRlink();
+        UDRLink udrlink = new UDRLink();
         udrlink.setUser(user);
-        udrlink.setDatabase(database);
+        if (role.equals("admin")) {
+            udrlink.setDatabase(null);
+        }else{
+            udrlink.setDatabase(database);
+        }
         udrlink.setRole(role);
 
-        udRlinkRepository.save(udrlink);
+        udrLinkRepository.save(udrlink);
+        userDetailsService.updateCustomUserDetails(user.getName());
 
-        return "redirect:/admin";
+        return generateUDRLinkTable(request, response);
     }
-    @PostMapping("/deleteUDR")
-    public String deleteUDR(@RequestParam("udrlinkId") Long udrlinkId) {
-        udRlinkRepository.deleteById(udrlinkId);
-        return "redirect:/admin";
+    @PostMapping("/deleteUDRLink")
+    @ResponseBody
+    public String deleteUDR(Principal principal, @RequestParam("udrLinkId") Long udrLinkId) {
+        if(udrLinkRepository.getById(udrLinkId).getRole().equals("ADMIN")){//TODO here should be maybe only warning
+            customLoggerRepository.save(new LoggerLine(LogTyp.ERROR, principal.getName(), "ADMIN cant be deleted from WEB"));
+            return "ADMIN cant be deleted from WEB";
+        }
+        udrLinkRepository.deleteById(udrLinkId);
+        return "User deleted";
     }
+
+    private String generateUDRLinkTable(HttpServletRequest request, HttpServletResponse response) {
+        WebContext context = new WebContext(request, response, request.getServletContext());
+        context.setVariable("UDRLinkList", udrLinkRepository.findAll());
+        return templateEngine.process("admin/UDRLinkTable.html", context);
+    }
+
     @PostMapping("/addUser")
-    public String addUser(@RequestParam("username") String username,
+    @ResponseBody
+    public String addUser(HttpServletRequest request,
+                          HttpServletResponse response,
+                          @RequestParam("username") String username,
                           @RequestParam("password") String password,
                           @RequestParam(value = "active", defaultValue = "false") boolean active) {
+
         //user aready exists?
         if (userRepository.findByName(username).isPresent()) {
             //TODO error that user already exists
@@ -148,12 +186,25 @@ public class AdminController {
         user.setActive(active);
         userRepository.save(user);
 
-        return "redirect:/admin";
+        //String text = generateUserTable(request, response, userRepository.findAll());
+        return generateUserTable(request, response, userRepository.findAll());
     }
     @PostMapping("/deleteUser")
-    public String deleteUser(@RequestParam("userId") Long userId) {
+    @ResponseBody
+    public String deleteUser(HttpServletRequest request, HttpServletResponse response,@RequestParam("userId") Long userId) {
+        User user = userRepository.getById(userId);
+        udrLinkRepository.deleteAllByUser(user);
+        userFindRepository.deleteAllByUser(user);
         userRepository.deleteById(userId);
-        return "redirect:/admin";
+        return "User " + user.getName() + " deleted" ;
+    }
+
+    private String generateUserTable(HttpServletRequest request, HttpServletResponse response, List<User> userList) {
+        WebContext context = new WebContext(request, response, request.getServletContext());
+        context.setVariable("userList", userList);
+        context.setVariable("databaseList", databaseRepository.findAll());
+        return templateEngine.process("admin/userTable.html", context);
     }
 
 }
+

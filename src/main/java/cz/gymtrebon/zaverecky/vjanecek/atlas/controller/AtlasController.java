@@ -8,7 +8,7 @@ import cz.gymtrebon.zaverecky.vjanecek.atlas.entity.*;
 import cz.gymtrebon.zaverecky.vjanecek.atlas.entity.enums.Typ;
 import cz.gymtrebon.zaverecky.vjanecek.atlas.form.FindForm;
 import cz.gymtrebon.zaverecky.vjanecek.atlas.form.TestForm;
-import cz.gymtrebon.zaverecky.vjanecek.atlas.repository.UDRlinkRepository;
+import cz.gymtrebon.zaverecky.vjanecek.atlas.repository.UDRLinkRepository;
 import cz.gymtrebon.zaverecky.vjanecek.atlas.repository.UserFindRepository;
 import cz.gymtrebon.zaverecky.vjanecek.atlas.repository.UserRepository;
 import cz.gymtrebon.zaverecky.vjanecek.atlas.service.AtlasService;
@@ -43,14 +43,19 @@ public class AtlasController {
 
 	private final AtlasService service;
 	private static String text = "";
-	private final UDRlinkRepository udrlinkRepository;
+	private final UDRLinkRepository udrlinkRepository;
 	private final UserRepository userRepository;
 	private final FindService findService;
 	private final UserFindRepository userFindRepository;
 	private final CustomUserDetailsService userDetailsService;
 
+	@GetMapping(value = { ""})
+	public String nothing(Model model) {
+		return "redirect:/home";
+	}
+
 	@SuppressWarnings("SameReturnValue")
-	@GetMapping(value = { "","test"})
+	@GetMapping(value = { "test"})
 	public String test(Model model) {
 			TestForm form = new TestForm();
 			form.setCelyText(text);
@@ -136,9 +141,9 @@ public class AtlasController {
 	}
 	public void addDatabaseList(Principal principal, Model model) {
 		String username = principal.getName();
-		List<UDRlink> list = udrlinkRepository.findAllByUserName(username);
+		List<UDRLink> list = udrlinkRepository.findAllByUserName(username);
 		List<DatabaseListHelper> databaseList = new ArrayList<>();
-		for (UDRlink udrlink : list) {
+		for (UDRLink udrlink : list) {
 			boolean found = false;
 			for (DatabaseListHelper databaseListHelper: databaseList ) {
 				if (databaseListHelper.getDatabase().equals(udrlink.getDatabase().getName())) {

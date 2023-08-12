@@ -223,11 +223,43 @@ public class AtlasService {
 		}
 
 	}
-	public void uploadRequestImage(Integer imageId, MultipartFile file) {
+	//for uploading start data files
+	public void uploadImage(Integer ItemId, File file) {
+
+		Item p = itemRepository.getById(ItemId);
+
+		Image o = new Image();
+		o.setItem(p);
+		o.setFileName(file.getName());
+
+		imageRepository.save(o);
+		log.info("Importing file " + file.getAbsolutePath());
 		try {
-			File imageFile = new File(imagesFolder+CurrentDatabase.getCurrentDatabase()+"/request/images");
+			File imageFile = new File(imagesFolder+CurrentDatabase.getCurrentDatabase()+"/images");
 			imagePath = imageFile.getAbsolutePath();
-			File f = new File(imagePath, String.valueOf(imageId)); //TODO vzit Id z mapovani
+			imageFile.mkdirs();
+			File f = new File(imagePath, String.valueOf(o.getId()));
+			InputStream in = new BufferedInputStream(new FileInputStream(file));
+			OutputStream out = new BufferedOutputStream(new FileOutputStream(f));
+			byte[] buffer = new byte[1024];
+			int lengthRead;
+			while ((lengthRead = in.read(buffer)) > 0) {
+				out.write(buffer, 0, lengthRead);
+				out.flush();
+			}
+			out.close();
+			in.close();
+		} catch (IOException e) {
+			log.error("Error while saving image", e);
+			throw new RuntimeException("Error while saving image", e);
+		}
+	}
+
+	public void uploadRequestImage(Integer imageId, MultipartFile file, String name) {
+		try {
+			File imageFile = new File(imagesFolder+CurrentDatabase.getCurrentDatabase()+"/user/"+name+"/request/images");
+			imageFile.mkdirs();
+			File f = new File(imageFile.getAbsolutePath(), String.valueOf(imageId));
 			FileOutputStream fos = new FileOutputStream(f);
 			fos.write(file.getBytes());
 			fos.close();

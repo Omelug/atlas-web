@@ -1,8 +1,8 @@
 package cz.gymtrebon.zaverecky.vjanecek.atlas.service;
 
-import cz.gymtrebon.zaverecky.vjanecek.atlas.entity.UDRlink;
+import cz.gymtrebon.zaverecky.vjanecek.atlas.entity.UDRLink;
 import cz.gymtrebon.zaverecky.vjanecek.atlas.entity.User;
-import cz.gymtrebon.zaverecky.vjanecek.atlas.repository.UDRlinkRepository;
+import cz.gymtrebon.zaverecky.vjanecek.atlas.repository.UDRLinkRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -18,12 +18,12 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class UDRLinkService {
 
-    private final UDRlinkRepository udrlinkRepository;
+    private final UDRLinkRepository udrlinkRepository;
 
     public List<GrantedAuthority> getAuthorities(User user) {
-        List<UDRlink> udrlist = udrlinkRepository.findAllByUser(user);
+        List<UDRLink> udrlist = udrlinkRepository.findAllByUser(user);
         Set<String> set = new HashSet<>();
-        for (UDRlink udrlink : udrlist){
+        for (UDRLink udrlink : udrlist){
             set.add(udrlink.getRole().getName());
         }
         return Arrays.stream(set.toArray(new String[set.size()])).

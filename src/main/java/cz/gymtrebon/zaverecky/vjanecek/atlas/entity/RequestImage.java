@@ -50,8 +50,6 @@ public class RequestImage {
 		this.modifyDate = new Date(transportRequestImage.getModifyDate());
 	}
 
-
-
 	@Override
 	public int hashCode() {
 		final int prime = 31;

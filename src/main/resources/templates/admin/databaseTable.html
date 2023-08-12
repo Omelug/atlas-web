@@ -1,0 +1,35 @@
+
+  <tr th:each="database : ${databaseList}">
+    <td th:text="${database.id}"></td>
+    <td th:text="${database.name}"></td>
+    <td>
+      <form class="deleteDatabaseForm" th:action="@{/admin/deleteDatabase}" method="post">
+        <input type="hidden" name="databaseId" th:value="${database.id}" />
+        <button type="submit">X</button>
+      </form>
+    </td>
+  </tr>
+
+<script>
+  $(document).ready(function () {
+    $(document).on("submit", ".deleteDatabaseForm", function (event) {
+      event.preventDefault();
+
+      var form = $(this);
+      var formData = form.serialize();
+
+      $.ajax({
+        type: "POST",
+        url: form.attr("action"),
+        data: formData,
+        success: function (response) {
+          form.closest("tr").remove();
+          console.log(response);
+        },
+        error: function (xhr, textStatus, errorThrown) {
+          console.error("Error deleting database:", textStatus, errorThrown);
+        },
+      });
+    });
+  });
+</script>

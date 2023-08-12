@@ -1,0 +1,33 @@
+<table>
+  <thead>
+  <tr>
+    <th>ID</th>
+    <th>Name</th>
+  </tr>
+  </thead>
+  <tbody>
+  <tr th:each="role : ${roleList}">
+    <td th:text="${role.id}"></td>
+    <td th:text="${role.name}"></td>
+  </tr>
+  </tbody>
+</table>
+<br><br>
+<table>
+  <thead>
+  <tr>
+    <th>Time</th>
+    <th>Type</th>
+    <th>Title</th>
+    <th>Message</th>
+  </tr>
+  </thead>
+  <tbody>
+  <tr th:each="log : ${logList}">
+    <td th:text="${log.time}"></td>
+    <td th:text="${log.typ}"></td>
+    <td th:text="${log.title}"></td>
+    <td th:text="${log.message}"></td>
+  </tr>
+  </tbody>
+</table>

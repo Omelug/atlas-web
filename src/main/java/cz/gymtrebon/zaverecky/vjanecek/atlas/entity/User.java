@@ -4,6 +4,7 @@ import lombok.*;
 import org.hibernate.Hibernate;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import javax.persistence.*;
 import java.util.Date;
@@ -46,7 +47,7 @@ public class User {
 	private String currentDB_name;
 
 	@OneToMany(mappedBy = "user")
-	private List<UDRlink> udrLinks;
+	private List<UDRLink> udrLinks;
 
 	public User(String username, String password, String databaseName) {
 		this.name = username;
@@ -79,4 +80,8 @@ public class User {
 		return getClass().hashCode();
 	}
 
+	public void setPassword(String password) {
+		BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+		this.password = passwordEncoder.encode(password);
+	}
 }

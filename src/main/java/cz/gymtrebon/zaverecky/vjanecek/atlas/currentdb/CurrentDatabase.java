@@ -10,6 +10,9 @@ public class CurrentDatabase{
     private static String currentDatabase;
 
     public static String getCurrentDatabase() {
+        if (currentDatabase == null){
+            return DEFAULT_DATABASE;
+        }
         return currentDatabase;
     }
     public static void setCurrentDatabase(String database) {

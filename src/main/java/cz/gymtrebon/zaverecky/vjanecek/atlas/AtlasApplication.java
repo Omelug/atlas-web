@@ -1,5 +1,9 @@
 package cz.gymtrebon.zaverecky.vjanecek.atlas;
 
+import com.opencsv.CSVReader;
+import cz.gymtrebon.zaverecky.vjanecek.atlas.currentdb.CurrentDatabase;
+import cz.gymtrebon.zaverecky.vjanecek.atlas.entity.*;
+import cz.gymtrebon.zaverecky.vjanecek.atlas.entity.enums.Typ;
 import cz.gymtrebon.zaverecky.vjanecek.atlas.repository.*;
 import cz.gymtrebon.zaverecky.vjanecek.atlas.service.AtlasService;
 import cz.gymtrebon.zaverecky.vjanecek.atlas.service.SchemaService;
@@ -9,9 +13,18 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
+import org.springframework.context.annotation.Bean;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
+import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
+import org.springframework.util.ResourceUtils;
+import org.springframework.web.multipart.commons.CommonsMultipartResolver;
 
 import java.io.File;
+import java.io.FileReader;
+import java.io.Reader;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @SpringBootApplication
 @RequiredArgsConstructor
@@ -20,14 +33,17 @@ import java.io.File;
 @Log
 public class AtlasApplication implements CommandLineRunner {
 
-	private final ItemRepository ItemRepo;
+	private final ItemRepository itemRepository;
 	private final ImageRepository ImageRepo;
-	private final UDRlinkRepository udrLinkRepository;
+	private final UDRLinkRepository udrLinkRepository;
 	private final UserRepository userRepo;
 	private final DatabaseRepository dataRepo;
 	private final RoleRepository roleRepo;
 	private final AtlasService atlasService;
 	private final SchemaService schemaService;
+	private final LocalContainerEntityManagerFactoryBean entityManagerFactory;
+	static String first_database_name = "public";
+
 
 	public static void main(String[] args) {
 		SpringApplication.run(AtlasApplication.class, args);
@@ -39,72 +55,87 @@ public class AtlasApplication implements CommandLineRunner {
 		File directory = new File("../atlas-web/src/main/resources/pokusna_data/images");
 		System.out.println(directory.getAbsolutePath());
 
-		//TODO spusteni poprve, potom to nějak oddelit
-		/*schemaService.createSchema("config");
-		Database publicdb = dataRepo.save(new Database(CurrentDatabase.));
-		User admin = userRepo.save(new User("admin", "admin", publicdb.getName()));
-		Role adminrole = roleRepo.save(new Role("ADMIN"));
-		udrLinkRepository.save(new UDRlink(admin, publicdb, adminrole));
-
-		roleRepo.save(new Role("EDITOR"));
-		roleRepo.save(new Role("USER"));*/
-
-
-		/*Map<Integer, Integer> mapovaniimageId = new HashMap<>();
-		Map<Integer, Integer> mapovaniId = new HashMap<>();
-
-		Item p = new Item();
-		p.setParentGroup(null);
-		p.setName("ATLAS");
-		p.setTyp(Typ.ROOT);
-		ItemRepo.save(p);
-
-		mapovaniId.put(0, p.getId());
-
-		File flowers = ResourceUtils.getFile("classpath:data/FLOWER.csv");
-		List<String[]> flowerList = readAllLines(flowers);
-		for (int i = 1; i < flowerList.size();i++) {
-			String[] Item = flowerList.get(i);
-			int itemId = Integer.valueOf(Item[0]);
-			int idParenta = Integer.valueOf(Item[1]);
-
-			Item pol = new Item();
-			Item parent = ItemRepo.getById(mapovaniId.get(idParenta));
-			pol.setParentGroup(parent);
-			if (Integer.valueOf(Item[2]) == 1) {
-				pol.setTyp(Typ.GROUP);
-			}
-			if (Integer.valueOf(Item[2]) == 0) {
-				pol.setTyp(Typ.REPRESENTATIVE);
-			}
-			pol.setName(Item[3]);
-			pol.setName2(Item[4]);
-			pol.setAuthor(Item[5]);
-			pol.setText(Item[6]);
-			pol.setColor(Item[7]);
-			
-			ItemRepo.save(pol);
-			mapovaniId.put(itemId, pol.getId());
-		
+		if (false) {
+			//TODO spusteni poprve, potom to nějak oddelit
+			//schemaService.createSchema(AppSettings.CONFIG_TABLE);
+			CurrentDatabase.setCurrentDatabase(first_database_name);
+			//schemaService.createUserSchema(first_database_name);
+			//schemaService.createTablesInConfigSchema();
+			schemaService.createTablesInSchema(first_database_name);
 		}
 
+		if (false){
+			CurrentDatabase.setCurrentDatabase(first_database_name);
+			dataRepo.save(new Database(first_database_name));
+			Database first_database = dataRepo.findByName(first_database_name).get();
+			User admin = userRepo.save(new User("admin", "admin", first_database_name));
 
-		File imagesCSV = ResourceUtils.getFile("classpath:data/IMAGE_FLOWER2.csv");
-		List<String[]> imageList = readAllLines(imagesCSV);
-		File imagesFolder = ResourceUtils.getFile("classpath:data/images/AppVitek2022");
-		for (int i = 1; i < imageList.size();i++) {
-			String[] Item = imageList.get(i);
-			int idParenta = Integer.valueOf(Item[1]);
-		
-			String nameFromCsv = Item[2];
-			String[] parts = nameFromCsv.split("/");
-			String fileName = parts[parts.length - 1].replaceAll("%20", " ");
-			File imagesFile = new File(imagesFolder, fileName);	
-			log.info("ImageFiesFile:   " + imagesFile.getAbsolutePath());
-			atlasService.uploadImage(mapovaniId.get(idParenta), imagesFile);
+			Role adminrole = roleRepo.save(new Role("ADMIN"));
+			roleRepo.save(new Role("EDITOR"));
+			roleRepo.save(new Role("USER"));
+
+			udrLinkRepository.save(new UDRLink(admin, null, adminrole)); //TODD null neni vyzkousene
+
 		}
+
+		if (false) {
+			CurrentDatabase.setCurrentDatabase(first_database_name);
+			Map<Integer, Integer> mapovaniimageId = new HashMap<>();
+			Map<Integer, Integer> mapovaniId = new HashMap<>();
+
+			//Item p = new itemRepository.findByTyp(Typ.ROOT).get();
+			/*p.setParentGroup(null);
+			p.setName("ATLAS");
+			p.setTyp(Typ.ROOT);
+			ItemRepo.save(p);*/
+
+			mapovaniId.put(0, itemRepository.findByTyp(Typ.ROOT).get().getId());
+
+			File flowers = ResourceUtils.getFile("classpath:data/FLOWER.csv");
+			List<String[]> flowerList = readAllLines(flowers);
+			for (int i = 1; i < flowerList.size();i++) {
+				String[] Item = flowerList.get(i);
+				int itemId = Integer.valueOf(Item[0]);
+				int parentId = Integer.valueOf(Item[1]);
+
+				Item pol = new Item();
+				Item parent = itemRepository.getById(mapovaniId.get(parentId));
+				pol.setParentGroup(parent);
+				if (Integer.valueOf(Item[2]) == 1) {
+					pol.setTyp(Typ.GROUP);
+				}
+				if (Integer.valueOf(Item[2]) == 0) {
+					pol.setTyp(Typ.REPRESENTATIVE);
+				}
+				pol.setName(Item[3]);
+				pol.setName2(Item[4]);
+				pol.setAuthor(Item[5]);
+				pol.setText(Item[6]);
+				pol.setColor(Item[7]);
+
+				itemRepository.save(pol);
+				mapovaniId.put(itemId, pol.getId());
+
+			}
+
+
+			File imagesCSV = ResourceUtils.getFile("classpath:data/IMAGE_FLOWER2.csv");
+			List<String[]> imageList = readAllLines(imagesCSV);
+			File imagesFolder = ResourceUtils.getFile("classpath:data/images/AppVitek2022");
+			for (int i = 1; i < imageList.size();i++) {
+				String[] Item = imageList.get(i);
+				int parentId = Integer.valueOf(Item[1]);
+
+				String nameFromCsv = Item[2];
+				String[] parts = nameFromCsv.split("/");
+				String fileName = parts[parts.length - 1].replaceAll("%20", " ");
+				File imageFile = new File(imagesFolder, fileName);
+				log.info("ImageFiesFile:   " + imageFile.getAbsolutePath());
+				atlasService.uploadImage(mapovaniId.get(parentId), imageFile);
+			}
+		}
+
 	}
-
 	//@Bean
 	//public PasswordEncoder passwordEncoder(){
 	//	return NoOpPasswordEncoder.getInstance();
@@ -121,7 +152,7 @@ public class AtlasApplication implements CommandLineRunner {
 	        try (CSVReader csvReader = new CSVReader(reader)) {
 	            return csvReader.readAll();
 	        }
-	    }*/
+	    }
 	}
 
 }

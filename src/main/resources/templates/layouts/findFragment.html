@@ -1,0 +1,147 @@
+<form id="findItemForm" th:action="@{/find}" th:object="${item}" method="post">
+
+  <input type="hidden" id="open" name="open" th:value="${item.open ? 'true' : 'false'}">
+
+  <label for="name">Name:
+    <input type="text" id="name" name="name" th:value="${item.name}">
+  </label>
+  <label for="name2">Name 2:
+    <input type="text" id="name2" name="name2" th:value="${item.name2}">
+  </label>
+  <br>
+  <label for="author">Author:
+    <input type="text" id="author" name="author" th:value="${item.author}">
+  </label>
+  <label for="typ">Type:
+    <select id="typ" name="typ">
+      <option></option>
+      <option value="ROOT" th:selected="${item.typ == T(cz.gymtrebon.zaverecky.vjanecek.atlas.entity.enums.Typ).ROOT}">ROOT</option>
+      <option value="GROUP" th:selected="${item.typ == T(cz.gymtrebon.zaverecky.vjanecek.atlas.entity.enums.Typ).GROUP}">GROUP</option>
+      <option value="REPRESENTATIVE" th:selected="${item.typ == T(cz.gymtrebon.zaverecky.vjanecek.atlas.entity.enums.Typ).REPRESENTATIVE}">REPRESENTATIVE</option>
+    </select>
+  </label>
+  <br>
+  <div name ="parentGroupToggle">
+    <label for="parentGroup">Parent Group:
+      <input type="text" id="parentGroup" name="parentGroup" th:value="${item.parentGroup}">
+    </label>
+  </div>
+
+
+  <label for="selectedColors">Colors:</label>
+  <input type='text'
+         placeholder='color'
+         class='flexdatalist'
+         data-min-length='1'
+         data-search-disabled='1'
+         multiple=''
+         data-selection-required='1'
+         list='inputList'
+         name='color_search_disabled'>
+
+  <datalist id="inputList">
+    <option th:each="color : ${colorList}" th:value="${color}" th:text="${color.name}"></option>
+  </datalist>
+
+  <input type="hidden" id="selectedColors" name="selectedColors" th:value="${item.colors}">
+
+
+  <button type="submit">Find</button>
+</form>
+<tbody>
+<div class="table-container">
+  <table id="foundTable">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Name 2</th>
+        <th>Author</th>
+        <th>Color</th>
+      </tr>
+    </thead>
+    <tbody th:replace="layouts/foundItemTable"></tbody>
+  </table>
+</div>
+
+<script>
+  document.getElementById("findItemForm").addEventListener("submit", function(event) {
+    event.preventDefault(); // Prevent the default form submission
+
+    let selectedColors = [];
+    var inputField = document.querySelector('input[name="color_search_disabled"]');
+    console.log("Selected:", inputField.value);
+    for (var option of inputField.selectedOptions) {
+      selectedColors.push(option.value);
+    }
+
+    // Now you can do whatever you need to with the selected colors
+    // For example, update the 'item.colors' property or send it to the server
+    // For this example, let's just log the selected colors
+    console.log("Selected Colors:", selectedColors);
+  });
+</script>
+
+
+<script> <!--TODO tohle se asi nemusí posílat pořáad, ale zatím nechat kvůli přehlednosti -->
+
+  $(document).ready(function () {
+
+    $('.flexdatalist').flexdatalist({
+      selectionRequired: 1,
+      searchDisabled: 1,
+      minLength: 1,
+      allowFreeEntries: false
+    });
+
+    $("#findItemForm").submit(function (event) {
+      event.preventDefault();
+
+      var formData = $(this).serialize();
+
+      $.ajax({
+        type: "POST",
+        url: "/find",
+        data: formData,
+        success: function (data) {
+          $("#foundTable tbody").html(data);
+          console.log("Found Items updated successfully");
+        },
+        error: function (xhr, textStatus, errorThrown) {
+          console.error("Error update Items:", textStatus, errorThrown);
+        },
+      });
+    });
+  });
+</script>
+
+<script th:inline="javascript">
+
+  function toggleParentGroupVisibility() {
+    var typSelect = document.getElementById('typ');
+    var parentGroupInput = document.getElementById('parentGroupDiv');
+
+    if (typSelect.value === 'ROOT') {
+      parentGroupInput.style.display = 'none';
+    } else {
+      parentGroupInput.style.display = 'block';
+    }
+  }
+
+  document.getElementById('typ').addEventListener('change', toggleParentGroupVisibility);
+
+  function toggleColorSelection(button, color) {
+    button.classList.toggle("selected");
+    const selectedColorsInput = document.getElementById("selectedColors");
+    const selectedColors = selectedColorsInput.value.split(",");
+    const index = selectedColors.indexOf(color);
+    if (index !== -1) {
+      selectedColors.splice(index, 1);
+    } else {
+      selectedColors.push(color);
+    }
+    selectedColorsInput.value = selectedColors.join(",");
+  }
+</script>
+
+

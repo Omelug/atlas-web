@@ -10,10 +10,9 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface ItemRepository extends JpaRepository<Item, Integer> {
+public interface ItemRepository extends JpaRepository<Item, Long> {
 	Optional<Item> findByTyp(Typ typ);
 	List<Item> findAllByTyp(Typ typ);
-	//List<Item> findByNadrizenaSkupinaAndTyp(Item Item, Typ typ);
 	List<Item> findByParentGroupAndTyp(Item Item, Typ typ);
 	List<Item> findAll(Specification<Item> specification);
 	//List<Item> findByTypAndNameContainingAndName2ContainingAndAuthorContainingAndColorContainingAndTextContainingAndParentGroupContaining(Typ typ, String name, String name2, String author, String color, String text, String parentGroup);

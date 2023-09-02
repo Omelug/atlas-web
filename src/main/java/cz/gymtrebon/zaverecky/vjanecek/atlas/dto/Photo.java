@@ -5,7 +5,7 @@ import lombok.Data;
 @Data
 public class Photo {
 
-	private Integer id;
+	private Long id;
 	private String name;
 	private String url;
 	

@@ -4,14 +4,19 @@
     <td th:text="${user.name}"></td>
     <td class="password blur" th:text="${user.password}"></td>
     <td>
-      <form id="changeUserDatabase" th:action="@{/admin/changeUserDatabase}" method="post">
+      <form id="changeUserDatabaseForm" th:action="@{/admin/changeUserDatabase}" method="post">
         <input type="hidden" name="changeDBUserId" th:value="${user.id}" />
-        <select name="databaseName" id="databaseSelect">
-          <option th:each="database : ${databaseList}" th:value="${database.name}" th:text="${database.name}" th:selected="${user.currentDB_name == database.name}"></option>
+        <select class="databaseName" name="databaseName" id="databaseSelect">
+            <option value="" th:selected="${user.currentDB_name == null}" style="color: aquamarine" th:text="null" ></option>
+            <option th:each="database : ${databaseList}" th:value="${database.name}" th:text="${database.name}" th:selected="${user.currentDB_name == database.name}"></option>
         </select>
       </form>
     </td>
-    <td th:text="${user.active}"></td>
+    <td>
+        <form id="changeUserActiveForm" th:action="@{/admin/changeUserActive}" method="post">
+            <input type="checkbox" class="userActiveCheckbox" th:checked="${user.active}" name="changeUserActiveId" th:value="${user.id}" />
+        </form>
+    </td>
     <td th:text="${user.firstLogin}"></td>
     <td th:text="${user.lastLogin}"></td>
     <td th:text="${user.modifyDate}"></td>
@@ -22,7 +27,37 @@
       </form>
     </td>
   </tr>
+    <script>
 
+        $(document).ready(function () {
+            $(".databaseName").change(function () {
+
+                var selectedDatabaseName = $(this).val();
+                var userId = $(this).closest('tr').find("input[name='changeDBUserId']").val();
+
+                $.ajax({
+                    type: "POST",
+                    url: "/admin/changeUserDatabase",
+                    data: {
+                        changeDBUserId: userId,
+                        databaseName: selectedDatabaseName,
+                    },
+                    success: function (data) {
+                        console.log(data.toString());
+                        <!-- TODO here it should be better, less trafiic -->
+                        $("#userTable tbody").html(data);
+                    },
+                    error: function (xhr, textStatus, errorThrown) {
+                        if (xhr.status === 400) {
+                            alert(xhr.responseText);
+                        } else {
+                            console.error("Error changing database:", textStatus, errorThrown);
+                        }
+                    },
+                });
+            });
+        });
+    </script>
   <script>
     $(document).ready(function () {
       var passwordElements = document.querySelectorAll('.password');
@@ -33,25 +68,51 @@
         });
       });
 
+        $(".userActiveCheckbox").change(function () {
+            var isChecked = $(this).prop("checked");
+            var userId = $(this).val();
+
+            $.ajax({
+                type: "POST",
+                url: "/admin/changeUserActive",
+                data: {
+                    changeUserActiveId: userId,
+                    active: isChecked,
+                },
+                success: function (data) {
+                    console.log(data.toString());
+                },
+                error: function (xhr, textStatus, errorThrown) {
+                    console.error("Error changing user active status:", textStatus, errorThrown);
+                },
+            });
+        });
 
       $(document).on("submit", ".deleteUserForm", function (event) {
         event.preventDefault();
 
-        var form = $(this);
-        var formData = form.serialize();
+          var confirmationMessage = "Are you sure you want to delete this User?";
+          var result = confirmAction(confirmationMessage, "Title", "");
 
-        $.ajax({
-          type: "POST",
-          url: form.attr("action"),
-          data: formData,
-          success: function (response) {
-            form.closest("tr").remove();
-            console.log(response);
-          },
-          error: function (xhr, textStatus, errorThrown) {
-            console.error("Error deleting user:", textStatus, errorThrown);
-          },
-        });
+          if (result) {
+              var form = $(this);
+              var formData = form.serialize();
+
+              $.ajax({
+                  type: "POST",
+                  url: form.attr("action"),
+                  data: formData,
+                  success: function (response) {
+                      form.closest("tr").remove();
+                      console.log(response);
+                  },
+                  error: function (xhr, textStatus, errorThrown) {
+                      console.error("Error deleting user:", textStatus, errorThrown);
+                  },
+              });
+          } else {
+              console.log("Cancelled");
+          }
       });
     });
   </script>

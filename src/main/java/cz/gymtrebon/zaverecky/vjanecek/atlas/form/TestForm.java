@@ -4,5 +4,5 @@ import lombok.Data;
 
 @Data
 public class TestForm {
-	private String celyText;
+	private String allText;
 }

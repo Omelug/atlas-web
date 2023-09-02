@@ -24,9 +24,9 @@ import java.util.Date;
 public class Request {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO, generator = "native")
+    @GeneratedValue(strategy = GenerationType.IDENTITY, generator = "native")
     @GenericGenerator(name="native", strategy = "native")
-    private Integer id;
+    private Long id;
     private String requestMark;
     private String parentRequestMark;
     private Long link;
@@ -36,9 +36,11 @@ public class Request {
     private String name;
     private String request_message;
     @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = "createdate")
     private Date createDate;
     @UpdateTimestamp
     @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = "modifydate")
     private Date modifyDate;
 
     public Request(TransportRequest transportRequest) {

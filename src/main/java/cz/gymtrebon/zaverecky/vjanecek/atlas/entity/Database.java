@@ -1,5 +1,6 @@
 package cz.gymtrebon.zaverecky.vjanecek.atlas.entity;
 
+import cz.gymtrebon.zaverecky.vjanecek.atlas.entity.enums.DatabaseAccess;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -17,6 +18,7 @@ public class Database {
     private Long id;
 
     private String name;
+    private DatabaseAccess databaseAccess;
 
     @OneToMany(mappedBy = "database")
     private List<UDRLink> UDRLinks;

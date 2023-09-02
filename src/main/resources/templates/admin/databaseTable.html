@@ -1,35 +1,81 @@
-
-  <tr th:each="database : ${databaseList}">
+ <tr th:each="database : ${databaseList}">
     <td th:text="${database.id}"></td>
     <td th:text="${database.name}"></td>
-    <td>
-      <form class="deleteDatabaseForm" th:action="@{/admin/deleteDatabase}" method="post">
+    <td th:text="${database.databaseAccess}"></td>
+    <td th:if="${#lists.size(databaseList) > 1}">
         <input type="hidden" name="databaseId" th:value="${database.id}" />
         <button type="submit">X</button>
-      </form>
     </td>
   </tr>
+<style>
+  .custom-alert-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+  }
 
-<script>
-  $(document).ready(function () {
-    $(document).on("submit", ".deleteDatabaseForm", function (event) {
-      event.preventDefault();
+  .custom-alert-box {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+    text-align: center;
+  }
 
-      var form = $(this);
-      var formData = form.serialize();
+  .custom-alert-title {
+    font-size: 24px;
+    margin-bottom: 10px;
+  }
 
-      $.ajax({
-        type: "POST",
-        url: form.attr("action"),
-        data: formData,
-        success: function (response) {
-          form.closest("tr").remove();
-          console.log(response);
-        },
-        error: function (xhr, textStatus, errorThrown) {
-          console.error("Error deleting database:", textStatus, errorThrown);
-        },
-      });
-    });
-  });
-</script>
+  .custom-alert-message {
+    font-size: 18px;
+    margin-bottom: 20px;
+  }
+
+  .custom-alert-logo {
+    max-width: 100px;
+    margin-bottom: 20px;
+  }
+
+  .custom-alert-buttons {
+    display: flex;
+    justify-content: center;
+  }
+
+  .custom-alert-button {
+    padding: 10px 20px;
+    margin: 0 10px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+
+  .custom-alert-confirm {
+    background-color: #007bff;
+    color: #fff;
+  }
+
+  .custom-alert-cancel {
+    background-color: #ccc;
+  }
+</style>
+
+<div class="custom-alert-overlay">
+  <div class="custom-alert-box">
+    <div class="custom-alert-title">Custom Alert</div>
+    <img class="custom-alert-logo" src="custom-logo.png" alt="Logo">
+    <div class="custom-alert-message">Are you sure you want to perform this action?</div>
+    <div class="custom-alert-buttons">
+      <button class="custom-alert-button custom-alert-confirm">Yes</button>
+      <button class="custom-alert-button custom-alert-cancel">Cancel</button>
+    </div>
+  </div>
+</div>
+

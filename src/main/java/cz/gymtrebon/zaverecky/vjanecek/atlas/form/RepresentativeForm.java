@@ -1,20 +1,22 @@
 package cz.gymtrebon.zaverecky.vjanecek.atlas.form;
 
 import cz.gymtrebon.zaverecky.vjanecek.atlas.dto.Photo;
+import cz.gymtrebon.zaverecky.vjanecek.atlas.entity.Color;
 import lombok.Data;
 
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 @Data
 public class RepresentativeForm {
 	
-	private Integer id;
+	private Long id;
 	
 	@NotNull(message = "Parent group cant be null")
-	private Integer idParentGroup;
+	private Long idParentGroup;
 	
 	@NotEmpty(message = "Name cant be empty ")
 	private String name;
@@ -22,8 +24,9 @@ public class RepresentativeForm {
 	private String name2;
 	private String author;
 	private String text;
-	private String color;
+	private Set<Color> colors; //TODO
 	List<Photo> images = new ArrayList<>();
-	
-	
+
+    public void setColors(Set<Color> colors) {
+    }
 }

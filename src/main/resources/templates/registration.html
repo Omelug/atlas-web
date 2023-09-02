@@ -1,41 +1,53 @@
-<!DOCTYPE HTML>
-<html xmlns:layout="http://www.w3.org/1999/xhtml" xmlns:th="http://www.springframework.org/schema/data/jaxb"
-      layout:decorate="~{fragments/main_layout}" lang="en">
+<html xmlns:th="http://www.thymeleaf.org" xmlns:tiles="http://www.thymeleaf.org" xmlns:sec="http://www.w3.org/1999/xhtml" lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-  <title>Register Form</title>
+  <title tiles:fragment="title">Registration</title>
+  <link rel="stylesheet" href="/css/main.css">
 </head>
 <body>
-<div layout:fragment="content" class="container" >
-  <div class="simple-login-container  col-md-4 offset-md-4">
-    <h2>Register Form</h2>
-    <form th:action="@{/register}" method="post">
-      <div class="row">
-        <div class="col-md-12 form-group">
-          <label for="firstName"></label><input type="text" class="" placeholder="First Name" id="firstName" >
+<div class="centerDiv">
+  <form name="f" th:action="@{/registration}" th:object="${registrationForm}" method="post">
+    <fieldset class="fieldset-auto-width centerDiv" style="width: 100%">
+      <legend sec:authorize="isAuthenticated()"  style="text-align: center"> You are logged [[${#authentication.getPrincipal().getUsername()}]] </legend>
+      <legend sec:authorize="!isAuthenticated()" style="text-align: center">Please login</legend>
+      <br>
+      <div class="loginDiv">
+        <p>Username</p>
+        <label for="username">
+          <input id="username" name="username" type="text"/>
+        </label>
+        <div th:if="${#fields.hasErrors('username')}" class="alert alert-error errorMsg">
+          <p th:errors="*{username}"></p>
+        </div>
+        <p >Password </p>
+        <label for="password">
+          <input type="password" id="password" name="password"/>
+        </label>
+        <div th:if="${#fields.hasErrors('password')}" class="alert alert-error errorMsg">
+          <p th:errors="*{password}"></p>
+        </div>
+        <p>Password again</p>
+        <label for="password">
+          <input type="password" id="password2" name="password2"/>
+        </label>
+        <div th:if="${#fields.hasErrors('password2')}" class="alert alert-error errorMsg">
+          <p th:errors="*{password2}"></p>
+        </div>
+        <div th:if="${passwordMismatch}" class="alert alert-error errorMsg">
+          Passwords do not match.
         </div>
       </div>
-      <div class="row">
-        <div class="col-md-12 form-group">
-          <label for="lastName"></label><input type="text" class="" placeholder="Last Name" id="lastName">
-        </div>
+      <div th:if="${registrationError}" class="alert alert-error errorMsg">
+        Registration error - try later or contact admin
       </div>
-      <div class="row">
-        <div class="col-md-12 form-group">
-          <label for="email"></label><input type="text" class="" placeholder="email" id="email">
-        </div>
+      <br/>
+      <div class="form-actions">
+        <button type="submit" class="btn">Register</button>
       </div>
-      <div class="row">
-        <div class="col-md-12 form-group">
-          <label for="password"></label><input type="password" placeholder="Enter your Password" id="password" class="">
-        </div>
+      <div>
+        <a class="btn" th:href="@{/login}">Already have account? Login</a>
       </div>
-      <div class="row">
-        <div class="col-md-12 form-group">
-          <input type="submit" class="btn btn-lg btn-primary btn-block">
-        </div>
-      </div>
-    </form>
-  </div>
+    </fieldset>
+  </form>
 </div>
+</body>
+</html>

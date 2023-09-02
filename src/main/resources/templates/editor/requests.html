@@ -1,23 +1,35 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
+<html lang="en" th:replace="~{layouts/tools_layout::content(~{::#headdiv}, ~{::#content})}" >
+
+<div id="headdiv">
     <title>Requests</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    <meta name="robots" content="noindex,follow" />
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css">
-    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"></script>
-    <link rel="stylesheet" href="/styly.css">
-</head>
-<body>
-    <div>
+</div>
+    <div id="content">
+        <style>
+            th,td{
+                padding-left: 5px;
+                padding-right: 5px;
+            }
+            td{
+                font-family: "Times New Roman", Times, serif;
+                font-size: 16px;
+                letter-spacing: 2px;
+                word-spacing: 0px;
+                color: #000000;
+                font-weight: normal;
+                text-decoration: rgb(68, 68, 68);
+                font-style: normal;
+                font-variant: normal;
+                text-transform: none;
+            }
+            .date{
+                font-size: 11px;
+            }
+        </style>
         <br><span>Request:</span>
-        <div class="container-fluid">
-            <div class="row">
-                <table class="table table-striped">
+        <div class="row">
+            <div class="col-md-5 order-md-1">
+                <table class="table-striped">
                     <thead>
                     <tr>
                         <th>ID</th>
@@ -28,7 +40,7 @@
                         <th>Request Type</th>
                         <th>Request Status</th>
                         <th>Name</th>
-                        <!--<th>Request Message</th>-->ad
+                        <!--<th>Request Message</th>-->
                         <th>Create Date</th>
                         <th>Modify Date</th>
                     </tr>
@@ -46,8 +58,8 @@
                             <td th:text="${request.request_status}"></td>
                             <td th:text="${request.name}"></td>
                             <!--<td th:text="${request.request_message}"></td>-->
-                            <td th:text="${#dates.format(request.createDate, 'yyyy-MM-dd HH:mm:ss')}"></td>
-                            <td th:text="${#dates.format(request.modifyDate, 'yyyy-MM-dd HH:mm:ss')}"></td>
+                            <td class="date" th:text="${#dates.format(request.createDate, 'yyyy-MM-dd HH:mm:ss')}"></td>
+                            <td class="date" th:text="${#dates.format(request.modifyDate, 'yyyy-MM-dd HH:mm:ss')}"></td>
                         </form>
                     </tr>
                     </tbody>
@@ -77,12 +89,10 @@
                     });
                 </script>
             </div>
-            <div class="row">
+            <div class="col-md-7 order-md-2">
                 <div id="selectedRequestDiv"></div>
                 <div th:replace="editor/selectedRequest"></div>
             </div>
         </div>
-
     </div>
-</body>
 </html>

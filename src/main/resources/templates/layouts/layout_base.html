@@ -1,26 +1,28 @@
 <!doctype html>
-<html lang="en" th:fragment="content(start, content)" xmlns:th="http://www.thymeleaf.org"
-	  xmlns:sec="http://www.w3.org/1999/xhtml">
+<html lang="en" th:fragment="content(start, content)" xmlns:th="http://www.thymeleaf.org">
 
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 	<meta name="robots" content="noindex,follow" />
-	<title>Flowers</title>
+	<title>Atlas</title>
 
-	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css">
 	<script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
-
 	<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"></script>
 	<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"></script>
 	<script type="text/javascript" th:src="@{/ckeditor5-35.3.1/build/ckeditor.js}"></script>
-	<link rel="stylesheet" href="/styly.css">
+	<script type="text/javascript" th:src="@{/javascript/jquery-flexdatalist-2.3.0/jquery.flexdatalist.js}"></script>
+
+	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css">
+	<link href="/javascript/jquery-flexdatalist-2.3.0/jquery.flexdatalist.css" rel="stylesheet" type="text/css">
+	<link href="/css/main.css" rel="stylesheet" type="text/css">
+
 
 	<script>
-		function togglefindDiv() {
-			var findDiv = document.getElementById("findDiv");
-			var open = document.getElementById("open");
+		function toggleFindDiv() {
+			let findDiv = document.getElementById("findDiv");0
+			let open = document.getElementById("open");
 			if (findDiv.style.display === "none") {
 				findDiv.style.display = "block";
 				open.value = "true";
@@ -32,20 +34,20 @@
 			}
 		}
 		function updateURLsWithOpenParameter() {
-			var openValue = document.getElementById("open").value;
-			var elements = document.querySelectorAll("button, a");
+			let openValue = document.getElementById("open").value;
+			let elements = document.querySelectorAll("button, a");
 
 			elements.forEach(function(element) {
-				var href = element.getAttribute("href");
+				let href = element.getAttribute("href");
 
 				if (href) {
 					if (href.includes("open=")) {
-						var updatedHref = href.replace(/open=[^&]+/, "open=" + encodeURIComponent(openValue));
+						let updatedHref = href.replace(/open=[^&]+/, "open=" + encodeURIComponent(openValue));
 
 						element.setAttribute("href", updatedHref);
 					} else {
-						var separator = href.includes("?") ? "&" : "?";
-						var newHref = href + separator + "open=" + encodeURIComponent(openValue);
+						let separator = href.includes("?") ? "&" : "?";
+						let newHref = href + separator + "open=" + encodeURIComponent(openValue);
 
 						element.setAttribute("href", newHref);
 					}
@@ -53,7 +55,6 @@
 			});
 		}
 
-		//When page is loaded
 		document.addEventListener("DOMContentLoaded", function() {
 			updateURLsWithOpenParameter();
 		});
@@ -61,161 +62,41 @@
 </head>
 
 <body>
-<div th:replace="${start}"></div>
+	<div th:replace="${start}"></div>
 	<div class="row">
-		<div class="upbar col-md-8 order-md-1">
-
+		<div class="order-md-2 sidebar">
+			<div id="foundItemTableContainer" th:replace="layouts/toolbar_left"></div>
+		</div>
+		<div th:if="${databaseIsSelected}" class="upbar col-md-9 order-md-1">
 			<div class=" ml-auto d-flex justify-content-end">
-				<div class="find image-container" onclick="togglefindDiv()">
+				<div class="find image-container" onclick="toggleFindDiv()">
 					<img class="icon" src="/png/find.png" alt="DB">
 				</div>
 			</div>
 		</div>
-
-		<div class="col-md-8 order-md-1 nopadding">
-			<div id="findDiv" th:style="${item.open ? 'display: block' : 'display: none'}" class=" upbar findDiv">
-				<form th:action="@{/find}" th:object="${item}" method="post">
-
-					 <input type="hidden" id="open" name="open" th:value="${item.open ? 'true' : 'false'}">
-
-					<label for="name">Name:
-						<input type="text" id="name" name="name" th:value="${item.name}">
-					</label>
-					<label for="name2">Name 2:
-						<input type="text" id="name2" name="name2" th:value="${item.name2}">
-					</label>
-					<label for="typ">Type:
-						<select id="typ" name="typ">
-							<option></option>
-							<option value="ROOT" th:selected="${item.typ == T(cz.gymtrebon.zaverecky.vjanecek.atlas.entity.enums.Typ).ROOT}">ROOT</option>
-							<option value="GROUP" th:selected="${item.typ == T(cz.gymtrebon.zaverecky.vjanecek.atlas.entity.enums.Typ).GROUP}">GROUP</option>
-							<option value="REPRESENTATIVE" th:selected="${item.typ == T(cz.gymtrebon.zaverecky.vjanecek.atlas.entity.enums.Typ).REPRESENTATIVE}">REPRESENTATIVE</option>
-						</select>
-					</label>
-
-					<label for="parentGroup">Parent Group:
-						<input type="text" id="parentGroup" name="parentGroup" th:value="${item.parentGroup}">
-					</label>
-					<label for="author">Author:
-						<input type="text" id="author" name="author" th:value="${item.author}">
-					</label>
-					<label for="color">Color:
-						<input type="text" id="color" name="color" th:value="${item.color}">
-					</label>
-					<button type="submit">Find</button>
-				</form>
-				<div>
-					<table>
-						<thead>
-						<tr>
-							<th>Type</th>
-							<th>Name</th>
-							<th>Name 2</th>
-							<th>Author</th>
-							<th>Color</th>
-						</tr>
-						</thead>
-						<tbody>
-						<tr th:each="founditem : ${foundItems}">
-							<td th:text="${founditem.typ}"></td>
-							<td th:text="${founditem.name}"></td>
-							<td th:text="${founditem.name2}"></td>
-							<td th:text="${founditem.author}"></td>
-							<td th:text="${founditem.color}"></td>
-						</tr>
-						</tbody>
-					</table>
+		<div class="col-md-9 order-md-1 no_padding">
+			<div th:if="${databaseIsSelected}">
+				<div id="findDiv" th:style="${item.open ? 'display: block' : 'display: none'}" class=" upbar findDiv">
+					<div th:replace="layouts/findFragment"></div>
 				</div>
-			</div>
-
-			<div class="breadcrumb" id="breadcrumb">
-				<span th:each="breadcrumb, iterStat : ${breadcrumbs}">
-					<span th:if="${iterStat.first}" th:class="${iterStat.first} ? 'firstbreadcrumb' : ''">
-						<a th:href="'/group/' + ${breadcrumb.id}" th:text="${breadcrumb.name}"></a>
+				<div class="breadcrumb" id="breadcrumb">
+					<span th:each="breadcrumb, iterStat : ${breadcrumbs}">
+						<span th:if="${iterStat.first}" th:class="${iterStat.first} ? 'firstbreadcrumb' : ''">
+							<a th:href="'/group/' + ${breadcrumb.id}" th:text="${breadcrumb.name}"></a>
+						</span>
+						<span th:unless="${iterStat.first}">
+							<a th:if="${breadcrumb.typ == T(cz.gymtrebon.zaverecky.vjanecek.atlas.entity.enums.Typ).REPRESENTATIVE}" th:href="'/representative/' + ${breadcrumb.id}" th:text="'>' + ${breadcrumb.name}"></a>
+							<a th:if="${breadcrumb.typ == T(cz.gymtrebon.zaverecky.vjanecek.atlas.entity.enums.Typ).GROUP}" th:href="'/group/' + ${breadcrumb.id}" th:text="'>' + ${breadcrumb.name}"></a>
+						</span>
 					</span>
-					<span th:unless="${iterStat.first}">
-						<a th:if="${breadcrumb.typ == T(cz.gymtrebon.zaverecky.vjanecek.atlas.entity.enums.Typ).REPRESENTATIVE}" th:href="'/representative/' + ${breadcrumb.id}" th:text="'>' + ${breadcrumb.name}"></a>
-						<a th:if="${breadcrumb.typ == T(cz.gymtrebon.zaverecky.vjanecek.atlas.entity.enums.Typ).GROUP}" th:href="'/group/' + ${breadcrumb.id}" th:text="'>' + ${breadcrumb.name}"></a>
-					</span>
-				</span>
+				</div>
 			</div>
 
 			<div class="main-content">
 				<div th:replace="${content}"></div>
 			</div>
 		</div>
-		<div class="col-md-3 order-md-2 sidebar ">
-			<div class="row">
-				<span style="margin-right: 10px;" > Login: </span>
-				<a sec:authorize="isAuthenticated()" th:href="@{/login}" class=" d-flex flex-row-revers" role="button" th:text="${#authentication.getPrincipal().getUsername()}" ></a>
-				<a th:href="@{/login}" class=" d-flex flex-row-revers" role="button" sec:authorize="isAnonymous()" >Login</a>
-				<div class="image-container">
-					<img class="icon" src="/png/user.png" alt="">
-				</div>
-			</div>
-			<div class="row" th:if="${#authorization.expression('hasAnyAuthority(''ADMIN'')')}" >
-				<a href="/admin" style="margin-right: 10px;"> Admin tools</a>
-				<div class="image-container">
-					<img class="icon" src="/png/settings.png" alt="">
-				</div>
-			</div>
-			<div class="row" th:if="${#authorization.expression('hasAnyAuthority(''EDITOR'')')}" >
-				<a href="/requests" style="margin-right: 10px;"> Editor tools</a>
-				<div class="image-container">
-					<img class="icon" src="/png/editor_paper.png" alt="">
-				</div>
-			</div>
-			<div class="row">
-				<span style="margin-right: 10px;"> Database </span>
-				<div class="image-container">
-					<img class="icon" src="/png/database.png" alt="">
-				</div>
-			</div>
-				<ul  class="db_list" th:each="dbhelper : ${databaseList}">
-					<form class="" method="post" action="/changeDatabase">
-						<td th:unless="${currentDatabase == dbhelper.database}">
-							<button class="link-button" th:text="${dbhelper.database}" th:value="${dbhelper.database}" ></button>
-						</td>
-						<td th:if="${currentDatabase == dbhelper.database}">
-							<button class="link-button" style="font-weight: bold" th:text="${dbhelper.database}" th:value="${dbhelper.database}" ></button>
-						</td>
-						<td> <a class="smallText" th:text="${dbhelper.roles}" ></a></td>
-						<input type="hidden" name="databaseName" th:value="${dbhelper.database}" />
-					</form>
-				</ul>
-		</div>
 	</div>
-	<script>
-
-		ClassicEditor.create(document.getElementById("inputText"), {
-			// https://ckeditor.com/docs/ckeditor5/latest/features/toolbar/toolbar.html#extended-toolbar-configuration-format
-			toolbar: {
-				items: [
-					'bold', 'italic', 'strikethrough', 'underline', 'subscript', 'superscript', '|', 'undo', 'redo'
-				],
-				shouldNotGroupWhenFull: true
-			},
-			removePlugins: [
-				'ExportPdf',
-				'ExportWord',
-				'CKBox',
-				'CKFinder',
-				'EasyImage',
-				'RealTimeCollaborativeComments',
-				'RealTimeCollaborativeTrackChanges',
-				'RealTimeCollaborativeRevisionHistory',
-				'PresenceList',
-				'Comments',
-				'TrackChanges',
-				'TrackChangesData',
-				'RevisionHistory',
-				'Pagination',
-				'WProofreader',
-				'MathType'
-			]
-		});
-
-	</script>
 </body>
 
 </html>

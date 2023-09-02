@@ -1,0 +1,13 @@
+<tr th:each="foundItem : ${foundItems}">
+  <td th:text="${foundItem.typ}"></td>
+  <td th:text="${foundItem.name}"></td>
+  <td th:text="${foundItem.name2}"></td>
+  <td th:text="${foundItem.author}"></td>
+  <td>
+    <span th:each="color, iterStat : ${foundItem.colors}">
+        <span th:text="${color}"></span>
+        <span th:unless="${iterStat.last}">, </span>
+    </span>
+  </td>
+
+</tr>

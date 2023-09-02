@@ -1,5 +1,6 @@
 package cz.gymtrebon.zaverecky.vjanecek.atlas.entity;
 
+import cz.gymtrebon.zaverecky.vjanecek.atlas.form.RegistrationForm;
 import lombok.*;
 import org.hibernate.Hibernate;
 import org.hibernate.annotations.CreationTimestamp;
@@ -37,11 +38,11 @@ public class User {
 	@Temporal(TemporalType.TIMESTAMP)
 	private Date firstLogin;
 
-	//TODO dont work with first login
 	private Date lastLogin;
 
 	@UpdateTimestamp
 	@Temporal(TemporalType.TIMESTAMP)
+	@Column(name = "modifydate")
 	private Date modifyDate;
 
 	private String currentDB_name;
@@ -53,14 +54,30 @@ public class User {
 		this.name = username;
         this.password = password;
         this.active = true;
-        this.firstLogin = new Date();
-        this.lastLogin = new Date();
-        this.modifyDate = new Date();
-        this.currentDB_name = databaseName;
-        this.udrLinks = null;
+		Date actualDate = new Date();
+       	firstLogin = actualDate;
+        lastLogin = actualDate;
+        modifyDate = actualDate;
+        currentDB_name = databaseName;
+	}
+	public User(String username, String password, String databaseName, boolean hash) {
+		this(username, password, databaseName);
+		if (hash){
+			setPassword(password);
+		}
 	}
 
-	public boolean isActive() {
+    public User(RegistrationForm registrationForm) {
+		this.name = registrationForm.getUsername();
+		this.setPassword(registrationForm.getPassword());
+		this.active = true;
+		Date actualDate = new Date();
+		firstLogin = actualDate;
+		lastLogin = actualDate;
+		modifyDate = actualDate;
+    }
+
+    public boolean isActive() {
 		return active;
 	}
 	public void setActive(boolean active) {
@@ -83,5 +100,10 @@ public class User {
 	public void setPassword(String password) {
 		BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 		this.password = passwordEncoder.encode(password);
+	}
+
+	@Override
+	public String toString() {
+		return "User{" + "id=" + id + ", name='" + name+"}";
 	}
 }

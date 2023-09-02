@@ -6,5 +6,5 @@ import cz.gymtrebon.zaverecky.vjanecek.atlas.entity.Image;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface ImageRepository extends JpaRepository<Image, Integer> {
+public interface ImageRepository extends JpaRepository<Image, Long> {
 }

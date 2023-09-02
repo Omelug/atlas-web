@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="cs" xmlns:th="http://www.thymeleaf.org">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 
 <head>
 	<meta charset="utf-8">
@@ -10,9 +10,9 @@
 
 <div id="main">
 	<div th:if="${text != null}">
-		<p th:text="${text.celyText}"> fesfse</p>
+		<p th:text="${text.allText}"> fesfse</p>
 
-		<div th:utext="${text.celyText}">
+		<div th:utext="${text.allText}">
 
 		</div>
 	</div>
@@ -23,11 +23,12 @@
 	<form th:action="@{/test2}" th:object="${text}" method="post">
 		<div class="form-group col-md-6">
 
-			<label for="text"></label><textarea id="text" class="" name="celyText" th:text="${text.celyText}" field="*{celyText}">
+			<label for="text"></label><textarea id="text" class="" name="allText" th:text="${text.allText}" field="*{allText}">
 			</textarea>
 		</div>
 		<button type="submit" class="btn btn-danger" name="action-test">Test</button>
-	</form><script>
+	</form>
+	<script>
 
 	ClassicEditor.create(document.getElementById("text"), {
 		// https://ckeditor.com/docs/ckeditor5/latest/features/toolbar/toolbar.html#extended-toolbar-configuration-format
@@ -59,5 +60,20 @@
 
 </script>
 </div>
+/**
+var form = $(this);
+var formData = form.serialize();
 
+$.ajax({
+type: "POST",
+url: form.attr("action"),
+data: formData,
+success: function (response) {
+form.closest("tr").remove();
+console.log(response);
+},
+error: function (xhr, textStatus, errorThrown) {
+console.error("Error deleting database:", textStatus, errorThrown);
+},
+}); */
 </html>

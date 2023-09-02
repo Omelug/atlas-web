@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="cs" th:replace="~{layouts/layout_base::content(~{::#headdiv}, ~{::#all})}"
+<html lang="en" th:replace="~{layouts/layout_base::content(~{::#headdiv}, ~{::#all})}"
 	th:fragment="layout(head ,info, main, buttons, breadcrumb)" xmlns:th="http://www.thymeleaf.org">
 
 
@@ -15,8 +15,7 @@
 		<div th:replace="${main}"></div>
 		<div th:replace="${buttons}"></div>
 		<script>
-		ClassicEditor.create(document.getElementById("celyText"), {
-                // https://ckeditor.com/docs/ckeditor5/latest/features/toolbar/toolbar.html#extended-toolbar-configuration-format
+		ClassicEditor.create(document.getElementById("inputText"), {
                 toolbar: {
                     items: [
 						'bold', 'italic', 'strikethrough', 'underline', 'subscript', 'superscript', '|', 'undo', 'redo'

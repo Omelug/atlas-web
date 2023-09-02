@@ -1,7 +1,10 @@
 package cz.gymtrebon.zaverecky.vjanecek.atlas.entity;
 
 import cz.gymtrebon.zaverecky.vjanecek.atlas.entity.enums.Typ;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -10,6 +13,7 @@ import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 
 @Entity
 @Table(name = "Item")
@@ -21,7 +25,7 @@ public class Item {
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO, generator = "native")
 	@GenericGenerator(name="native", strategy = "native")
-	private Integer id;
+	private Long id;
 	
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "parent_group_id")
@@ -38,21 +42,26 @@ public class Item {
 	
 	@Column( length=250)
 	private String author;
-	
-	@Column( length=250)
-	private String color;
+
+	@ManyToMany
+	@JoinTable(
+			name = "item_color",
+			joinColumns = @JoinColumn(name = "item_id"),
+			inverseJoinColumns = @JoinColumn(name = "color_id")
+	)
+	private Set<Color> colors;
 	
 	@Column( length=2500)
 	private String text;
 
 	@CreationTimestamp
 	@Temporal(TemporalType.TIMESTAMP)
-	@Column(name = "create_time")
+	@Column(name = "createdate")
 	private Date createDate;
 
 	@UpdateTimestamp
 	@Temporal(TemporalType.TIMESTAMP)
-	@Column(name = "update_time")
+	@Column(name = "modifydate")
 	private Date modifyDate;
 	
 	@OneToMany(mappedBy="parentGroup", cascade = CascadeType.REMOVE)
@@ -61,11 +70,11 @@ public class Item {
 	@OneToMany(mappedBy="Item", cascade = CascadeType.REMOVE)
 	private List<Image> images = new ArrayList<>();
 
-	public Item(String name, String name2, String author, String color, String text, Typ typ, Item parent) {
+	public Item(String name, String name2, String author, Set<Color> colors, String text, Typ typ, Item parent) {
 		setName(name);
 		setName2(name2);
 		setAuthor(author);
-		setColor(color);
+		setColors(colors);
 		setText(text);
 		setTyp(typ);
 		setParentGroup(parent);

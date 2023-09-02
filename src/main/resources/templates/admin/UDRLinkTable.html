@@ -1,7 +1,8 @@
   <tr th:each="UDRLink : ${UDRLinkList}">
       <td th:text="${UDRLink.id}"></td>
       <td th:text="${UDRLink.user.name}"></td>
-      <td th:text="${UDRLink.database.name}"></td>
+      <td th:if="${UDRLink.database == null}" th:text="all"></td>
+      <td th:unless="${UDRLink.database == null}" th:text="${UDRLink.database.name}"></td>
       <td th:text="${UDRLink.role.name}"></td>
       <td>
         <form th:if="${UDRLink.role.name != 'ADMIN'}" class="deleteUDRLinkForm" th:action="@{/admin/deleteUDRLink}" method="post">
@@ -16,21 +17,29 @@
     $(document).on("submit", ".deleteUDRLinkForm", function (event) {
       event.preventDefault();
 
-      var form = $(this);
-      var formData = form.serialize();
+        let confirmationMessage = "Are you sure you want to delete this UDRLink?";
+        let result = confirmAction(confirmationMessage, "Title", "");
 
-      $.ajax({
-        type: "POST",
-        url: form.attr("action"),
-        data: formData,
-        success: function (response) {
-          form.closest("tr").remove();
-          console.log(response);
-        },
-        error: function (xhr, textStatus, errorThrown) {
-          console.error("Error deleting udrLInk:", textStatus, errorThrown);
-        },
-      });
+        if (result) {
+            console.log("Confirmed");
+            let form = $(this);
+            let formData = form.serialize();
+
+            $.ajax({
+                type: "POST",
+                url: form.attr("action"),
+                data: formData,
+                success: function (response) {
+                    form.closest("tr").remove();
+                    console.log(response);
+                },
+                error: function (xhr, textStatus, errorThrown) {
+                    console.error("Error deleting udrLInk:", textStatus, errorThrown);
+                },
+            });
+        } else {
+            console.log("Cancelled");
+        }
     });
   });
 </script>

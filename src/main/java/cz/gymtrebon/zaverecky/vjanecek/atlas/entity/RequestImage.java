@@ -5,7 +5,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import javax.persistence.*;
@@ -19,9 +18,8 @@ import java.util.Optional;
 public class RequestImage {
 	
 	@Id
-	@GeneratedValue(strategy = GenerationType.AUTO, generator="native")
-	@GenericGenerator(name="native", strategy = "native")
-	private Integer id;
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Long id;
 	
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "request_id")
@@ -32,12 +30,12 @@ public class RequestImage {
 
 	@CreationTimestamp
 	@Temporal(TemporalType.TIMESTAMP)
-	@Column(name = "create_time")
+	@Column(name = "createdate")
 	private Date createDate;
 
 	@UpdateTimestamp
 	@Temporal(TemporalType.TIMESTAMP)
-	@Column(name = "update_time")
+	@Column(name = "modifydate")
 	private Date modifyDate;
 
 	public RequestImage(TransportRequestImage transportRequestImage, Optional<Request> request) {

@@ -49,7 +49,7 @@ public class RestAPIController {
 	private String imagesFolder;
 
 	@GetMapping("/group/{id}")
-	public ResponseEntity<TransportItem> group(@PathVariable("id") Integer id) {
+	public ResponseEntity<TransportItem> group(@PathVariable("id") Long id) {
 		TransportItem tp = service.ItemToTransportItem(id);
 		return ResponseEntity.ok(tp);
 	}
@@ -69,7 +69,7 @@ public class RestAPIController {
 		return new ResponseEntity<>(obrazky, HttpStatus.OK);
 	}
 	@GetMapping("/image/{id}")
-	public ResponseEntity<InputStreamResource> Image (@PathVariable("id") Integer id) throws IOException {
+	public ResponseEntity<InputStreamResource> Image (@PathVariable("id") Long id) throws IOException {
 	    InputStream in = service.inputStream(id);
 		return ResponseEntity.ok()
 				.contentType(MediaType.IMAGE_JPEG)
@@ -115,7 +115,7 @@ public class RestAPIController {
 			File imageFolder = new File(imagesFolder+CurrentDatabase.getCurrentDatabase()+"/user/"+principal.getName()+"/request/images/");
 			imageFolder.mkdirs();
 			File imageFile = new File(imageFolder, String.valueOf(transportRequestImage.getId()));
-			Integer id = requestImageRepository.save(new RequestImage(transportRequestImage, request)).getId();
+			Long id = requestImageRepository.save(new RequestImage(transportRequestImage, request)).getId();
 
 			File destFolder = new File(imagesFolder+CurrentDatabase.getCurrentDatabase()+"/request/images/");
 			destFolder.mkdirs();

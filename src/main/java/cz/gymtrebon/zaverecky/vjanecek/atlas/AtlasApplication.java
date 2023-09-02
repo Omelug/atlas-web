@@ -3,6 +3,7 @@ package cz.gymtrebon.zaverecky.vjanecek.atlas;
 import com.opencsv.CSVReader;
 import cz.gymtrebon.zaverecky.vjanecek.atlas.currentdb.CurrentDatabase;
 import cz.gymtrebon.zaverecky.vjanecek.atlas.entity.*;
+import cz.gymtrebon.zaverecky.vjanecek.atlas.entity.enums.DatabaseAccess;
 import cz.gymtrebon.zaverecky.vjanecek.atlas.entity.enums.Typ;
 import cz.gymtrebon.zaverecky.vjanecek.atlas.repository.*;
 import cz.gymtrebon.zaverecky.vjanecek.atlas.service.AtlasService;
@@ -66,9 +67,11 @@ public class AtlasApplication implements CommandLineRunner {
 
 		if (false){
 			CurrentDatabase.setCurrentDatabase(first_database_name);
-			dataRepo.save(new Database(first_database_name));
+			Database firstDB = new Database(first_database_name);
+			firstDB.setDatabaseAccess(DatabaseAccess.PUBLIC);
+			dataRepo.save(firstDB);
 			Database first_database = dataRepo.findByName(first_database_name).get();
-			User admin = userRepo.save(new User("admin", "admin", first_database_name));
+			User admin = userRepo.save(new User("admin", "$2a$10$X3iBZZQgGfvxx4olu6YwCebHTBiV9iqcEAN3Anb4VbljJZV3oGhPa", first_database_name)); //TODO mozna staci admin
 
 			Role adminrole = roleRepo.save(new Role("ADMIN"));
 			roleRepo.save(new Role("EDITOR"));
@@ -80,8 +83,8 @@ public class AtlasApplication implements CommandLineRunner {
 
 		if (false) {
 			CurrentDatabase.setCurrentDatabase(first_database_name);
-			Map<Integer, Integer> mapovaniimageId = new HashMap<>();
-			Map<Integer, Integer> mapovaniId = new HashMap<>();
+			Map<Long, Long> mapovaniimageId = new HashMap<>();
+			Map<Long, Long> mapovaniId = new HashMap<>();
 
 			//Item p = new itemRepository.findByTyp(Typ.ROOT).get();
 			/*p.setParentGroup(null);
@@ -89,14 +92,14 @@ public class AtlasApplication implements CommandLineRunner {
 			p.setTyp(Typ.ROOT);
 			ItemRepo.save(p);*/
 
-			mapovaniId.put(0, itemRepository.findByTyp(Typ.ROOT).get().getId());
+			mapovaniId.put(0L, itemRepository.findByTyp(Typ.ROOT).get().getId());
 
 			File flowers = ResourceUtils.getFile("classpath:data/FLOWER.csv");
 			List<String[]> flowerList = readAllLines(flowers);
-			for (int i = 1; i < flowerList.size();i++) {
+			for (int i = 1; i < flowerList.size(); i++) {
 				String[] Item = flowerList.get(i);
-				int itemId = Integer.valueOf(Item[0]);
-				int parentId = Integer.valueOf(Item[1]);
+				long itemId = Integer.valueOf(Item[0]);
+				long parentId = Integer.valueOf(Item[1]);
 
 				Item pol = new Item();
 				Item parent = itemRepository.getById(mapovaniId.get(parentId));
@@ -111,7 +114,7 @@ public class AtlasApplication implements CommandLineRunner {
 				pol.setName2(Item[4]);
 				pol.setAuthor(Item[5]);
 				pol.setText(Item[6]);
-				pol.setColor(Item[7]);
+				//pol.setColors(Item[7]); //TODO
 
 				itemRepository.save(pol);
 				mapovaniId.put(itemId, pol.getId());
@@ -124,7 +127,7 @@ public class AtlasApplication implements CommandLineRunner {
 			File imagesFolder = ResourceUtils.getFile("classpath:data/images/AppVitek2022");
 			for (int i = 1; i < imageList.size();i++) {
 				String[] Item = imageList.get(i);
-				int parentId = Integer.valueOf(Item[1]);
+				long parentId = Long.valueOf(Item[1]);
 
 				String nameFromCsv = Item[2];
 				String[] parts = nameFromCsv.split("/");
@@ -136,10 +139,6 @@ public class AtlasApplication implements CommandLineRunner {
 		}
 
 	}
-	//@Bean
-	//public PasswordEncoder passwordEncoder(){
-	//	return NoOpPasswordEncoder.getInstance();
-	//}
 
 	@Bean(name = "multipartResolver")
 	public CommonsMultipartResolver multipartResolver() {

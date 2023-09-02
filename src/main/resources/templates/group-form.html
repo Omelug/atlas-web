@@ -4,7 +4,8 @@
 
 <div id="info">
 	<h1 th:if="${newItem == true}">New group</h1>
-	<h1 th:if="${newItem == false}">Group editor</h1>
+	<h1 th:if="${newItem == false && root == false}">Group editor</h1>
+	<h1 th:if="${newItem == false && root == true}">Root editor</h1>
 	<hr>
 </div>
 
@@ -13,14 +14,12 @@
 
 		<input type="hidden" id="inputId" th:field="*{id}">
 
-		<div class="form-row">
-
+		<div class="form-row" th:unless="${root == true}">
 			<div class="form-group col-md-6">
 				<label for="idParentGroup">Parent group</label>
 				<select id="idParentGroup" class="" th:field="*{idParentGroup}">
 					<option value=""></option>
-					<option th:each="s : ${groups}" th:value="${s.id}" th:text="${s.name}"
-						th:selected="${s.id==group.idParentGroup}"></option>
+					<option th:each="s : ${groups}" th:value="${s.id}" th:text="${s.name}" th:selected="${s.id==group.idParentGroup}"></option>
 				</select>
 				<p th:if="${#fields.hasErrors('idParentGroup')}" th:errors="*{idParentGroup}"
 					class="invalid-feedback"></p>
@@ -35,22 +34,20 @@
 			</div>
 		</div>
 
-		<div class="form-row">
-			<div class="form-group col-md-6">
-				<label for="inputText" class="cutomlabel">Text</label>
-				<textarea id="inputText" class="" name="text" th:text="${group.text}"
-					th:field="*{text}">
+		<div class="form-group" >
+			<label for="inputText" class="custom_label">Text</label>
+			<textarea id="inputText" class="" name="text" th:text="${group.text}"
+					  th:field="*{text}">
 				</textarea>
-				<p th:if="${#fields.hasErrors('text')}" th:errors="*{text}" class="invalid-feedback"></p>
-			</div>
+			<p th:if="${#fields.hasErrors('text')}" th:errors="*{text}" class="invalid-feedback"></p>
 		</div>
 
-		<button th:if="${newItem == false && group.idParentGroup != null}" type="submit" class="btn btn-danger"
-			name="action-delete">Delete</button>
-
-		<button type="submit" class="btn btn-primary" name="action-save">Save</button>
-
-		<button type="submit" class="btn btn-secondary" name="action-back">Back</button>
+		<button class="link-button" type="submit" name="action-save">Save</button>
+		|
+		<button class="link-button" type="submit" name="action-back">Back</button>
+		|
+		<button class="link-button" th:if="${newItem == false && group.idParentGroup != null}" type="submit"
+				name="action-delete">Delete</button>
 
 	</form>
 </div>

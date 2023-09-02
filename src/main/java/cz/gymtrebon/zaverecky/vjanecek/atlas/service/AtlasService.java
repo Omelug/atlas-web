@@ -2,9 +2,11 @@ package cz.gymtrebon.zaverecky.vjanecek.atlas.service;
 
 import cz.gymtrebon.zaverecky.vjanecek.atlas.currentdb.CurrentDatabase;
 import cz.gymtrebon.zaverecky.vjanecek.atlas.dto.*;
+import cz.gymtrebon.zaverecky.vjanecek.atlas.entity.Color;
 import cz.gymtrebon.zaverecky.vjanecek.atlas.entity.Image;
 import cz.gymtrebon.zaverecky.vjanecek.atlas.entity.Item;
 import cz.gymtrebon.zaverecky.vjanecek.atlas.entity.enums.Typ;
+import cz.gymtrebon.zaverecky.vjanecek.atlas.repository.ColorRepository;
 import cz.gymtrebon.zaverecky.vjanecek.atlas.repository.ImageRepository;
 import cz.gymtrebon.zaverecky.vjanecek.atlas.repository.ItemRepository;
 import lombok.RequiredArgsConstructor;
@@ -14,10 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.*;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -25,6 +24,7 @@ import java.util.Optional;
 public class AtlasService {
 	private final ItemRepository itemRepository;
 	private final ImageRepository imageRepository;
+	private final ColorRepository colorRepository;
 	
 	@Value("${images.path}")
 	private String imagesFolder;
@@ -38,6 +38,23 @@ public class AtlasService {
 			resultItem.setName(CurrentDatabase.getCurrentDatabase());
 			resultItem.setTyp(Typ.ROOT);
 			itemRepository.save(resultItem);
+			//TODO tohle asi presunout
+
+			List<Color> colorList = new ArrayList<>();
+			colorList.add(new Color("black"));
+			colorList.add(new Color("white"));
+			colorList.add(new Color("purple"));
+			colorList.add(new Color("green"));
+			colorList.add(new Color("orange"));
+			colorList.add(new Color("pink"));
+			colorList.add(new Color("yellow"));
+			colorList.add(new Color("gray"));
+			colorList.add(new Color("silver"));
+			colorList.add(new Color("black"));
+			colorList.add(new Color("lime"));
+			colorList.add(new Color("brown"));
+			colorRepository.saveAll(colorList);
+
 			return ItemToGroup(resultItem);
 		}else{
 			return ItemToGroup(item.get());
@@ -46,8 +63,10 @@ public class AtlasService {
 
 	public List<BreadCrumb> breadCrumbList() {
 		List<BreadCrumb> groups = new ArrayList<>();
-
-		groups.add(ItemToBreadCrumb(itemRepository.findByTyp(Typ.ROOT).orElseThrow()));
+		Item root = itemRepository.findByTyp(Typ.ROOT).orElse(null);
+		/*if (root != null) {
+			groups.add(ItemToBreadCrumb(root));
+		}*/
 		for (Item Item : itemRepository.findAllByTyp(Typ.GROUP)) {
 			BreadCrumb bc = new BreadCrumb();
 			bc.setId(Item.getId());
@@ -58,7 +77,7 @@ public class AtlasService {
 		return groups;
 	}
 
-	public List<Group> subgroupList(Integer parentId) {
+	public List<Group> subgroupList(Long parentId) {
 		Item parent = itemRepository.getById(parentId);
 		List<Group> groups = new ArrayList<>();
 		for (Item Item : itemRepository.findByParentGroupAndTyp(parent, Typ.GROUP)) {
@@ -67,7 +86,7 @@ public class AtlasService {
 		return groups;
 	}
 
-	public List<Representative> representativeList(Integer parentId) {
+	public List<Representative> representativeList(Long parentId) {
 		Item parent = itemRepository.getById(parentId);
 		List<Representative> representative = new ArrayList<>();
 		for (Item Item : itemRepository.findByParentGroupAndTyp(parent, Typ.REPRESENTATIVE)) {
@@ -76,7 +95,7 @@ public class AtlasService {
 		return representative;
 	}
 
-	public Integer createGroup(Integer idParentGroup, String name, String text) {
+	public Long createGroup(Long idParentGroup, String name, String text) {
 
 		Item parent = itemRepository.getById(idParentGroup);
 
@@ -89,19 +108,20 @@ public class AtlasService {
 		return item.getId();
 	}
 
-	public Integer saveGroup(Integer parentId, Integer groupId, String name, String text) {
-
-		Item parent = itemRepository.getById(parentId);
+	public Long saveGroup(Long parentId, Long groupId, String name, String text) {
 		Item group = itemRepository.getById(groupId);
+		if (group.getTyp() != Typ.ROOT) {
+			Item parent = itemRepository.getById(parentId);
+			group.setParentGroup(parent);
+		}
 		group.setName(name);
 		group.setText(text);
 		group.setTyp(Typ.GROUP);
-		group.setParentGroup(parent);
 		itemRepository.save(group);
 		return group.getId();
 	}
 
-	public void removeGroup(Integer groupId) {
+	public void removeGroup(Long groupId) {
 		for (Group group : subgroupList(groupId)) {
 			removeGroup(group.getId());
 		}
@@ -111,31 +131,31 @@ public class AtlasService {
 		removeItem(groupId);
 	}
 
-	public void removeItem(Integer representativeId) {
+	public void removeItem(Long representativeId) {
 		if (!(itemRepository.getById(representativeId).getTyp() == Typ.ROOT)) {
 			itemRepository.deleteById(representativeId);
 		}
 	}
 
-	public Integer createRepresentative(Integer idParentGroup, String name, String name2, String author, String color,
+	public Long createRepresentative(Long idParentGroup, String name, String name2, String author, Set<Color> colors,
 			String text) {
 
 		Item parent = itemRepository.getById(idParentGroup);
-		Item representative = new Item(name, name2, author, color, text, Typ.REPRESENTATIVE, parent);
+		Item representative = new Item(name, name2, author, colors, text, Typ.REPRESENTATIVE, parent);
 
 		itemRepository.save(representative);
 		return representative.getId();
 	}
 
-	public Integer saveRepresentative(Integer idParentGroup, Integer groupId, String name, String name2,
-			String author, String color, String text) {
+	public Long saveRepresentative(Long idParentGroup, Long groupId, String name, String name2,
+			String author, Set<Color> colors, String text) {
 
 		Item parent = itemRepository.getById(idParentGroup);
 		Item representative = itemRepository.getById(groupId);
 		representative.setName(name);
 		representative.setName2(name2);
 		representative.setAuthor(author);
-		representative.setColor(color);
+		representative.setColors(colors);
 		representative.setText(text);
 
 		representative.setTyp(Typ.REPRESENTATIVE);
@@ -144,28 +164,28 @@ public class AtlasService {
 		return representative.getId();
 	}
 
-	public Group findGroupById(Integer groupId) {
+	public Group findGroupById(Long groupId) {
 		return ItemToGroup(itemRepository.getById(groupId));
 	}
 
-	public Representative findRepresentativeById(Integer idRepresentative) {
+	public Representative findRepresentativeById(Long idRepresentative) {
 		return ItemToRepresentative(itemRepository.getById(idRepresentative));
 	}
 
-	public Image findImageById(Integer id) {
+	public Image findImageById(Long id) {
 		return imageRepository.getById(id);
 	}
 
-	public Group ItemToGroup(Item Item) {
-		Group s = new Group();
-		s.setId(Item.getId());
-		s.setName(Item.getName());
-		s.setText(Item.getText());
-		if (Item.getParentGroup() != null) {
-			s.setIdParentGroup(Item.getParentGroup().getId());
+	public Group ItemToGroup(Item item) {
+		Group group = new Group();
+		group.setId(item.getId());
+		group.setName(item.getName());
+		group.setText(item.getText());
+		group.setRoot(item.getTyp() == Typ.ROOT);
+		if (item.getParentGroup() != null) {
+			group.setIdParentGroup(item.getParentGroup().getId());
 		}
-
-		return s;
+		return group;
 	}
 
 	public Representative ItemToRepresentative(Item item) {
@@ -174,7 +194,7 @@ public class AtlasService {
 		r.setName(item.getName());
 		r.setName2(item.getName2());
 		r.setAuthor(item.getAuthor());
-		r.setColor(item.getColor());
+		r.setColors(item.getColors());
 		r.setText(item.getText());
 		if (item.getParentGroup() != null) {
 			r.setIdParentGroup(item.getParentGroup().getId());
@@ -189,11 +209,11 @@ public class AtlasService {
 	}
 
 	public Photo PhotoFromImage(Image Image) {
-		Photo f = new Photo();
-		f.setId(Image.getId());
-		f.setName(Image.getFileName());
-		f.setUrl("/image/" + Image.getId());
-		return f;
+		Photo photo = new Photo();
+		photo.setId(Image.getId());
+		photo.setName(Image.getFileName());
+		photo.setUrl("/image/" + Image.getId());
+		return photo;
 	}
 
 	public BreadCrumb ItemToBreadCrumb(Item Item) {
@@ -204,7 +224,7 @@ public class AtlasService {
 		return p;
 	}
 
-	public void uploadImage(Integer ItemId, MultipartFile file) {
+	public void uploadImage(Long ItemId, MultipartFile file) {
 
 		Image o = new Image();
 		o.setFileName(file.getOriginalFilename());
@@ -221,10 +241,9 @@ public class AtlasService {
 		} catch (IOException e) {
 			log.error("Error while saving image", e);
 		}
-
 	}
 	//for uploading start data files
-	public void uploadImage(Integer ItemId, File file) {
+	public void uploadImage(Long ItemId, File file) {
 
 		Item p = itemRepository.getById(ItemId);
 
@@ -297,13 +316,13 @@ public class AtlasService {
 		}
 	}*/
 
-	public File imageFile(Integer ImageId) {
+	public File imageFile(Long ImageId) {
 		Image o = imageRepository.getById(ImageId);
 		imagePath = new File(imagesFolder+CurrentDatabase.getCurrentDatabase()+"/images").getAbsolutePath();
 		return new File(imagePath, String.valueOf(o.getId()));
 	}
 
-	public void deleteImage(Integer ImageId) {
+	public void deleteImage(Long ImageId) {
 		Image o = imageRepository.getById(ImageId);
 		imagePath = new File(imagesFolder+CurrentDatabase.getCurrentDatabase()+"/images").getAbsolutePath();
 		File f = new File(imagePath, String.valueOf(o.getId()));
@@ -312,7 +331,7 @@ public class AtlasService {
 
 	}
 
-	public TransportItem ItemToTransportItem(Integer itemId) {
+	public TransportItem ItemToTransportItem(Long itemId) {
 		TransportItem tp = new TransportItem();
 		Item Item = itemRepository.getById(itemId);
 
@@ -328,20 +347,20 @@ public class AtlasService {
 
 		tp.setId(Item.getId());
 		tp.setAuthor(Item.getAuthor());
-		tp.setColor(Item.getColor());
+		tp.setColors(Item.getColors());
 		tp.setName2(Item.getName2());
 
 		return tp;
 	}
 
-	public void recursiveItemAdding(Integer itemId, List<TransportItem> database) {
+	public void recursiveItemAdding(Long itemId, List<TransportItem> database) {
 		addToTransportItem(itemId, database);
 		for (Item podItem : itemRepository.getById(itemId).getItems()) {
 			recursiveItemAdding(podItem.getId(), database);
 		}
 	}
 
-	private void addToTransportItem(Integer itemId, List<TransportItem> listTP) {
+	private void addToTransportItem(Long itemId, List<TransportItem> listTP) {
 		TransportItem tp = ItemToTransportItem(itemId);
 		listTP.add(tp);
 	}
@@ -364,14 +383,14 @@ public class AtlasService {
 		return to;
 	}
 
-	public InputStream inputStream(Integer ImageId) throws FileNotFoundException {
+	public InputStream inputStream(Long ImageId) throws FileNotFoundException {
 		Image o = imageRepository.getById(ImageId);
 		imagePath = new File(imagesFolder+CurrentDatabase.getCurrentDatabase()+"/images").getAbsolutePath();
 		File f = new File(imagePath, String.valueOf(o.getId()));
 		return new FileInputStream(f);
 	}
 
-	public List<BreadCrumb> getBreadCrumbs(Integer id) {
+	public List<BreadCrumb> getBreadCrumbs(Long id) {
 		List<BreadCrumb> bcList = new ArrayList<>();
 		Item item = itemRepository.getById(id);
 		while (item != null) {

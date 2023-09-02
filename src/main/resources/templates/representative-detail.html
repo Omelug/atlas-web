@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="cs" th:replace="~{layouts/layout_info::layout( _ ,~{::#info} , _ , ~{::#buttons})}"
+<html lang="en" th:replace="~{layouts/layout_info::layout( _ ,~{::#info} , _ , ~{::#buttons})}"
 	xmlns:th="http://www.thymeleaf.org">
 
 <div id="info">
@@ -11,7 +11,12 @@
 
 			<p th:text="${representative.name2}"></p>
 			<p th:text="${representative.author}"></p>
-			<p th:text="${representative.color}"></p>
+			<p>
+				<span th:each="color, iterStat : ${representative.colors}">
+					<span th:text="${color}"></span>
+					<span th:unless="${iterStat.last}">, </span>
+				</span>
+			</p>
 			<p th:utext="${representative.text}"></p>
 
 		</div>
@@ -19,7 +24,6 @@
 		<div class="form-group col-md-6">
 			<h2 th:if="${representative.images != null}">Image list</h2>
 			<h2 th:if="${representative.images == null}">Image list is Empty</h2>
-			<!-- https://stackoverflow.com/questions/39509689/combining-conditions-and-iterations-in-thymeleaf/39515137#39515137  -->
 			<div th:if="${representative.images != null}">
 				<th:block
 					th:with="partitions=${T(org.apache.commons.collections4.ListUtils).partition(representative.images, 2)}">
@@ -38,7 +42,7 @@
 			</div>
 			<form
 					th:if="${#authorization.expression('hasAnyAuthority(''EDITOR'', ''ADMIN'')')}"
-				th:action="${newItem == true} ? @{'/representative/imageNoId/upload'} : @{'/representative/'+${representative.id}+'/upload'} "
+				th:action="${newItem} ? @{'/representative/imageNoId/upload'} : @{'/representative/'+${representative.id}+'/upload'} "
 				method="post" enctype="multipart/form-data">
 
 					<label path="file">Add image:
@@ -53,6 +57,7 @@
 <hr>
 </div>
 <div th:if="${#authorization.expression('hasAnyAuthority(''EDITOR'', ''ADMIN'')')}" id="buttons">
-	<a class="btn btn-primary" th:href="@{'/representative/'+${representative.id}+'/edit'}">Edit</a>
+	<a class="link-button" th:href="@{'/representative/'+${representative.id}+'/edit'}">Edit</a>
+
 </div>
 </html>

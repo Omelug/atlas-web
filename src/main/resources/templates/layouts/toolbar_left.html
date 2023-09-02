@@ -1,0 +1,65 @@
+
+<div class="row">
+  <span style="margin-right: 10px;" > Login: </span>
+  <a sec:authorize="isAuthenticated()" th:href="@{/login}" class=" d-flex flex-row-revers" role="button" th:text="${#authentication.getPrincipal().getUsername()}" ></a>
+  <a th:href="@{/login}" class=" d-flex flex-row-revers" role="button" sec:authorize="isAnonymous()" >Login</a>
+  <div class="image-container">
+    <img class="icon" src="/png/user.png" alt="">
+  </div>
+</div>
+<div class="row" th:if="${#authorization.expression('hasAnyAuthority(''ADMIN'')')}" >
+  <a href="/admin" style="margin-right: 10px;"> Admin tools</a>
+  <div class="image-container">
+    <img class="icon" src="/png/settings.png" alt="">
+  </div>
+</div>
+<div class="row" th:if="${#authorization.expression('hasAnyAuthority(''EDITOR'', ''ADMIN'')')}">
+  <a href="/requests" style="margin-right: 10px;"> Editor tools</a>
+  <div class="image-container">
+    <img class="icon" src="/png/editor_paper.png" alt="">
+  </div>
+</div>
+<div th:if="${databaseList != null and not #lists.isEmpty(databaseList)}">
+  <div class="row">
+    <span style="margin-right: 10px;">Database</span>
+    <div class="image-container">
+      <img class="icon" src="/png/database.png" alt="">
+    </div>
+  </div>
+  <ul  class="db_list" th:each="dbhelper : ${databaseList}">
+    <form id="changeDatabaseForm" method="post" action="/changeDatabase">
+      <td th:unless="${currentDatabase == dbhelper.database}">
+        <button type="submit" class="link-button" th:text="${dbhelper.database}" th:value="${dbhelper.database}" ></button>
+      </td>
+      <td th:if="${currentDatabase == dbhelper.database}">
+        <button type="submit" class="link-button" style="font-weight: bold" th:text="${dbhelper.database}" th:value="${dbhelper.database}" ></button>
+      </td>
+      <td> <a class="smallText" th:text="${dbhelper.roles}" ></a></td>
+      <input type="hidden" name="databaseName" th:value="${dbhelper.database}" />
+    </form>
+  </ul>
+</div>
+<!--TODO tohle se asi nemusí posílat pořáad, ale zatím nechat kvůli přehlednosti -->
+<!--<script>
+  $(document).ready(function () {
+    $("#changeDatabaseForm").submit(function (event) {
+      event.preventDefault();
+
+      var formData = $(this).serialize();
+
+      $.ajax({
+        type: "POST",
+        url: "/changeDatabase",
+        data: formData,
+        success: function (data) {
+          $("#databaseListContainer").html(data);
+          console.log(data);
+          console.log("Toolbar updated successfully");
+        },
+        error: function (xhr, textStatus, errorThrown) {
+          console.error("Error update left toolbar:", textStatus, errorThrown);
+        },
+      });
+    });
+  });
+</script>-->

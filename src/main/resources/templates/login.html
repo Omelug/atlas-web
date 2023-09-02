@@ -1,34 +1,58 @@
-<html xmlns:th="http://www.thymeleaf.org" xmlns:tiles="http://www.thymeleaf.org" xmlns:sec="http://www.w3.org/1999/xhtml" lang="en">
+<html xmlns:th="http://www.thymeleaf.org" xmlns:tiles="http://www.thymeleaf.org"
+      xmlns:sec="http://www.w3.org/1999/xhtml" xmlns="http://www.w3.org/1999/html" lang="en">
 <head>
-  <title tiles:fragment="title">Messages : Create</title>
-  <link rel="stylesheet" href="/styly.css">
+  <title tiles:fragment="title">Login</title>
+  <link rel="stylesheet" href="/css/main.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
 </head>
 <body>
+<style>
+  .password-input {
+    position: relative;
+  }
+
+  #togglePassword {
+    transform: translateY(25%);
+    right: 5px;
+  }
+  .icon-rtl {
+    padding-left: 25px;
+    background: url("/png/find.png") no-repeat left;
+    background-size: 20px;
+  }
+  .icon-user{
+    padding-left: 25px;
+    background: url("/png/user.png") no-repeat left;
+    background-size: 20px;
+  }
+</style>
 <div class="centerDiv">
-  <form name="f" th:action="@{/login}" method="post" class="centerDiv">
+  <form name="f" th:action="@{/login}" method="post">
     <fieldset class="fieldset-auto-width centerDiv" style="width: 100%">
       <legend sec:authorize="isAuthenticated()"  style="text-align: center"> You are logged [[${#authentication.getPrincipal().getUsername()}]] </legend>
       <legend sec:authorize="!isAuthenticated()" style="text-align: center">Please Login</legend>
       <br>
       <div class="loginDiv">
         <p>Username</p>
-        <label for="username">
-          <input id="username" name="username" type="text"/>
-        </label>
+          <input type="text"  id="username" class="icon-user" name="username" placeholder="Username"/>
       </div>
       <br>
       <div class="loginDiv">
-        <p >Password </p>
-        <label for="password">
-          <input type="password" id="password" name="password"/>
-        </label>
+        <div class="row">
+          <p >Password </p>
+        </div>
+        <div class="image-container">
+
+        </div>
+
+        <input type="password" id="password" class="icon-rtl" name="password" placeholder="Password">
+        <img class="icon" id="togglePassword" src="/png/eye_no.png">
       </div>
-
       <br/>
-
       <div th:if="${param.error}" class="alert alert-error errorMsg" >
         Invalid username and password.
       </div>
+
       <div th:if="${param.logout}" class="alert alert-success">
         You have been logged out.
       </div>
@@ -37,8 +61,29 @@
         <button type="submit" class="btn">Log in</button>
       </div>
 
+      <div>
+        <a class="btn" th:href="@{/registration}">Dont have account? Register</a>
+      </div>
+
     </fieldset>
   </form>
+  <script>
+    const passwordInput = document.getElementById('password');
+    const togglePasswordButton = document.getElementById('togglePassword');
+
+    togglePasswordButton.addEventListener('click', function() {
+      if (passwordInput.type === 'password') {
+        passwordInput.type = 'text';
+        togglePasswordButton.innerHTML = '<input type="text" class="icon-rtl" value placeholder="Search">';
+        togglePasswordButton.src = "/png/eye_no.png";
+
+      } else {
+        passwordInput.type = 'password';
+        togglePasswordButton.innerHTML = '<input type="text" class="icon-rtl" value placeholder="Search">';
+        togglePasswordButton.src = "/png/eye_open.png";
+      }
+    });
+  </script>
 </div>
 </body>
 </html>

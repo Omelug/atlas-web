@@ -1,7 +1,10 @@
 package cz.gymtrebon.zaverecky.vjanecek.atlas.form;
 
+import cz.gymtrebon.zaverecky.vjanecek.atlas.entity.Color;
 import cz.gymtrebon.zaverecky.vjanecek.atlas.entity.enums.Typ;
 import lombok.Data;
+
+import java.util.Set;
 
 @Data
 public class FindForm {
@@ -11,6 +14,6 @@ public class FindForm {
     private Typ typ;
     private String parentGroup;
     private String author;
-    private String color;
+    private Set<Color> colors;
     private String text;
 }

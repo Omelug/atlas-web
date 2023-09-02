@@ -4,8 +4,9 @@ import lombok.Data;
 
 @Data
 public class Group {
-	private Integer id;
-	private Integer idParentGroup;
+	private boolean isRoot;
+	private Long id;
+	private Long idParentGroup;
 	private String name;
 	private String text;
 }

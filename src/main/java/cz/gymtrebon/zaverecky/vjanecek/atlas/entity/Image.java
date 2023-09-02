@@ -19,7 +19,7 @@ public class Image {
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO, generator="native")
 	@GenericGenerator(name="native", strategy = "native")
-	private Integer id;
+	private Long id;
 	
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "Item_id")
@@ -30,12 +30,12 @@ public class Image {
 
 	@CreationTimestamp
 	@Temporal(TemporalType.TIMESTAMP)
-	@Column(name = "create_time")
+	@Column(name = "createdate")
 	private Date createDate;
 
 	@UpdateTimestamp
 	@Temporal(TemporalType.TIMESTAMP)
-	@Column(name = "update_time")
+	@Column(name = "modifydate")
 	private Date modifyDate;
 
 

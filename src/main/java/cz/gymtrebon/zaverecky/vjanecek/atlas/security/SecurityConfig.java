@@ -32,17 +32,19 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
         protected void configure(HttpSecurity http) throws Exception {
             http.addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
-            http.cors().and().csrf().disable()
+            http.cors().and()
                     .authorizeRequests()
-                    .antMatchers("/api/userinfo", "/api/login", "/styly.css", "/error/403").permitAll()
+                    .antMatchers("/registration","/api/userinfo", "/api/login", "/error/403","/home").permitAll()
                     .and()
                     .formLogin()
                     .loginPage("/login")
-                    .defaultSuccessUrl("/home", true)
+                    .defaultSuccessUrl("/loginUpdate", true)
                     .permitAll()
                     .and()
                     .logout()
-                    .permitAll();
+                    .permitAll()
+                    .and()
+                    .csrf().disable();
 
         }
         @Override
@@ -50,10 +52,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
         public AuthenticationManager authenticationManagerBean() throws Exception {
             return super.authenticationManagerBean();
         }
-        //@Bean
-        //public PasswordEncoder passwordEncoder(){
-        //    return NoOpPasswordEncoder.getInstance();
-        //}
+
         @Bean
         public PasswordEncoder passwordEncoder() {
             return new BCryptPasswordEncoder();

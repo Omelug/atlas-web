@@ -7,7 +7,7 @@ import org.springframework.stereotype.Repository;
 import java.util.Optional;
 
 @Repository
-public interface RequestRepository extends JpaRepository<Request, Integer> {
+public interface RequestRepository extends JpaRepository<Request, Long> {
 	//Optional<Request> findByRequest_typ(RequestTyp typ);
     Optional<Request> findByRequestMark(String requestMark);
 }

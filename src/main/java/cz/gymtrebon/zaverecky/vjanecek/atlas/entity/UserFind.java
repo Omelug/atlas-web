@@ -1,10 +1,16 @@
 package cz.gymtrebon.zaverecky.vjanecek.atlas.entity;
 
 import cz.gymtrebon.zaverecky.vjanecek.atlas.entity.enums.Typ;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import javax.persistence.*;
+import java.util.HashSet;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Entity
 @Table(name = "finds", schema="config")
@@ -16,7 +22,7 @@ public class UserFind {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    private Integer id;
+    private Long id;
 
     @OneToOne
     @JoinColumn(name = "user_id")
@@ -39,14 +45,14 @@ public class UserFind {
 
 
 
-    public UserFind(Optional<User> byName, String name, String name2, Typ typ, String parentGroup, String author, String color, String text, boolean open) {
+    public UserFind(Optional<User> byName, String name, String name2, Typ typ, String parentGroup, String author, Set<Color> colors, String text, boolean open) {
         this.user = byName.orElseThrow();
         this.name = name;
         this.name2 = name2;
         this.typ = typ;
         this.parentGroup = parentGroup;
         this.author = author;
-        this.color = color;
+        this.color = serializeColors(colors);
         this.text = text;
         this.open = open;
     }
@@ -69,5 +75,34 @@ public class UserFind {
                 ", color='" + color + '\'' +
                 ", text='" + text + '\'' +
                 '}';
+    }
+   public static String serializeColors(Set<Color> colors) {
+        if (colors == null) {
+            return "";
+        }
+        return colors.stream()
+                .map(Color::getName)
+                .collect(Collectors.joining(","));
+    }
+
+    public static Set<Color> deserializeColors(String serializedColors) {
+        Set<Color> colors = new HashSet<>();
+        if (serializedColors == null) {
+            return colors;
+        }
+        String[] colorNames = serializedColors.split(",");
+
+        for (String colorName : colorNames) {
+            colors.add(new Color(colorName.trim()));
+        }
+
+        return colors;
+    }
+
+    public void setColors(Set<Color> colors) {
+        setColor(serializeColors(colors));
+    }
+    public Set<Color>  getColors() {
+        return deserializeColors(color);
     }
 }

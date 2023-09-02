@@ -3,7 +3,7 @@ import lombok.Data;
 
 @Data
 public class TransportRequestImage {
-	private long id;
+	private Long id;
     private Integer itemId;
 	private String name;
 	private long createDate;

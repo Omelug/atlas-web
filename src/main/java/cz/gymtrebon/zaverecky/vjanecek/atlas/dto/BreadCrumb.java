@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class BreadCrumb {
 
-	private Integer id;
+	private Long id;
 	private Typ typ;
 	private String name;
 	private String saveRepresentative;

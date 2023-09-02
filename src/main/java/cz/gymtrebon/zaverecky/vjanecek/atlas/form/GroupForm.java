@@ -3,15 +3,14 @@ package cz.gymtrebon.zaverecky.vjanecek.atlas.form;
 import lombok.Data;
 
 import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
 
 @Data
 public class GroupForm {
 	
-	private Integer id;
+	private Long id;
 	
-	@NotNull(message = "Parent group cant be null")
-	private Integer idParentGroup;
+	//@NotNull(message = "Parent group cant be null") //TODO
+	private Long idParentGroup;
 	
 	@NotEmpty(message = "Name cant be empty")
 	private String name;

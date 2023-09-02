@@ -2,10 +2,13 @@ package cz.gymtrebon.zaverecky.vjanecek.atlas.controller;
 
 import cz.gymtrebon.zaverecky.vjanecek.atlas.dto.Group;
 import cz.gymtrebon.zaverecky.vjanecek.atlas.dto.Representative;
+import cz.gymtrebon.zaverecky.vjanecek.atlas.entity.Item;
 import cz.gymtrebon.zaverecky.vjanecek.atlas.entity.Request;
 import cz.gymtrebon.zaverecky.vjanecek.atlas.entity.User;
+import cz.gymtrebon.zaverecky.vjanecek.atlas.entity.enums.Typ;
 import cz.gymtrebon.zaverecky.vjanecek.atlas.form.GroupForm;
 import cz.gymtrebon.zaverecky.vjanecek.atlas.form.RepresentativeForm;
+import cz.gymtrebon.zaverecky.vjanecek.atlas.repository.ItemRepository;
 import cz.gymtrebon.zaverecky.vjanecek.atlas.repository.RequestRepository;
 import cz.gymtrebon.zaverecky.vjanecek.atlas.service.AtlasService;
 import lombok.RequiredArgsConstructor;
@@ -31,6 +34,7 @@ import java.util.Optional;
 @Slf4j
 @PreAuthorize("hasAuthority('" + User.EDITOR + "') OR hasAuthority('" + User.ADMIN + "')")
 public class EditorController {
+    private final ItemRepository itemRepository;
     private final AtlasService service;
     private final AtlasController atlasController;
     private final RequestRepository requestRepository;
@@ -47,7 +51,7 @@ public class EditorController {
 
     @GetMapping("/group/newItem")
     public String newGroup(Principal principal,Model model,
-            @RequestParam("idParentGroup") Optional<Integer> idParentGroup ) {
+            @RequestParam("idParentGroup") Optional<Long> idParentGroup ) {
         GroupForm form = new GroupForm();
         if (idParentGroup.isPresent()) {
             form.setIdParentGroup(idParentGroup.get());
@@ -73,7 +77,7 @@ public class EditorController {
             return "group-form";
         }
 
-        Integer groupId;
+        Long groupId;
         if (newGroup) {
             groupId = service.createGroup(
                     form.getIdParentGroup(),
@@ -90,22 +94,39 @@ public class EditorController {
         return "redirect:/group/" + groupId;
     }
 
-    private void breadCrumbsCorrection(Model model, Integer idParentGroup) {
+    private void breadCrumbsCorrection(Model model, Long idParentGroup) {
         if (idParentGroup == null) {
-            Integer originalParentId = (Integer) model.getAttribute("originalParentId");
+            Long originalParentId = (Long) model.getAttribute("originalParentId");
             if(originalParentId != null) {
                 model.addAttribute("breadcrumbs", service.getBreadCrumbs(originalParentId));
-                return;
             }
+        }else{
+            model.addAttribute("breadcrumbs", service.getBreadCrumbs(idParentGroup));
         }
-        model.addAttribute("breadcrumbs", service.getBreadCrumbs(idParentGroup));
 
     }
 
+    @GetMapping("/group/root/edit")
+    public String editGroup(Principal principal,
+                            Model model) {
+        Item root = itemRepository.findByTyp(Typ.ROOT).get();
+        GroupForm form = new GroupForm();
+        form.setId(root.getId());
+        form.setName(root.getName());
+        form.setText(root.getText());
+
+        model.addAttribute("groups", service.breadCrumbList());
+        model.addAttribute("group", form);
+        model.addAttribute("newItem", false);
+        model.addAttribute("root", true);
+
+        atlasController.addBase(principal, model);
+        return "group-form";
+    }
 
     @GetMapping("/group/{id}/edit")
     public String editGroup(Principal principal,
-            @PathVariable("id") Integer id,
+            @PathVariable("id") Long id,
             Model model) {
 
         Group group = service.findGroupById(id);
@@ -118,6 +139,7 @@ public class EditorController {
         model.addAttribute("groups", service.breadCrumbList());
         model.addAttribute("group", form);
         model.addAttribute("newItem", false);
+        model.addAttribute("root", false);
 
         atlasController.addBase(principal, model);
         return "group-form";
@@ -149,7 +171,7 @@ public class EditorController {
     }
     @GetMapping("/representative/newItem")
     public String newRepresentative(Principal principal,
-            @RequestParam("idParentGroup") Optional<Integer> idParentGroup,
+            @RequestParam("idParentGroup") Optional<Long> idParentGroup,
             Model model) {
 
         RepresentativeForm form = new RepresentativeForm();
@@ -167,7 +189,7 @@ public class EditorController {
 
     @GetMapping("/representative/{id}/edit")
     public String editRepresentative(Principal principal,
-            @PathVariable("id") Integer id,
+            @PathVariable("id") Long id,
                                      Model model) {
 
         Representative representative = service.findRepresentativeById(id);
@@ -177,7 +199,7 @@ public class EditorController {
         form.setName(representative.getName());
         form.setName2(representative.getName2());
         form.setAuthor(representative.getAuthor());
-        form.setColor(representative.getColor());
+        form.setColors(representative.getColors());
         form.setText(representative.getText());
         form.setImages(representative.getImages());
 
@@ -226,14 +248,14 @@ public class EditorController {
             return "representative-form";
         }
 
-        Integer idRepresentative;
+        Long idRepresentative;
         if (newRepresentative) {
             idRepresentative = service.createRepresentative(
                     form.getIdParentGroup(),
                     form.getName(),
                     form.getName2(),
                     form.getAuthor(),
-                    form.getColor(),
+                    form.getColors(),
                     form.getText()
             );
         } else {
@@ -243,7 +265,7 @@ public class EditorController {
                     form.getName(),
                     form.getName2(),
                     form.getAuthor(),
-                    form.getColor(),
+                    form.getColors(),
                     form.getText()
             );
         }
@@ -252,15 +274,15 @@ public class EditorController {
     @PostMapping("/representative/{ItemId}/upload")
     public String uploadImage(
             @RequestParam("file") MultipartFile file,
-            @PathVariable("ItemId") Integer ItemId) {
+            @PathVariable("ItemId") Long ItemId) {
         service.uploadImage(ItemId, file);
         return "redirect:/representative/" + ItemId;
     }
 
     @GetMapping("/representative/{id}/delete/{imageId}")
     public String deleteImage(
-            @PathVariable("id") Integer id,
-            @PathVariable("imageId") Integer imageId) {
+            @PathVariable("id") Long id,
+            @PathVariable("imageId") Long imageId) {
 
         service.deleteImage(imageId);
 

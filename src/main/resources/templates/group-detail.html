@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="cs" th:replace="~{layouts/layout_info::layout( _ , ~{::#info} , ~{::#main} , ~{::#buttons})}"
+<html lang="en" th:replace="~{layouts/layout_info::layout( _ , ~{::#info} , ~{::#main} , ~{::#buttons})}"
 	xmlns:th="http://www.thymeleaf.org">
 
 
@@ -13,7 +13,8 @@
 	|
 	<a th:href="@{'/representative/newItem?idParentGroup='+${group.id}}">Add representative</a>
 	|
-	<a th:unless="${home == true}" th:href="@{'/group/'+${group.id}+'/edit'}">Edit</a>
+	<a th:unless="${group.isRoot() == true}" th:href="@{'/group/'+${group.id}+'/edit'}">Edit</a>
+	<a th:if="${group.isRoot() == true}" th:href="@{'/group/root/edit'}">Edit</a>
 </div >
 
 <div id="main">

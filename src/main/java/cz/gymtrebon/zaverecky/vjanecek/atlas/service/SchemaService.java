@@ -2,7 +2,7 @@ package cz.gymtrebon.zaverecky.vjanecek.atlas.service;
 
 import cz.gymtrebon.zaverecky.vjanecek.atlas.currentdb.CurrentDatabase;
 import cz.gymtrebon.zaverecky.vjanecek.atlas.entity.*;
-import cz.gymtrebon.zaverecky.vjanecek.atlas.repository.CustomLoggerRepository;
+import cz.gymtrebon.zaverecky.vjanecek.atlas.repository.ColorRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
@@ -15,44 +15,78 @@ import org.hibernate.service.ServiceRegistry;
 import org.hibernate.tool.hbm2ddl.SchemaExport;
 import org.hibernate.tool.schema.TargetType;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.stereotype.Service;
 
 import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.EntityTransaction;
+import javax.sql.DataSource;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.sql.Statement;
-import java.util.EnumSet;
-import java.util.Properties;
-import java.util.Set;
+import java.util.*;
 
 @Service
 @Slf4j
 @RequiredArgsConstructor
 public class SchemaService {
-
+    private final DataSource dataSource;
     //@Autowired
     //private MetadataSources metadataSources;
-    private final LocalContainerEntityManagerFactoryBean entityManagerFactory;
+    //private final LocalContainerEntityManagerFactoryBean entityManagerFactory;
+    private final EntityManagerFactory entityManagerFactory;
     @Value("${images.path}")
     private String imagesFolder;
-    private final CustomLoggerRepository customLoggerRepository;
-
+    private final ColorRepository colorRepository;
     public void updateSchema() {
-        EntityManager entityManager = entityManagerFactory.getNativeEntityManagerFactory().createEntityManager();
+        /*EntityManager entityManager = entityManagerFactory.getNativeEntityManagerFactory().createEntityManager();
         Session session = entityManager.unwrap(Session.class);
 
         session.doWork(connection -> {
             try (Statement statement = connection.createStatement()) {
-                statement.executeUpdate("SET search_path TO " + CurrentDatabase.getCurrentDatabase());
+                String currentDatabase = CurrentDatabase.getCurrentDatabase();
+                statement.executeUpdate("SET search_path TO " + currentDatabase);
             }
         });
         log.info("Switched to schema " + CurrentDatabase.getCurrentDatabase());
-        entityManager.close();
+        entityManager.close();*/
+        String currentDatabase = CurrentDatabase.getCurrentDatabase();
+        if (currentDatabase != null) {
+            EntityManager entityManager = entityManagerFactory.createEntityManager();
+            EntityTransaction transaction = entityManager.getTransaction();
+
+            try {
+                transaction.begin();
+
+                Session session = entityManager.unwrap(Session.class);
+
+                session.doWork(connection -> {
+                    try (Statement statement = connection.createStatement()) {
+                        int rowsAffected = statement.executeUpdate("SET search_path TO " + currentDatabase);
+                        if (rowsAffected == 0) {
+                            log.info("search_path set successfully to " + currentDatabase);
+                        } else {
+                            log.warn("Setting search_path did not affect any rows: " + rowsAffected);
+                        }
+                    }
+                });
+                log.info("Switched to schema " + CurrentDatabase.getCurrentDatabase());
+
+                transaction.commit();
+            } catch (Exception e) {
+                if (transaction.isActive()) {
+                    transaction.rollback();
+                }
+                log.error("Error updating schema", e);
+            } finally {
+                entityManager.close();
+            }
+        }
     }
     public void createSchema(String schemaName) {
-        EntityManager entityManager = entityManagerFactory.getNativeEntityManagerFactory().createEntityManager();
+        //EntityManager entityManager = entityManagerFactory.getNativeEntityManagerFactory().createEntityManager();
+        EntityManager entityManager = entityManagerFactory.createEntityManager();
         Session session = entityManager.unwrap(Session.class);
 
         session.doWork(connection -> {
@@ -84,10 +118,11 @@ public class SchemaService {
     public void createTablesInSchema(String schemaName) {
         StandardServiceRegistry serviceRegistry = new StandardServiceRegistryBuilder()
                 .applySetting("hibernate.dialect", "org.hibernate.dialect.PostgreSQL9Dialect")
-                .applySetting("hibernate.hbm2ddl.auto", "validate")
-                .applySetting("hibernate.show_sql", "false")
-                .applySetting("hibernate.format_sql", "true")
+                //.applySetting("hibernate.hbm2ddl.auto", "validate")
+                //.applySetting("hibernate.show_sql", "false")
+                //.applySetting("hibernate.format_sql", "true")
                 // Add other Hibernate properties here if needed
+                .applySetting("hibernate.connection.datasource", dataSource)
                 .applySetting("hibernate.default_schema", schemaName).build();
 
         MetadataSources sources = new MetadataSources(serviceRegistry);
@@ -97,6 +132,7 @@ public class SchemaService {
         sources.addAnnotatedClass(Image.class);
         sources.addAnnotatedClass(Request.class);
         sources.addAnnotatedClass(RequestImage.class);
+        sources.addAnnotatedClass(Color.class);
 
         Metadata metadata = sources.buildMetadata();
 
@@ -109,6 +145,8 @@ public class SchemaService {
                 serviceRegistry);
 
         log.info("Tables created in schema: " + schemaName);
+
+
     }
 
     public void createTablesInConfigSchema() {
@@ -166,7 +204,8 @@ public class SchemaService {
 
 
     public void deleteSchema(String schemaName) {
-        EntityManager entityManager = entityManagerFactory.getNativeEntityManagerFactory().createEntityManager();
+        //EntityManager entityManager = entityManagerFactory.getNativeEntityManagerFactory().createEntityManager();
+        EntityManager entityManager = entityManagerFactory.createEntityManager();
         Session session = entityManager.unwrap(Session.class);
 
         session.doWork(connection -> {

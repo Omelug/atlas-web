@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="en" th:replace="~{layouts/layout_base::content( _ , ~{::#all})}" xmlns:th="http://www.thymeleaf.org">
+
+
+<div id="headdiv">
+	<div></div>
+</div>
+
+<div id="all">
+	<main>
+		<form action="/submit" method="post">
+		<p>Hello, <br>
+			You can login on  <a th:href="@{/login}" > login page </a>
+			If you dont have account, you can register on  <a th:href="@{/registration}"> registration page </a>
+			<br><br>
+			Contact:
+			</p>
+		</form>
+	</main>
+</div>
+
+
+</html>

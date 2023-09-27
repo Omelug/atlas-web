@@ -14,7 +14,6 @@ import java.util.Objects;
 
 @Getter
 @Setter
-@ToString
 @RequiredArgsConstructor
 @AllArgsConstructor
 @Entity
@@ -66,19 +65,14 @@ public class User {
 			setPassword(password);
 		}
 	}
-
-    public User(RegistrationForm registrationForm) {
-		this.name = registrationForm.getUsername();
-		this.setPassword(registrationForm.getPassword());
-		this.active = true;
-		Date actualDate = new Date();
-		firstLogin = actualDate;
-		lastLogin = actualDate;
-		modifyDate = actualDate;
-    }
-
-    public boolean isActive() {
-		return active;
+	public User(RegistrationForm registrationForm) {
+			this.name = registrationForm.getUsername();
+			this.setPassword(registrationForm.getPassword());
+			this.active = true;
+			Date actualDate = new Date();
+			firstLogin = actualDate;
+			lastLogin = actualDate;
+			modifyDate = actualDate;
 	}
 	public void setActive(boolean active) {
 		this.active = active;

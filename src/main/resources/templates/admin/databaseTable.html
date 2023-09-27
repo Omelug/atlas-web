@@ -3,8 +3,10 @@
     <td th:text="${database.name}"></td>
     <td th:text="${database.databaseAccess}"></td>
     <td th:if="${#lists.size(databaseList) > 1}">
+        <form class="deleteDatabaseForm" th:action="@{/admin/deleteDatabase}" method="post">
         <input type="hidden" name="databaseId" th:value="${database.id}" />
         <button type="submit">X</button>
+        </form>
     </td>
   </tr>
 <style>
@@ -78,4 +80,33 @@
     </div>
   </div>
 </div>
+
+ <script>
+     $(document).on("submit", ".deleteDatabaseForm", function (event) {
+         event.preventDefault();
+         const confirmationMessage = "Are you sure you want to delete this database?";
+         let trToDelete = $(this).closest("tr");
+         const result = confirmAction(confirmationMessage, "Title", "");
+
+         if (result) {
+             console.log("Confirmed");
+             let form = $(this);
+             let formData = form.serialize();
+
+             $.ajax({
+                 type: "POST",
+                 url: form.attr("action"),
+                 data: formData,
+                 success: function (data) {
+                     $("#databaseTable tbody").html(data);
+                 },
+                 error: function (xhr, textStatus, errorThrown) {
+                     console.error("Error deleting database:", textStatus, errorThrown);
+                 },
+             });
+         } else {
+             console.log("Cancelled");
+         }
+     });
+ </script>
 

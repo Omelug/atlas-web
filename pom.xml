@@ -10,6 +10,7 @@
 	<groupId>gymtrebon.zaverecky.vjanecek</groupId>
 	<artifactId>atlas-web</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
+	<packaging>war</packaging>
 	<name>atlas-web</name>
 	<description>WEB project atlas - kytky</description>
 	<properties>
@@ -19,6 +20,11 @@
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.maven.plugins</groupId>
+			<artifactId>maven-dependency-plugin</artifactId>
+			<version>3.6.0</version>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>

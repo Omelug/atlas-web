@@ -3,6 +3,7 @@ package cz.gymtrebon.zaverecky.vjanecek.atlas.service;
 import cz.gymtrebon.zaverecky.vjanecek.atlas.currentdb.CurrentDatabase;
 import cz.gymtrebon.zaverecky.vjanecek.atlas.entity.*;
 import cz.gymtrebon.zaverecky.vjanecek.atlas.repository.ColorRepository;
+import cz.gymtrebon.zaverecky.vjanecek.atlas.repository.CustomLoggerRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
@@ -25,7 +26,9 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.sql.Statement;
-import java.util.*;
+import java.util.EnumSet;
+import java.util.Properties;
+import java.util.Set;
 
 @Service
 @Slf4j
@@ -39,18 +42,8 @@ public class SchemaService {
     @Value("${images.path}")
     private String imagesFolder;
     private final ColorRepository colorRepository;
+    private final CustomLoggerRepository customLoggerRepository;
     public void updateSchema() {
-        /*EntityManager entityManager = entityManagerFactory.getNativeEntityManagerFactory().createEntityManager();
-        Session session = entityManager.unwrap(Session.class);
-
-        session.doWork(connection -> {
-            try (Statement statement = connection.createStatement()) {
-                String currentDatabase = CurrentDatabase.getCurrentDatabase();
-                statement.executeUpdate("SET search_path TO " + currentDatabase);
-            }
-        });
-        log.info("Switched to schema " + CurrentDatabase.getCurrentDatabase());
-        entityManager.close();*/
         String currentDatabase = CurrentDatabase.getCurrentDatabase();
         if (currentDatabase != null) {
             EntityManager entityManager = entityManagerFactory.createEntityManager();
@@ -79,13 +72,13 @@ public class SchemaService {
                     transaction.rollback();
                 }
                 log.error("Error updating schema", e);
+                CurrentDatabase.setCurrentDatabase(null);
             } finally {
                 entityManager.close();
             }
         }
     }
     public void createSchema(String schemaName) {
-        //EntityManager entityManager = entityManagerFactory.getNativeEntityManagerFactory().createEntityManager();
         EntityManager entityManager = entityManagerFactory.createEntityManager();
         Session session = entityManager.unwrap(Session.class);
 
@@ -98,6 +91,12 @@ public class SchemaService {
         log.info("Schema created: " + schemaName);
         entityManager.close();
     }
+
+    private boolean isValidSchemaName(String schemaName) {
+        //TODO look oon the database name restriction around user iinput
+        return true;
+    }
+
     public void createUserSchema(String schemaName) {
         createSchema(schemaName);
 
@@ -216,7 +215,7 @@ public class SchemaService {
         try {
             FileUtils.deleteDirectory(new File(imagesFolder+schemaName));
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            e.printStackTrace();
         }
         log.info("Schema deleted: " + schemaName);
         entityManager.close();

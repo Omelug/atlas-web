@@ -110,21 +110,26 @@ public class RestAPIController {
 	}*/
 	@PostMapping("/request/sendTransportRequestImages")
 	public void handleTransportRequestImages(Principal principal, @RequestBody List<TransportRequestImage> transportRequestImages) {
-		Optional<Request> request = requestRepository.findByRequestMark(transportRequestImages.get(0).getRequestMark());
-		for (TransportRequestImage transportRequestImage : transportRequestImages){
-			File imageFolder = new File(imagesFolder+CurrentDatabase.getCurrentDatabase()+"/user/"+principal.getName()+"/request/images/");
-			imageFolder.mkdirs();
-			File imageFile = new File(imageFolder, String.valueOf(transportRequestImage.getId()));
-			Long id = requestImageRepository.save(new RequestImage(transportRequestImage, request)).getId();
+		int i = 0;
+		File imageFolder = new File(imagesFolder+CurrentDatabase.getCurrentDatabase()+"/user/"+principal.getName()+"/request/images/");
+		imageFolder.mkdirs();
+		File destFolder = new File(imagesFolder+CurrentDatabase.getCurrentDatabase()+"/request/images/");
+		destFolder.mkdirs();
 
-			File destFolder = new File(imagesFolder+CurrentDatabase.getCurrentDatabase()+"/request/images/");
-			destFolder.mkdirs();
+		for (TransportRequestImage transportRequestImage : transportRequestImages){
+			Optional<Request> request = requestRepository.findByRequestMark(transportRequestImages.get(i).getRequestMark());
+			if (request.isEmpty()){
+				continue;
+			}
+			File imageFile = new File(imageFolder, String.valueOf(transportRequestImage.getId()));
+			Long id = requestImageRepository.save(new RequestImage(transportRequestImage, request.get())).getId();
 			File destFile = new File(destFolder, String.valueOf(id));
+			i++;
 			try {
 				FileUtils.moveFile(imageFile,destFile);
 				imageFile.delete();
 			} catch (IOException e) {
-				throw new RuntimeException(e);
+				e.printStackTrace();
 			}
 		}
 	}

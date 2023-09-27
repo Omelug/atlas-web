@@ -1,15 +1,16 @@
 package cz.gymtrebon.zaverecky.vjanecek.atlas.controller;
 
+import cz.gymtrebon.zaverecky.vjanecek.atlas.currentdb.CurrentDatabase;
 import cz.gymtrebon.zaverecky.vjanecek.atlas.entity.*;
 import cz.gymtrebon.zaverecky.vjanecek.atlas.entity.enums.DatabaseAccess;
 import cz.gymtrebon.zaverecky.vjanecek.atlas.log.LogTyp;
 import cz.gymtrebon.zaverecky.vjanecek.atlas.repository.*;
-import cz.gymtrebon.zaverecky.vjanecek.atlas.service.CustomUserDetailsService;
 import cz.gymtrebon.zaverecky.vjanecek.atlas.service.DatabaseBackupService;
 import cz.gymtrebon.zaverecky.vjanecek.atlas.service.SchemaService;
 import cz.gymtrebon.zaverecky.vjanecek.atlas.service.UDRLinkService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,11 +18,13 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.thymeleaf.context.WebContext;
 import org.thymeleaf.spring5.SpringTemplateEngine;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.File;
 import java.io.IOException;
 import java.security.Principal;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 
 
@@ -38,12 +41,12 @@ public class AdminController {
     private final RoleRepository roleRepository;
     private final SchemaService schemaService;
     private final CustomLoggerRepository customLoggerRepository;
-    private final CustomUserDetailsService userDetailsService;
     private final UserFindRepository userFindRepository;
     private final SpringTemplateEngine templateEngine;
-    private final RequestRepository requestRepository;
     private final UDRLinkService udrLinkService;
     private final DatabaseBackupService databaseBackupService;
+    @Value("${images.path}")
+    private String imagesFolder;
 
     @GetMapping("")
     public String adminTools(Model model) {
@@ -99,11 +102,32 @@ public class AdminController {
             List<UDRLink> UDRLinklist = udrLinkRepository.findAllByDatabase(database);
             udrLinkRepository.deleteAll(UDRLinklist);
             databaseRepository.delete(database);
-            //TODO delete remove schema and directories from web and save confirm massage to admin (maybe email)
+            //TODO save confirm massage to admin (maybe email)
             if(databaseBackupService.performDatabaseBackup()){
                 schemaService.deleteSchema(database.getName());
+                File databasePath = new File(imagesFolder+ CurrentDatabase.getCurrentDatabase());
+                if (databasePath.exists() && databasePath.isDirectory()) {
+                    SimpleDateFormat sdf = new SimpleDateFormat("HHmmss_ddMMyyyy");
+                    String currentTime = sdf.format(new Date());
+
+                    File parentDirectory = databasePath.getParentFile();
+                    String newFolderName = databasePath.getName() + "_backup_" + currentTime;
+
+                    int maxNameLength = 255; //255 is Windows, Unix are often longer, so I hope this will be ok
+                    if (newFolderName.length() > maxNameLength) {
+                        newFolderName = newFolderName.substring(0, maxNameLength);
+                    }
+
+                    File newFolderPath = new File(parentDirectory, newFolderName);
+                    if (databasePath.renameTo(newFolderPath)) {
+                        System.out.println("Folder renamed successfully.");
+                    } else {
+                        System.err.println("Failed to rename folder.");
+                    }
+                } else {
+                    System.err.println("The folder does not exist or is not a directory.");
+                }
             }
-            //projde spoje na databazi a nastavi default databazi
             List<User> userList = UDRLinkService.findUsersInUDRList(UDRLinklist);
             for (User user : userList) {
                 List<UDRLink> list = udrLinkRepository.findAllByUserName(user.getName());
@@ -162,7 +186,7 @@ public class AdminController {
             userRepository.save(user);
             return "OK";
         } else {
-            customLoggerRepository.save(new LoggerLine(LogTyp.WARN, principal.getName(), "Activation of account " + user.getName() + " was NOT changed. "));
+            customLoggerRepository.save(new LoggerLine(LogTyp.WARN, principal.getName(), "Activation was NOT changed."));
             return "Oh no!";
         }
 
@@ -215,10 +239,9 @@ public class AdminController {
     @PostMapping("/deleteUDRLink")
     @ResponseBody
     public String deleteUDR(Principal principal,
-                            HttpServletRequest request,
                             HttpServletResponse response,
                             @RequestParam("udrLinkId") Long udrLinkId) {
-        if(udrLinkRepository.getById(udrLinkId).getRole().equals("ADMIN")){
+        if(udrLinkRepository.getById(udrLinkId).getRole().getName().equals("ADMIN")){
             customLoggerRepository.save(new LoggerLine(LogTyp.ERROR, principal.getName(), "ADMIN cant be deleted from WEB"));
             try {
                 response.getWriter().write("ADMIN cant be deleted from WEB");

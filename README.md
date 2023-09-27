@@ -4,11 +4,17 @@
 
 There are lot of things in this project, that should be done.
 So there are some temporary solutions.
+
+## Start Docekr
+1. start daemon```sudo systemctl start docker```(control with ```sudo systemctl status docker```)
+2. give permission too see it from IntelliJ ```sudo chmod 0666 /var/run/docker.sock```
+3. run compose file
+
 ## Start - Installation, database connection
 ```
 sudo git clone https://gitlab.com/gymtrebon/zaverecky/vjanecek/atlas-web.git
 DBeaver - create a database by default tepmlate1 (default database is public)
-        SELECT current_database(); should give you database name
+        SELECT current_database(); should give you database name, if not edit connection and reconnect
         CREATE schema config
         GRANT ALL PRIVILEGES ON SCHEMA config TO <database user>;
         GRANT ALL PRIVILEGES ON SCHEMA public TO <database user>;
@@ -19,8 +25,6 @@ start -> you can upload first data with (in AtlassApplication false/true/true) *
 
 
 ```
-
-
 ## Integrate with your tools
 
 - [ ] [Set up project integrations](https://gitlab.com/gymtrebon/zaverecky/vjanecek/atlas-web/-/settings/integrations)

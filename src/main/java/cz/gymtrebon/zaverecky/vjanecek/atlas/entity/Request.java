@@ -27,7 +27,9 @@ public class Request {
     @GeneratedValue(strategy = GenerationType.IDENTITY, generator = "native")
     @GenericGenerator(name="native", strategy = "native")
     private Long id;
+    @Column(name = "request_mark")
     private String requestMark;
+    @Column(name = "parent_request_mark")
     private String parentRequestMark;
     private Long link;
     private boolean local_visibility;

@@ -1,0 +1,36 @@
+#sudo systemctl start docker
+#sudo chmod 0666 /var/run/docker.sock
+
+version: "2"
+services:
+  postgresql:
+    image: postgres:latest
+    container_name: postgresql
+    hostname: postgresql
+    ports:
+      - "6432:5432"
+    environment:
+      - POSTGRES_USER=atlas
+      - POSTGRES_PASSWORD=atlas
+    networks:
+      - spring-cloud-network
+  atlas_web:
+    container_name: atlas_web
+    hostname: atlas_web
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "9081:8081"
+    depends_on:
+      - postgresql
+    networks:
+      - spring-cloud-network
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgresql:5432/test_database5
+      - SPRING_DATASOURCE_USERNAME=atlas
+      - SPRING_DATASOURCE_PASSWORD=atlas
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+networks:
+  spring-cloud-network:
+    driver: bridge

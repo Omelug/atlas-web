@@ -8,7 +8,6 @@ import lombok.Setter;
 
 import javax.persistence.*;
 import java.util.HashSet;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -21,7 +20,7 @@ import java.util.stream.Collectors;
 public class UserFind {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @OneToOne
@@ -45,8 +44,8 @@ public class UserFind {
 
 
 
-    public UserFind(Optional<User> byName, String name, String name2, Typ typ, String parentGroup, String author, Set<Color> colors, String text, boolean open) {
-        this.user = byName.orElseThrow();
+    public UserFind(User user, String name, String name2, Typ typ, String parentGroup, String author, Set<Color> colors, String text, boolean open) {
+        this.user = user;
         this.name = name;
         this.name2 = name2;
         this.typ = typ;
@@ -57,8 +56,8 @@ public class UserFind {
         this.open = open;
     }
 
-    public UserFind(Optional<User> byName) {
-        this.user = byName.orElseThrow();
+    public UserFind(User user) {
+        this.user = user;
     }
 
     @Override

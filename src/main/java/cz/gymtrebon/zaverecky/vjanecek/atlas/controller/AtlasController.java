@@ -57,6 +57,7 @@ public class AtlasController {
 	private final UDRLinkService udrLinkService;
 	private final DatabaseRepository databaseRepository;
 	private final UserService userService;
+	private final UserFindService userFindService;
 	@GetMapping(value = { ""})
 	public String nothing() {
 		return "redirect:/home";
@@ -90,6 +91,7 @@ public class AtlasController {
 			model.addAttribute("databaseIsSelected", false);
 			return "without_database";
 		}
+		System.out.println("Curren " + CurrentDatabase.getCurrentDatabase());
 		Group group = service.findORcreateGroup();
 		model.addAttribute("home", true);
 		return groupDetail(principal,model, group.getId());
@@ -212,14 +214,11 @@ public class AtlasController {
 	}
 	public void addBase(Principal principal, Model model) {
 		addDatabaseList(principal, model);
-		Optional<UserFind> u = userFindRepository.findByUserName(principal.getName());
-		if (u.isEmpty()) {
-			UserFind userFind = new UserFind(userRepository.findByName(principal.getName()));
-			userFindRepository.save(userFind);
-		}
-		model.addAttribute("item", userFindRepository.findByUserName(principal.getName()).orElse(new UserFind()));
+		UserFind u = userFindService.getUserFind(principal.getName());
+		System.out.println("" + u.getName() + "");
+		model.addAttribute("item", u);
 		model.addAttribute("colorList", colorRepository.findAll());
-		model.addAttribute("foundItems", findService.findItems(userFindRepository.findByUserName(principal.getName()).orElse(new UserFind())));
+		model.addAttribute("foundItems", findService.findItems(u));
 		model.addAttribute("databaseIsSelected", true);
 	}
 
@@ -237,7 +236,7 @@ public class AtlasController {
 		String text = form.getText();
 
 		Optional<UserFind> existingUserFind = userFindRepository.findByUserName(principal.getName());
-		UserFind userFind;
+		UserFind userFind = new UserFind();
 		if (existingUserFind.isPresent()) {
 			userFind = existingUserFind.get();
 			userFind.setOpen(open);
@@ -249,9 +248,12 @@ public class AtlasController {
 			userFind.setColors(colors);
 			userFind.setText(text);
 		}else{
-			userFind = new UserFind(userRepository.findByName(principal.getName()), name, name2, typ, parentGroup, author, colors, text, open);
+			Optional<User> user = userRepository.findByName(principal.getName());
+			if (user.isPresent()) {
+				userFind = new UserFind(user.get(), name, name2, typ, parentGroup, author, colors, text, open);
+				userFindRepository.save(userFind);
+			}
 		}
-		userFindRepository.save(userFind);
 
 		WebContext context = new WebContext(request, response, request.getServletContext());
 		//TODO searching

@@ -24,7 +24,7 @@ public class RepresentativeForm {
 	private String name2;
 	private String author;
 	private String text;
-	private Set<Color> colors; //TODO
+	private Set<Color> colors;
 	List<Photo> images = new ArrayList<>();
 
     public void setColors(Set<Color> colors) {

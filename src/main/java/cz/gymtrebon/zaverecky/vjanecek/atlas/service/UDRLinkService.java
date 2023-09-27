@@ -63,8 +63,8 @@ public class UDRLinkService {
         for (UDRLink udrlink : udrlist){
             set.add(udrlink.getRole().getName());
         }
-        return Arrays.stream(set.toArray(new String[set.size()])).
-                map(SimpleGrantedAuthority::new)
+        return set.stream()
+                .map(SimpleGrantedAuthority::new)
                 .collect(Collectors.toList());
     }
 

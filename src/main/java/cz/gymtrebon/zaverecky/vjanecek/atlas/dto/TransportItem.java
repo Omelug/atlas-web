@@ -13,7 +13,7 @@ public class TransportItem {
 	private String name;
 	private String name2;
 	private String author;
-	private Set<Color> colors; //TODO
+	private Set<Color> colors;
 	private String text;
 }
 

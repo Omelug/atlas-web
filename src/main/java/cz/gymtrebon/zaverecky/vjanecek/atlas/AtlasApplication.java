@@ -46,8 +46,7 @@ public class AtlasApplication implements CommandLineRunner {
 	static String first_database_name = "public";
 
 
-	public static void main(String[] args) {
-		SpringApplication.run(AtlasApplication.class, args);
+	public static void main(String[] args) {SpringApplication.run(AtlasApplication.class, args);
 	}
 
 	@Override

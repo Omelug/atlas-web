@@ -9,7 +9,6 @@ import org.hibernate.annotations.UpdateTimestamp;
 
 import javax.persistence.*;
 import java.util.Date;
-import java.util.Optional;
 
 @Entity
 @Table(name = "imageRequest")
@@ -38,11 +37,8 @@ public class RequestImage {
 	@Column(name = "modifydate")
 	private Date modifyDate;
 
-	public RequestImage(TransportRequestImage transportRequestImage, Optional<Request> request) {
-		if (request.isEmpty()){
-			return;
-		}
-		this.request = request.get();
+	public RequestImage(TransportRequestImage transportRequestImage, Request request) {
+		this.request = request;
 		this.FileName = transportRequestImage.getName();
 		this.createDate = new Date(transportRequestImage.getCreateDate());
 		this.modifyDate = new Date(transportRequestImage.getModifyDate());

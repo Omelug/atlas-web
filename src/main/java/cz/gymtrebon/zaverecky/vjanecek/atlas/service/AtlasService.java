@@ -38,7 +38,6 @@ public class AtlasService {
 			resultItem.setName(CurrentDatabase.getCurrentDatabase());
 			resultItem.setTyp(Typ.ROOT);
 			itemRepository.save(resultItem);
-			//TODO tohle asi presunout
 
 			List<Color> colorList = new ArrayList<>();
 			colorList.add(new Color("black"));

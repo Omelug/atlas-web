@@ -23,4 +23,13 @@ public class UserFindService {
     }
     return userFind.get();
   }
+
+  public void setOpen(String name, boolean open) {
+    Optional<UserFind> userFind = userFindRepository.findByUserName(name);
+    if (userFind.isPresent()){
+      UserFind u = userFind.get();
+      u.setOpen(open);
+      userFindRepository.save(u);
+    }
+  }
 }

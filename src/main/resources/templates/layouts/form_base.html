@@ -1,0 +1,67 @@
+<form th:action="@{/group/save}" th:object="${itemForm}" method="post">
+
+    <input type="hidden" id="inputId" th:field="*{id}">
+
+    <div class="form-row" th:unless="${root == true}">
+        <div class="form-group col-md-6">
+            <label for="idParentGroup" >Parent group</label>
+            <select id="idParentGroup" th:field="*{idParentGroup}">
+                <option value=""></option>
+                <option th:each="s : ${groups}" th:value="${s.id}" th:text="${s.name}" th:selected="${s.id==itemForm.idParentGroup}"></option>
+            </select>
+            <p th:if="${#fields.hasErrors('idParentGroup')}" th:errors="*{idParentGroup}"
+               class="invalid-feedback"></p>
+        </div>
+    </div>
+
+    <div class="form-row">
+        <div class="form-group col-md-6">
+            <label for="inputName">Name</label>
+            <input type="text" class="" id="inputName" placeholder="Group name" th:field="*{name}">
+            <p th:if="${#fields.hasErrors('name')}" th:errors="*{name}" class="invalid-feedback"></p>
+        </div>
+    </div>
+
+    <div class="form-row">
+        <div class="form-group col-md-6">
+            <label for="inputName2">Other names</label>
+            <input type="text" class="" id="inputName2" placeholder="Another name" th:field="*{name2}">
+            <p th:if="${#fields.hasErrors('name2')}" th:errors="*{name2}" class="invalid-feedback"></p>
+        </div>
+    </div>
+
+    <div class="form-row">
+        <label for="colors" class="paramLabel" >Colors:</label>
+        <div class="multi_select_box">
+            <select id="colors" name="colors" class="multi_select" multiple>
+                <option th:each="color : ${colorList}" th:value="${color.name}" th:text="${color.name}" th:selected="${colorsSelected.contains(color.name)}"></option>
+            </select>
+        </div>
+    </div>
+
+    <div class="form-group" >
+        <label for="inputText" class="custom_label">Text</label>
+        <textarea id="inputText" class="" name="text" th:text="${itemForm.text}"
+                  th:field="*{text}">
+				</textarea>
+        <p th:if="${#fields.hasErrors('text')}" th:errors="*{text}" class="invalid-feedback"></p>
+    </div>
+
+    <button class="link-button" type="submit" name="action-save">Save</button>
+    |
+    <button class="link-button" type="submit" name="action-back">Back</button>
+    |
+    <button class="link-button" th:if="${newItem == false && itemForm.idParentGroup != null}" type="submit"
+            name="action-delete">Delete</button>
+
+</form>
+
+<!--
+
+    <button class="link-button" type="submit" name="action-save">Save</button>
+    |
+    <button class="link-button" type="submit" name="action-back">Back</button>
+    |
+    <button class="link-button" th:if="${newItem == false}" type="submit"
+            name="action-delete">Delete</button>
+            -->

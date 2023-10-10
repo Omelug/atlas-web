@@ -3,7 +3,6 @@ package cz.gymtrebon.zaverecky.vjanecek.atlas.controller;
 import cz.gymtrebon.zaverecky.vjanecek.atlas.currentdb.CurrentDatabase;
 import cz.gymtrebon.zaverecky.vjanecek.atlas.dto.Group;
 import cz.gymtrebon.zaverecky.vjanecek.atlas.dto.Representative;
-import cz.gymtrebon.zaverecky.vjanecek.atlas.entity.Color;
 import cz.gymtrebon.zaverecky.vjanecek.atlas.entity.Image;
 import cz.gymtrebon.zaverecky.vjanecek.atlas.entity.User;
 import cz.gymtrebon.zaverecky.vjanecek.atlas.entity.UserFind;
@@ -12,7 +11,10 @@ import cz.gymtrebon.zaverecky.vjanecek.atlas.entity.enums.Typ;
 import cz.gymtrebon.zaverecky.vjanecek.atlas.form.FindForm;
 import cz.gymtrebon.zaverecky.vjanecek.atlas.form.RegistrationForm;
 import cz.gymtrebon.zaverecky.vjanecek.atlas.form.TestForm;
-import cz.gymtrebon.zaverecky.vjanecek.atlas.repository.*;
+import cz.gymtrebon.zaverecky.vjanecek.atlas.repository.ColorRepository;
+import cz.gymtrebon.zaverecky.vjanecek.atlas.repository.DatabaseRepository;
+import cz.gymtrebon.zaverecky.vjanecek.atlas.repository.UserFindRepository;
+import cz.gymtrebon.zaverecky.vjanecek.atlas.repository.UserRepository;
 import cz.gymtrebon.zaverecky.vjanecek.atlas.service.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -35,8 +37,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.security.Principal;
+import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 @Controller
 @RequestMapping("/")
@@ -48,7 +50,6 @@ public class AtlasController {
 
 	private final AtlasService service;
 	private static String text = "";
-	private final UDRLinkRepository udrlinkRepository;
 	private final UserRepository userRepository;
 	private final FindService findService;
 	private final UserFindRepository userFindRepository;
@@ -57,6 +58,7 @@ public class AtlasController {
 	private final UDRLinkService udrLinkService;
 	private final DatabaseRepository databaseRepository;
 	private final UserService userService;
+	private final ColorService colorService;
 	private final UserFindService userFindService;
 	@GetMapping(value = { ""})
 	public String nothing() {
@@ -161,7 +163,6 @@ public class AtlasController {
 	public String detailRepresentative(Principal principal,Model model, @PathVariable("id") Long representativeId) {
 		Representative representative = service.findRepresentativeById(representativeId);
 		model.addAttribute("representative", representative);
-
 		model.addAttribute("breadcrumbs", service.getBreadCrumbs(representativeId));
 
 		addBase(principal, model);
@@ -186,7 +187,7 @@ public class AtlasController {
 	@PreAuthorize("hasAuthority('" + User.USER + "') OR hasAuthority('" + User.EDITOR + "') OR hasAuthority('" + User.ADMIN + "')")
 	@PostMapping("/changeDatabase")
 	//@ResponseBody
-	public String changeDatabase(HttpServletRequest request, HttpServletResponse response, Principal principal, @RequestParam("databaseName") String databaseName) {
+	public String changeDatabase(Principal principal, @RequestParam("databaseName") String databaseName) {
 		User user = userRepository.findByName(principal.getName()).orElse(null);
 		if (user != null && !udrLinkService.getUDRLinks(user, databaseName).isEmpty()) {
 			user.setCurrentDB_name(databaseName);
@@ -194,11 +195,6 @@ public class AtlasController {
 			userDetailsService.updateCustomUserDetails(user.getName());
 			log.info("Everything should work with " + CurrentDatabase.getCurrentDatabase());
 		}
-		//TODO muse se updatovat i detail itemu
-		/*WebContext context = new WebContext(request, response, request.getServletContext());
-		addDatabaseListContext(principal, context);
-		System.out.println("awdaw" + templateEngine.process("layouts/foundItemTable.html", context));
-		return templateEngine.process("layouts/toolbar_left.html", context);*/
 		return "redirect:/home";
 	}
 
@@ -208,14 +204,9 @@ public class AtlasController {
 			model.addAttribute("currentDatabase", CurrentDatabase.getCurrentDatabase());
 		}
 	}
-	public void addDatabaseListContext(Principal principal, WebContext context) {
-		context.setVariable("databaseList", udrLinkService.getDatabaseList(principal.getName()));
-		context.setVariable("currentDatabase", CurrentDatabase.getCurrentDatabase());
-	}
 	public void addBase(Principal principal, Model model) {
 		addDatabaseList(principal, model);
 		UserFind u = userFindService.getUserFind(principal.getName());
-		System.out.println("" + u.getName() + "");
 		model.addAttribute("item", u);
 		model.addAttribute("colorList", colorRepository.findAll());
 		model.addAttribute("foundItems", findService.findItems(u));
@@ -224,7 +215,7 @@ public class AtlasController {
 
 	@PostMapping(value="/find")
 	@ResponseBody
-	public String find(HttpServletRequest request, HttpServletResponse response, Principal principal, @Valid @ModelAttribute("item") FindForm form) {
+	public String find(@RequestParam("colors") List<String> colors, HttpServletRequest request, HttpServletResponse response, Principal principal, @Valid @ModelAttribute("item") FindForm form) {
 
 		boolean open = form.isOpen();
 		String name = form.getName();
@@ -232,7 +223,6 @@ public class AtlasController {
 		Typ typ = form.getTyp();
 		String parentGroup = form.getParentGroup();
 		String author = form.getAuthor();
-		Set<Color> colors = form.getColors();
 		String text = form.getText();
 
 		Optional<UserFind> existingUserFind = userFindRepository.findByUserName(principal.getName());
@@ -245,12 +235,12 @@ public class AtlasController {
 			userFind.setTyp(typ);
 			userFind.setParentGroup(parentGroup);
 			userFind.setAuthor(author);
-			userFind.setColors(colors);
+			userFind.setColors(colorService.getColorsObject(colors));
 			userFind.setText(text);
 		}else{
 			Optional<User> user = userRepository.findByName(principal.getName());
 			if (user.isPresent()) {
-				userFind = new UserFind(user.get(), name, name2, typ, parentGroup, author, colors, text, open);
+				userFind = new UserFind(user.get(), name, name2, typ, parentGroup, author, null, text, open); //TODO nahradit null za colors
 				userFindRepository.save(userFind);
 			}
 		}

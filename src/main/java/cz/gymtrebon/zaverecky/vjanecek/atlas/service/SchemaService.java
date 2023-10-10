@@ -2,6 +2,7 @@ package cz.gymtrebon.zaverecky.vjanecek.atlas.service;
 
 import cz.gymtrebon.zaverecky.vjanecek.atlas.currentdb.CurrentDatabase;
 import cz.gymtrebon.zaverecky.vjanecek.atlas.entity.*;
+import cz.gymtrebon.zaverecky.vjanecek.atlas.log.LogTyp;
 import cz.gymtrebon.zaverecky.vjanecek.atlas.repository.ColorRepository;
 import cz.gymtrebon.zaverecky.vjanecek.atlas.repository.CustomLoggerRepository;
 import lombok.RequiredArgsConstructor;
@@ -35,9 +36,6 @@ import java.util.Set;
 @RequiredArgsConstructor
 public class SchemaService {
     private final DataSource dataSource;
-    //@Autowired
-    //private MetadataSources metadataSources;
-    //private final LocalContainerEntityManagerFactoryBean entityManagerFactory;
     private final EntityManagerFactory entityManagerFactory;
     @Value("${images.path}")
     private String imagesFolder;
@@ -104,12 +102,12 @@ public class SchemaService {
         if (!folder.exists()) {
             boolean folderCreated = folder.mkdirs();
             if (folderCreated) {
-                //customLoggerRepository.save(new LoggerLine(LogTyp.INFO, "databaseCreation", "Folder for  "+schemaName+" created"));
+                customLoggerRepository.save(new LoggerLine(LogTyp.INFO, "databaseCreation", "Folder for  "+schemaName+" created"));
             } else {
-                //customLoggerRepository.save(new LoggerLine(LogTyp.ERROR, "databaseCreation", "Failed to create the folder "+ folder.getAbsolutePath()));
+                customLoggerRepository.save(new LoggerLine(LogTyp.ERROR, "databaseCreation", "Failed to create the folder "+ folder.getAbsolutePath()));
             }
         } else {
-            //customLoggerRepository.save(new LoggerLine(LogTyp.ERROR, "databaseCreation", "Folder for  "+schemaName+" already exists"));
+            customLoggerRepository.save(new LoggerLine(LogTyp.ERROR, "databaseCreation", "Folder for  "+schemaName+" already exists"));
         }
 
     }
@@ -117,16 +115,11 @@ public class SchemaService {
     public void createTablesInSchema(String schemaName) {
         StandardServiceRegistry serviceRegistry = new StandardServiceRegistryBuilder()
                 .applySetting("hibernate.dialect", "org.hibernate.dialect.PostgreSQL9Dialect")
-                //.applySetting("hibernate.hbm2ddl.auto", "validate")
-                //.applySetting("hibernate.show_sql", "false")
-                //.applySetting("hibernate.format_sql", "true")
-                // Add other Hibernate properties here if needed
                 .applySetting("hibernate.connection.datasource", dataSource)
                 .applySetting("hibernate.default_schema", schemaName).build();
 
         MetadataSources sources = new MetadataSources(serviceRegistry);
 
-        // Add the entity classes
         sources.addAnnotatedClass(Item.class);
         sources.addAnnotatedClass(Image.class);
         sources.addAnnotatedClass(Request.class);
@@ -203,7 +196,6 @@ public class SchemaService {
 
 
     public void deleteSchema(String schemaName) {
-        //EntityManager entityManager = entityManagerFactory.getNativeEntityManagerFactory().createEntityManager();
         EntityManager entityManager = entityManagerFactory.createEntityManager();
         Session session = entityManager.unwrap(Session.class);
 

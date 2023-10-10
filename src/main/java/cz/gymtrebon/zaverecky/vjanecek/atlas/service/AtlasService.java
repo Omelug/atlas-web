@@ -55,23 +55,16 @@ public class AtlasService {
 			colorRepository.saveAll(colorList);
 
 			return ItemToGroup(resultItem);
-		}else{
-			return ItemToGroup(item.get());
-		}
-    }
+			}else{
+				return ItemToGroup(item.get());
+			}
+	}
 
 	public List<BreadCrumb> breadCrumbList() {
 		List<BreadCrumb> groups = new ArrayList<>();
-		Item root = itemRepository.findByTyp(Typ.ROOT).orElse(null);
-		/*if (root != null) {
-			groups.add(ItemToBreadCrumb(root));
-		}*/
-		for (Item Item : itemRepository.findAllByTyp(Typ.GROUP)) {
-			BreadCrumb bc = new BreadCrumb();
-			bc.setId(Item.getId());
-			bc.setName(Item.getName());
-			bc.setTyp(Item.getTyp());
-			groups.add(bc);
+   itemRepository.findByTyp(Typ.ROOT).ifPresent(root -> groups.add(itemToBreadCrumb(root)));
+   for (Item group : itemRepository.findAllByTyp(Typ.GROUP)) {
+			groups.add(itemToBreadCrumb(group));
 		}
 		return groups;
 	}
@@ -94,7 +87,7 @@ public class AtlasService {
 		return representative;
 	}
 
-	public Long createGroup(Long idParentGroup, String name, String text) {
+	public Long createGroup(Long idParentGroup, String name, String text, Set<Color> colors) {
 
 		Item parent = itemRepository.getById(idParentGroup);
 
@@ -103,11 +96,13 @@ public class AtlasService {
 		item.setText(text);
 		item.setTyp(Typ.GROUP);
 		item.setParentGroup(parent);
+		item.setColors(colors);
 		itemRepository.save(item);
+
 		return item.getId();
 	}
 
-	public Long saveGroup(Long parentId, Long groupId, String name, String text) {
+	public Long saveGroup(Long parentId, Long groupId, String name, String text, Set<Color> colors) {
 		Item group = itemRepository.getById(groupId);
 		if (group.getTyp() != Typ.ROOT) {
 			Item parent = itemRepository.getById(parentId);
@@ -116,6 +111,7 @@ public class AtlasService {
 		group.setName(name);
 		group.setText(text);
 		group.setTyp(Typ.GROUP);
+		group.setColors(colors);
 		itemRepository.save(group);
 		return group.getId();
 	}
@@ -200,14 +196,13 @@ public class AtlasService {
 		}
 		if (item.getImages() != null) {
 			for (Image Image : item.getImages()) {
-				r.getImages().add(PhotoFromImage(Image));
+				r.getImages().add(photoFromImage(Image));
 			}
 		}
-
 		return r;
 	}
 
-	public Photo PhotoFromImage(Image Image) {
+	public Photo photoFromImage(Image Image) {
 		Photo photo = new Photo();
 		photo.setId(Image.getId());
 		photo.setName(Image.getFileName());
@@ -215,12 +210,12 @@ public class AtlasService {
 		return photo;
 	}
 
-	public BreadCrumb ItemToBreadCrumb(Item Item) {
-		BreadCrumb p = new BreadCrumb();
-		p.setId(Item.getId());
-		p.setName(Item.getName());
-		p.setTyp(Item.getTyp());
-		return p;
+	public BreadCrumb itemToBreadCrumb(Item Item) {
+		BreadCrumb breadCrumb = new BreadCrumb();
+		breadCrumb.setId(Item.getId());
+		breadCrumb.setName(Item.getName());
+		breadCrumb.setTyp(Item.getTyp());
+		return breadCrumb;
 	}
 
 	public void uploadImage(Long ItemId, MultipartFile file) {
@@ -241,7 +236,6 @@ public class AtlasService {
 			log.error("Error while saving image", e);
 		}
 	}
-	//for uploading start data files
 	public void uploadImage(Long ItemId, File file) {
 
 		Item p = itemRepository.getById(ItemId);

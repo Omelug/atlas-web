@@ -45,20 +45,18 @@ public class UserRegistrationController {
 
         }catch (BadCredentialsException e){
             customLoggerRepository.save(new LoggerLine(LogTyp.ERROR, jwtRequest.getName(), "User failed to login with password " + jwtRequest.getPassword()));
-            e.printStackTrace();
             return new JWTResponse();
         }
 
         final CustomUserDetails userDetails = userService.loadUserByUsername(jwtRequest.getName());
         final String token = jwtUtility.generateToken(userDetails);
         return new JWTResponse(token);
-
     }
 
     @GetMapping("/userinfo")
     public ResponseEntity<String> userinfo(@RequestHeader (name="Authorization") String token) {
         CustomUserDetails userDetails = userService.loadUserByUsername(jwtUtility.getUsernameFromToken(token));
-       if (validate(token, userDetails, "EDITOR")){
+       if (validate(token, userDetails, "EDITOR") || validate(token, userDetails, "ADMIN")){
            ResponseEntity.ok("User has EDITOR role");
        }
        return noAuthError();

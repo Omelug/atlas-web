@@ -8,7 +8,7 @@ import java.util.Date;
 @Data
 public class UserDto {
 
- 	@NotBlank(message = "Řekněte jméno!")
+	@NotBlank(message = "User needs name!")
 	private String name;
 	@NotBlank(message = "Password!")
 	private String password;

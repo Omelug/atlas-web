@@ -38,7 +38,7 @@ public class UserFind {
     @Column( length=250)
     private String author;
     @Column( length=250)
-    private String color;
+    private String color; //TODO
     @Column( length=2500)
     private String text;
 
@@ -104,4 +104,5 @@ public class UserFind {
     public Set<Color>  getColors() {
         return deserializeColors(color);
     }
+
 }

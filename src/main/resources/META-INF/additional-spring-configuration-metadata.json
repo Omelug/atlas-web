@@ -1,0 +1,18 @@
+{
+  "properties": [
+    {
+      "name": "jwt.token.expiration",
+      "type": "java.lang.String",
+      "description": "Expiration time for jwt tokens in seconds."
+    },
+    {
+      "name": "app.jwttoken.message",
+      "type": "java.lang.String",
+      "description": "JWT token message."
+    },
+    {
+      "name": "app.name",
+      "type": "java.lang.String",
+      "description": "Name of the whole app."
+    }
+  ] }

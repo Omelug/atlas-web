@@ -84,7 +84,6 @@ public class AdminController {
         database.setDatabaseAccess(DatabaseAccess.PUBLIC);
         databaseRepository.save(database);
 
-        //create schema for database
         schemaService.createUserSchema(databaseName);
         schemaService.createTablesInSchema(databaseName);
         return generateTableFragmentHtml(request, response, databaseRepository.findAllByOrderByName());
@@ -110,15 +109,7 @@ public class AdminController {
                     SimpleDateFormat sdf = new SimpleDateFormat("HHmmss_ddMMyyyy");
                     String currentTime = sdf.format(new Date());
 
-                    File parentDirectory = databasePath.getParentFile();
-                    String newFolderName = databasePath.getName() + "_backup_" + currentTime;
-
-                    int maxNameLength = 255; //255 is Windows, Unix are often longer, so I hope this will be ok
-                    if (newFolderName.length() > maxNameLength) {
-                        newFolderName = newFolderName.substring(0, maxNameLength);
-                    }
-
-                    File newFolderPath = new File(parentDirectory, newFolderName);
+                    File newFolderPath = getFile(databasePath, currentTime);
                     if (databasePath.renameTo(newFolderPath)) {
                         System.out.println("Folder renamed successfully.");
                     } else {
@@ -141,6 +132,20 @@ public class AdminController {
         }
         return generateTableFragmentHtml(request, response, databaseRepository.findAllByOrderByName());
     }
+
+    private static File getFile(File databasePath, String currentTime) {
+        File parentDirectory = databasePath.getParentFile();
+        String newFolderName = databasePath.getName() + "_backup_" + currentTime;
+
+        int maxNameLength = 255; //255 is Windows, Unix are often longer, so I hope this will be ok
+        if (newFolderName.length() > maxNameLength) {
+            newFolderName = newFolderName.substring(0, maxNameLength);
+        }
+
+        File newFolderPath = new File(parentDirectory, newFolderName);
+        return newFolderPath;
+    }
+
     private String generateTableFragmentHtml(HttpServletRequest request, HttpServletResponse response, List<Database> databaseList) {
         System.out.println("HOH2" + databaseList);
         WebContext context = new WebContext(request, response, request.getServletContext());

@@ -16,7 +16,6 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.context.annotation.Bean;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
-import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.util.ResourceUtils;
 import org.springframework.web.multipart.commons.CommonsMultipartResolver;
 
@@ -35,14 +34,12 @@ import java.util.Map;
 public class AtlasApplication implements CommandLineRunner {
 
 	private final ItemRepository itemRepository;
-	private final ImageRepository ImageRepo;
 	private final UDRLinkRepository udrLinkRepository;
 	private final UserRepository userRepo;
 	private final DatabaseRepository dataRepo;
 	private final RoleRepository roleRepo;
 	private final AtlasService atlasService;
 	private final SchemaService schemaService;
-	private final LocalContainerEntityManagerFactoryBean entityManagerFactory;
 	static String first_database_name = "public";
 
 
@@ -52,24 +49,34 @@ public class AtlasApplication implements CommandLineRunner {
 	@Override
 	public void run(String ... args) throws Exception {
 		log.info("Atlas Command Line Runner");
+		boolean start1 = false;
+		boolean start2 = false;
+		boolean testData = false;
+		for (String arg : args) {
+			switch (arg){
+				case "start1":
+					start1 = true;
+				case "start2":
+					start2 = true;
+				case "testData":
+					testData = true;
+			}
+		}
+
+
 		File directory = new File("../atlas-web/src/main/resources/pokusna_data/images");
 		System.out.println(directory.getAbsolutePath());
 
-		if (false) {
-			//TODO spusteni poprve, potom to nějak oddelit
-			//schemaService.createSchema(AppSettings.CONFIG_TABLE);
+		if (start1) {
 			CurrentDatabase.setCurrentDatabase(first_database_name);
-			//schemaService.createUserSchema(first_database_name);
-			//schemaService.createTablesInConfigSchema();
 			schemaService.createTablesInSchema(first_database_name);
 		}
 
-		if (false){
+		if (start2){
 			CurrentDatabase.setCurrentDatabase(first_database_name);
 			Database firstDB = new Database(first_database_name);
 			firstDB.setDatabaseAccess(DatabaseAccess.PUBLIC);
 			dataRepo.save(firstDB);
-			Database first_database = dataRepo.findByName(first_database_name).get();
 			User admin = userRepo.save(new User("admin", "$2a$10$X3iBZZQgGfvxx4olu6YwCebHTBiV9iqcEAN3Anb4VbljJZV3oGhPa", first_database_name)); //TODO mozna staci admin
 
 			Role adminrole = roleRepo.save(new Role("ADMIN"));
@@ -80,33 +87,26 @@ public class AtlasApplication implements CommandLineRunner {
 
 		}
 
-		if (false) {
+		if (testData) {
 			CurrentDatabase.setCurrentDatabase(first_database_name);
-			Map<Long, Long> mapovaniimageId = new HashMap<>();
 			Map<Long, Long> mapovaniId = new HashMap<>();
 
-			//Item p = new itemRepository.findByTyp(Typ.ROOT).get();
-			/*p.setParentGroup(null);
-			p.setName("ATLAS");
-			p.setTyp(Typ.ROOT);
-			ItemRepo.save(p);*/
-
-			mapovaniId.put(0L, itemRepository.findByTyp(Typ.ROOT).get().getId());
+			mapovaniId.put(0L, itemRepository.findByTyp(Typ.ROOT).orElseThrow().getId());
 
 			File flowers = ResourceUtils.getFile("classpath:data/FLOWER.csv");
 			List<String[]> flowerList = readAllLines(flowers);
 			for (int i = 1; i < flowerList.size(); i++) {
 				String[] Item = flowerList.get(i);
-				long itemId = Integer.valueOf(Item[0]);
-				long parentId = Integer.valueOf(Item[1]);
+				long itemId = Integer.parseInt(Item[0]);
+				long parentId = Integer.parseInt(Item[1]);
 
 				Item pol = new Item();
 				Item parent = itemRepository.getById(mapovaniId.get(parentId));
 				pol.setParentGroup(parent);
-				if (Integer.valueOf(Item[2]) == 1) {
+				if (Integer.parseInt(Item[2]) == 1) {
 					pol.setTyp(Typ.GROUP);
 				}
-				if (Integer.valueOf(Item[2]) == 0) {
+				if (Integer.parseInt(Item[2]) == 0) {
 					pol.setTyp(Typ.REPRESENTATIVE);
 				}
 				pol.setName(Item[3]);
@@ -126,7 +126,7 @@ public class AtlasApplication implements CommandLineRunner {
 			File imagesFolder = ResourceUtils.getFile("classpath:data/images/AppVitek2022");
 			for (int i = 1; i < imageList.size();i++) {
 				String[] Item = imageList.get(i);
-				long parentId = Long.valueOf(Item[1]);
+				long parentId = Long.parseLong(Item[1]);
 
 				String nameFromCsv = Item[2];
 				String[] parts = nameFromCsv.split("/");
@@ -136,13 +136,12 @@ public class AtlasApplication implements CommandLineRunner {
 				atlasService.uploadImage(mapovaniId.get(parentId), imageFile);
 			}
 		}
-
 	}
+
 
 	@Bean(name = "multipartResolver")
 	public CommonsMultipartResolver multipartResolver() {
-	    CommonsMultipartResolver multipartResolver = new CommonsMultipartResolver(); 
-	    return multipartResolver;
+	    return new CommonsMultipartResolver();
 	}		
 	
 	public List<String[]> readAllLines(File file) throws Exception {

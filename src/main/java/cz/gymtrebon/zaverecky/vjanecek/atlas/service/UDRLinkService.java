@@ -5,14 +5,16 @@ import cz.gymtrebon.zaverecky.vjanecek.atlas.entity.Database;
 import cz.gymtrebon.zaverecky.vjanecek.atlas.entity.UDRLink;
 import cz.gymtrebon.zaverecky.vjanecek.atlas.entity.User;
 import cz.gymtrebon.zaverecky.vjanecek.atlas.repository.DatabaseRepository;
-import cz.gymtrebon.zaverecky.vjanecek.atlas.repository.RoleRepository;
 import cz.gymtrebon.zaverecky.vjanecek.atlas.repository.UDRLinkRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Service;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -21,7 +23,6 @@ public class UDRLinkService {
 
     private final UDRLinkRepository udrlinkRepository;
     private final DatabaseRepository databaseRepository;
-    private final RoleRepository roleRepository;
 
     public static List<User> findUsersInUDRList(List<UDRLink> udrLinklist) {
         Set<User> userSet = new HashSet<>();
@@ -68,7 +69,7 @@ public class UDRLinkService {
                 .collect(Collectors.toList());
     }
 
-    public List<UDRLink> getUDRLinks(User user, String databaseName) {;
+    public List<UDRLink> getUDRLinks(User user, String databaseName) {
         if (isAdmin(user)) {
             return udrlinkRepository.findAllByUserName(user.getName());
         }

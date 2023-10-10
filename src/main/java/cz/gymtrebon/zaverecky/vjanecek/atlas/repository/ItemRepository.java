@@ -15,11 +15,4 @@ public interface ItemRepository extends JpaRepository<Item, Long> {
 	List<Item> findAllByTyp(Typ typ);
 	List<Item> findByParentGroupAndTyp(Item Item, Typ typ);
 	List<Item> findAll(Specification<Item> specification);
-	//List<Item> findByTypAndNameContainingAndName2ContainingAndAuthorContainingAndColorContainingAndTextContainingAndParentGroupContaining(Typ typ, String name, String name2, String author, String color, String text, String parentGroup);
-
-    //@Query("SELECT new cz.gymtrebon.zaverecky.vjanecek.atlas.dto.BreadCrumb(i.id, i.name, i.parentGroup.id) FROM Item i WHERE i.id = :id AND i.name = :name AND i.parentGroup = :parentGroup")
-	//Optional<BreadCrumb> findBreadCrumbById(@Param("id") Integer id);
-
-	//@Query("SELECT new com.example.BreadCrumbDTO(i.id, i.name) FROM Item i WHERE i.parentGroup = :parentGroup AND i.typ = :typ")
-	//List<BreadCrumb> findBreadCrumbsByParentGroupAndTyp(@Param("parentGroup") Item parentGroup, @Param("typ") Typ typ);
 }

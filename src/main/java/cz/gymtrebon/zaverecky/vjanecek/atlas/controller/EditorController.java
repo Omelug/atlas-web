@@ -6,11 +6,12 @@ import cz.gymtrebon.zaverecky.vjanecek.atlas.entity.Item;
 import cz.gymtrebon.zaverecky.vjanecek.atlas.entity.Request;
 import cz.gymtrebon.zaverecky.vjanecek.atlas.entity.User;
 import cz.gymtrebon.zaverecky.vjanecek.atlas.entity.enums.Typ;
-import cz.gymtrebon.zaverecky.vjanecek.atlas.form.GroupForm;
-import cz.gymtrebon.zaverecky.vjanecek.atlas.form.RepresentativeForm;
+import cz.gymtrebon.zaverecky.vjanecek.atlas.form.ItemForm;
 import cz.gymtrebon.zaverecky.vjanecek.atlas.repository.ItemRepository;
 import cz.gymtrebon.zaverecky.vjanecek.atlas.repository.RequestRepository;
 import cz.gymtrebon.zaverecky.vjanecek.atlas.service.AtlasService;
+import cz.gymtrebon.zaverecky.vjanecek.atlas.service.ColorService;
+import cz.gymtrebon.zaverecky.vjanecek.atlas.service.UserFindService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -26,6 +27,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import java.security.Principal;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 @Controller
@@ -39,6 +42,8 @@ public class EditorController {
     private final AtlasController atlasController;
     private final RequestRepository requestRepository;
     private final SpringTemplateEngine templateEngine;
+    private final UserFindService userFindService;
+    private final ColorService colorService;
 
     @GetMapping("/requests")
     public String requests(Principal principal,Model model) {
@@ -51,45 +56,51 @@ public class EditorController {
 
     @GetMapping("/group/newItem")
     public String newGroup(Principal principal,Model model,
-            @RequestParam("idParentGroup") Optional<Long> idParentGroup ) {
-        GroupForm form = new GroupForm();
+            @RequestParam("idParentGroup") Optional<Long> idParentGroup, @RequestParam("open") boolean open ) {
+        ItemForm form = new ItemForm();
         if (idParentGroup.isPresent()) {
             form.setIdParentGroup(idParentGroup.get());
             model.addAttribute("originalParentId", idParentGroup.get());
             model.addAttribute("breadcrumbs", service.getBreadCrumbs(idParentGroup.get()));
         }
+        userFindService.setOpen(principal.getName(), open);
         model.addAttribute("groups", service.breadCrumbList());
-        model.addAttribute("group", form);
+        model.addAttribute("itemForm", form);
+        model.addAttribute("colorsSelected", new ArrayList<String>());
         model.addAttribute("newItem", true);
 
         atlasController.addBase(principal, model);
         return "group-form";
     }
-    @PostMapping(value="/group/save", params="action-save")
-    public String groupEditSave(Principal principal, Model model, @Valid @ModelAttribute("group") GroupForm form, BindingResult bindingResult) {
 
-        boolean newGroup = form.getId() == null;
+    @PostMapping(value="/group/save", params="action-save")
+    public String groupEditSave(Principal principal, @RequestParam("colors") List<String> colors, Model model, @Valid @ModelAttribute("itemForm") ItemForm itemForm, BindingResult bindingResult) {
+
+        boolean newGroup = itemForm.getId() == null;
         model.addAttribute("groups", service.breadCrumbList());
 
+
         if (bindingResult.hasErrors()) {
-            breadCrumbsCorrection(model, form.getIdParentGroup());
+            breadCrumbsCorrection(model, itemForm.getIdParentGroup());
             atlasController.addBase(principal, model);
+            model.addAttribute("colorsSelected", colors);
             return "group-form";
         }
-
         Long groupId;
         if (newGroup) {
             groupId = service.createGroup(
-                    form.getIdParentGroup(),
-                    form.getName(),
-                    form.getText());
+                    itemForm.getIdParentGroup(),
+                    itemForm.getName(),
+                    itemForm.getText(),
+                    colorService.getColorsObject(colors));
 
         } else {
             groupId = service.saveGroup(
-                    form.getIdParentGroup(),
-                    form.getId(),
-                    form.getName(),
-                    form.getText());
+                    itemForm.getIdParentGroup(),
+                    itemForm.getId(),
+                    itemForm.getName(),
+                    itemForm.getText(),
+                    colorService.getColorsObject(colors));
         }
         return "redirect:/group/" + groupId;
     }
@@ -109,32 +120,25 @@ public class EditorController {
     @GetMapping("/group/root/edit")
     public String editGroup(Principal principal,
                             Model model) {
-        Item root = itemRepository.findByTyp(Typ.ROOT).get();
-        GroupForm form = new GroupForm();
-        form.setId(root.getId());
-        form.setName(root.getName());
-        form.setText(root.getText());
+        Optional<Item> root = itemRepository.findByTyp(Typ.ROOT);
+        if (root.isPresent()) {
+            ItemForm form = new ItemForm(root.get());
+            model.addAttribute("groups", service.breadCrumbList());
+            model.addAttribute("group", form);
+            model.addAttribute("newItem", false);
+            model.addAttribute("root", true);
 
-        model.addAttribute("groups", service.breadCrumbList());
-        model.addAttribute("group", form);
-        model.addAttribute("newItem", false);
-        model.addAttribute("root", true);
-
-        atlasController.addBase(principal, model);
-        return "group-form";
+            atlasController.addBase(principal, model);
+            return "group-form";
+        }
+        return "redirect:/home";
     }
 
     @GetMapping("/group/{id}/edit")
-    public String editGroup(Principal principal,
-            @PathVariable("id") Long id,
-            Model model) {
+    public String editGroup(Principal principal, @PathVariable("id") Long id, Model model) {
 
         Group group = service.findGroupById(id);
-        GroupForm form = new GroupForm();
-        form.setId(group.getId());
-        form.setIdParentGroup(group.getIdParentGroup());
-        form.setName(group.getName());
-        form.setText(group.getText());
+        ItemForm form = new ItemForm(group);
 
         model.addAttribute("groups", service.breadCrumbList());
         model.addAttribute("group", form);
@@ -144,11 +148,8 @@ public class EditorController {
         atlasController.addBase(principal, model);
         return "group-form";
     }
-    //recursive
     @PostMapping(value="/group/save", params="action-delete")
-    public String groupDelete(
-            @ModelAttribute("group") GroupForm form) {
-        log.info("form id  is " + form.getId() );
+    public String groupDelete(@ModelAttribute("group") ItemForm form) {
         if (!(form.getId() == null)) {
             service.removeGroup(form.getId());
         }
@@ -160,7 +161,7 @@ public class EditorController {
     @PostMapping(value="/group/save", params="action-back")
     public String groupEditBack(
             Model model,
-            @ModelAttribute("group") GroupForm form) {
+            @ModelAttribute("group") ItemForm form) {
         boolean newGroup = form.getId() == null;
         if (newGroup) {
             Integer originalParentId = (Integer) model.getAttribute("originalParentId");
@@ -174,7 +175,7 @@ public class EditorController {
             @RequestParam("idParentGroup") Optional<Long> idParentGroup,
             Model model) {
 
-        RepresentativeForm form = new RepresentativeForm();
+        ItemForm form = new ItemForm();
         if (idParentGroup.isPresent()) {
             form.setIdParentGroup(idParentGroup.get());
             model.addAttribute("originalParentId", idParentGroup.get());
@@ -188,18 +189,15 @@ public class EditorController {
     }
 
     @GetMapping("/representative/{id}/edit")
-    public String editRepresentative(Principal principal,
-            @PathVariable("id") Long id,
-                                     Model model) {
+    public String editRepresentative(Principal principal, @PathVariable("id") Long id, Model model) {
 
         Representative representative = service.findRepresentativeById(id);
-        RepresentativeForm form = new RepresentativeForm();
+        ItemForm form = new ItemForm();
         form.setId(representative.getId());
         form.setIdParentGroup(representative.getIdParentGroup());
         form.setName(representative.getName());
         form.setName2(representative.getName2());
         form.setAuthor(representative.getAuthor());
-        form.setColors(representative.getColors());
         form.setText(representative.getText());
         form.setImages(representative.getImages());
 
@@ -213,7 +211,7 @@ public class EditorController {
 
     @PostMapping(value="/representative/save", params="action-delete")
     public String representativeDelete(
-            @ModelAttribute("representative") RepresentativeForm form) {
+            @ModelAttribute("representative") ItemForm form) {
         if (!(form.getId() == null)) {
             service.removeItem(form.getId());
         }
@@ -224,7 +222,7 @@ public class EditorController {
     @PostMapping(value="/representative/save", params="action-back")
     public String representativeEditBack(
             Model model,
-            @ModelAttribute("representative") RepresentativeForm form) {
+            @ModelAttribute("representative") ItemForm form) {
         boolean newRepresentative = form.getId() == null;
         if (newRepresentative) {
             Integer originalParentId = (Integer) model.getAttribute("originalParentId");
@@ -236,8 +234,8 @@ public class EditorController {
 
     @PostMapping(value="/representative/save", params="action-save")
     public String representativeEditSave(Principal principal,
-            Model model,
-            @Valid @ModelAttribute("representative") RepresentativeForm form,
+            Model model, @RequestParam("colors") List<String> colors,
+            @Valid @ModelAttribute("representative") ItemForm form,
             BindingResult bindingResult) {
 
         boolean newRepresentative = form.getId() == null;
@@ -245,6 +243,7 @@ public class EditorController {
 
         if (bindingResult.hasErrors()) {
             atlasController.addBase(principal, model);
+            model.addAttribute("colorsSelected", colors);
             return "representative-form";
         }
 
@@ -255,7 +254,7 @@ public class EditorController {
                     form.getName(),
                     form.getName2(),
                     form.getAuthor(),
-                    form.getColors(),
+                    colorService.getColorsObject(colors),
                     form.getText()
             );
         } else {
@@ -265,7 +264,7 @@ public class EditorController {
                     form.getName(),
                     form.getName2(),
                     form.getAuthor(),
-                    form.getColors(),
+                    colorService.getColorsObject(colors),
                     form.getText()
             );
         }
@@ -299,6 +298,5 @@ public class EditorController {
         String text = templateEngine.process("editor/selectedRequest.html", context);
         log.info(text);
         return templateEngine.process("editor/selectedRequest.html", context);
-        //return "test";
     }
 }

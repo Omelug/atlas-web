@@ -1,54 +1,50 @@
-.multi_select {
+//cd /src/main/resources/static/css sudo sass --watch main.scss:main.css --style expanded
+$input_text_color: #000000;
+$input_bg_color: #787e83;
+$a_color: #787e83;
+.multi_select{
   font-size: 14px;
 }
-
-.multi_select_box {
+.multi_select_box{
   width: 200px;
 }
-
-.multi_select_box select {
+.multi_select_box select{
   width: 100%;
   margin: 0;
 }
-
-.multi_select_box button {
-  color: #000000;
+.multi_select_box button{
+  color: $input_text_color;
 }
-
 body {
   margin: 2em auto;
   max-width: 80%;
   background-color: #d5e6e8;
   line-height: 1.2;
 }
-
-input {
-  background-color: #787e83;
+input{
+  background-color: $input_bg_color;
+  border: none;
+  outline: none;
+  box-shadow: none;
+}
+input[type="text"]:focus {
+  border: none;
+  outline: none;
+  box-shadow: none;
+}
+.dropdown-toggle, .dropdown-menu{
+  background-color: $input_bg_color;
   border: none;
   outline: none;
   box-shadow: none;
 }
 
-input[type=text]:focus {
-  border: none;
-  outline: none;
-  box-shadow: none;
-}
-
-.dropdown-toggle, .dropdown-menu {
-  background-color: #787e83;
-  border: none;
-  outline: none;
-  box-shadow: none;
-}
-
-select {
-  background-color: #787e83;
+select{
+  background-color: $input_bg_color;
   border: 1px;
-  outline: 1px solid #787e83;
+  outline: 1px solid $input_bg_color;
 }
-
-h2 {
+h2{
   font-family: "Times New Roman", Times, serif;
   font-size: 19px;
   word-spacing: 0;
@@ -69,143 +65,121 @@ h2 {
   font-weight: normal;
 }
 
-p {
-  font-family: "Times New Roman", Times, serif;
+p{
+  font-family: "Times New Roman", Times,serif;
 }
 
-.centerDiv {
+.centerDiv{
   margin: auto;
   width: 50%;
   padding: 10px;
 }
-
-a {
+a{
   color: darkslategrey;
 }
-
 .fieldset-auto-width {
   display: inline-block;
 }
 
-.breadcrumb {
+.breadcrumb{
   background-color: #809ea9;
   margin: 0;
   padding: 10px;
   width: 100%;
   border-radius: 0;
 }
-
-.errorMsg {
+.errorMsg{
   color: red;
   font-weight: bold;
   font-size: 17px;
-  margin-bottom: 10px;
-  margin-top: 10px;
+  margin-bottom:10px;
+  margin-top:10px;
 }
-
-.successMsg {
+.successMsg{
   color: forestgreen;
   font-weight: bold;
   font-size: 17px;
-  margin-bottom: 10px;
-  margin-top: 10px;
+  margin-bottom:10px;
+  margin-top:10px;
 }
-
-.loginDiv {
+.loginDiv{
   margin: auto;
-}
 
+}
 .table-container {
   font-size: 12pt;
   max-height: 500px; /* before sroll is shown */
   overflow-y: auto;
 }
-
-.jmeaObrazku {
+.jmeaObrazku{
   font-family: "Times New Roman", Times, serif;
   color: #000000;
   font-style: normal;
   font-variant: normal;
 }
-
-.smazatImage {
+.smazatImage{
   font-family: "Times New Roman", Times, serif;
   color: rgb(255, 0, 0);
   font-variant: normal;
 }
-
 .main-content {
   padding: 20px;
   background-color: #9ea0a2;
 }
-
 .sidebar {
   background-color: #a3e5ee;
   padding-top: 30px;
   padding-left: 35px;
   padding-right: 40px;
   font-size: 20px;
-  margin-left: 20px;
+  margin-left:20px;
 }
-
-.upbar {
+.upbar{
   padding: 0;
 }
-
-img.icon {
+img.icon{
   width: 25px;
   height: 25px;
 }
-
-table, th {
+table, th{
+  border: 1px solid;
+  text-align: center;
+}
+td{
   border: 1px solid;
   text-align: center;
 }
 
-td {
-  border: 1px solid;
-  text-align: center;
-}
-
-.db_list {
+.db_list{
   list-style-type: none;
   margin: 0;
   padding: 0;
 }
-
-.smallText {
+.smallText{
   font-size: 14px;
 }
-
 .link-button {
   background: none;
   border: none;
   padding: 0;
   cursor: pointer;
 }
-
-.invalid-feedback {
+.invalid-feedback{
   display: inline-block;
 }
-
-.firstbreadcrumb {
+.firstbreadcrumb{
   text-transform: uppercase;
 }
-
-.find {
+.find{
   padding: 10px;
   display: inline-flex;
   background-color: #458085;
 }
-
-.no_padding {
+.no_padding{
   padding: 0;
 }
-
-.findDiv {
+.findDiv{
   padding: 10px;
   margin-bottom: 25px;
   background-color: #458085;
 }
-
-/*# sourceMappingURL=main.css.map */

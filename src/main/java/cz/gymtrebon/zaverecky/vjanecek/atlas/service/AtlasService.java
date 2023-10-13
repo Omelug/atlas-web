@@ -49,7 +49,6 @@ public class AtlasService {
 			colorList.add(new Color("yellow"));
 			colorList.add(new Color("gray"));
 			colorList.add(new Color("silver"));
-			colorList.add(new Color("black"));
 			colorList.add(new Color("lime"));
 			colorList.add(new Color("brown"));
 			colorRepository.saveAll(colorList);
@@ -87,14 +86,16 @@ public class AtlasService {
 		return representative;
 	}
 
-	public Long createGroup(Long idParentGroup, String name, String text, Set<Color> colors) {
+	public Long createItem(Typ typ, Long idParentGroup, String name, String name2,String author, String text, Set<Color> colors) {
 
 		Item parent = itemRepository.getById(idParentGroup);
 
 		Item item = new Item();
 		item.setName(name);
+		item.setName2(name2);
+		item.setAuthor(author);
 		item.setText(text);
-		item.setTyp(Typ.GROUP);
+		item.setTyp(typ);
 		item.setParentGroup(parent);
 		item.setColors(colors);
 		itemRepository.save(item);
@@ -102,18 +103,21 @@ public class AtlasService {
 		return item.getId();
 	}
 
-	public Long saveGroup(Long parentId, Long groupId, String name, String text, Set<Color> colors) {
-		Item group = itemRepository.getById(groupId);
-		if (group.getTyp() != Typ.ROOT) {
+	public Long saveGroup(Typ typ,Long parentId, Long itemId, String name, String name2,String author, String text, Set<Color> colors) {
+		Item item = itemRepository.getById(itemId);
+		if (item.getTyp() != Typ.ROOT) {
 			Item parent = itemRepository.getById(parentId);
-			group.setParentGroup(parent);
+			item.setParentGroup(parent);
 		}
-		group.setName(name);
-		group.setText(text);
-		group.setTyp(Typ.GROUP);
-		group.setColors(colors);
-		itemRepository.save(group);
-		return group.getId();
+		item.setName(name);
+		item.setName2(name2);
+		item.setAuthor(author);
+		item.setText(text);
+		item.setTyp(typ);
+		item.setColors(colors);
+
+		itemRepository.save(item);
+		return item.getId();
 	}
 
 	public void removeGroup(Long groupId) {
@@ -132,7 +136,7 @@ public class AtlasService {
 		}
 	}
 
-	public Long createRepresentative(Long idParentGroup, String name, String name2, String author, Set<Color> colors,
+	/*public Long createRepresentative(Long idParentGroup, String name, String name2, String author, Set<Color> colors,
 			String text) {
 
 		Item parent = itemRepository.getById(idParentGroup);
@@ -157,7 +161,7 @@ public class AtlasService {
 		representative.setParentGroup(parent);
 		itemRepository.save(representative);
 		return representative.getId();
-	}
+	}*/
 
 	public Group findGroupById(Long groupId) {
 		return ItemToGroup(itemRepository.getById(groupId));
@@ -184,22 +188,22 @@ public class AtlasService {
 	}
 
 	public Representative ItemToRepresentative(Item item) {
-		Representative r = new Representative();
-		r.setId(item.getId());
-		r.setName(item.getName());
-		r.setName2(item.getName2());
-		r.setAuthor(item.getAuthor());
-		r.setColors(item.getColors());
-		r.setText(item.getText());
+		Representative representative = new Representative();
+		representative.setId(item.getId());
+		representative.setName(item.getName());
+		representative.setName2(item.getName2());
+		representative.setAuthor(item.getAuthor());
+		representative.setColors(item.getColors());
+		representative.setText(item.getText());
 		if (item.getParentGroup() != null) {
-			r.setIdParentGroup(item.getParentGroup().getId());
+			representative.setIdParentGroup(item.getParentGroup().getId());
 		}
 		if (item.getImages() != null) {
 			for (Image Image : item.getImages()) {
-				r.getImages().add(photoFromImage(Image));
+				representative.getImages().add(photoFromImage(Image));
 			}
 		}
-		return r;
+		return representative;
 	}
 
 	public Photo photoFromImage(Image Image) {

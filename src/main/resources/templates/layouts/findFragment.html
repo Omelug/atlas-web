@@ -2,30 +2,29 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.13.18/css/bootstrap-select.min.css" integrity="sha512-ARJR74swou2y0Q2V9k0GbzQ/5vJ2RBSoCWokg4zkfM29Fb3vZEQyv0iWBMW/yvKgyHSR/7D64pFMmU8nYmbRkg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.13.18/js/bootstrap-select.min.js" integrity="sha512-yDlE7vpGDP7o2eftkCiPZ+yuUyEcaBwoJoIhdXv71KZWugFqEphIS3PU60lEkFaz8RxaVsMpSvQxMBaKVwA5xg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 
-<form id="findItemForm" th:action="@{/find}" th:object="${item}" method="post">
+<form id="findItemForm" th:action="@{/find}" th:object="${findForm}" method="post">
 
-  <input type="hidden" id="open" name="open" th:value="${item.open ? 'true' : 'false'}">
-
+  <input type="hidden" id="open" name="open" th:value="${findForm.open ? 'true' : 'false'}">
   <label class="paramLabel" for="name">Name:</label>
-  <input type="text" id="name" name="name" th:value="${item.name}">
+  <input type="text" id="name" name="name" th:value="${findForm.name}">
 
   <label class="paramLabel" for="name2">Name 2:</label>
-  <input type="text" id="name2" name="name2" th:value="${item.name2}">
+  <input type="text" id="name2" name="name2" th:value="${findForm.name2}">
 
   <label class="paramLabel" for="author">Author:</label>
-  <input type="text" id="author" name="author" th:value="${item.author}">
+  <input type="text" id="author" name="author" th:value="${findForm.author}">
 
   <label class="paramLabel" for="typ">Type:</label>
   <select id="typ" name="typ">
     <option></option>
-    <option value="ROOT" th:selected="${item.typ == T(cz.gymtrebon.zaverecky.vjanecek.atlas.entity.enums.Typ).ROOT}">ROOT</option>
-    <option value="GROUP" th:selected="${item.typ == T(cz.gymtrebon.zaverecky.vjanecek.atlas.entity.enums.Typ).GROUP}">GROUP</option>
-    <option value="REPRESENTATIVE" th:selected="${item.typ == T(cz.gymtrebon.zaverecky.vjanecek.atlas.entity.enums.Typ).REPRESENTATIVE}">REPRESENTATIVE</option>
+    <option value="ROOT" th:selected="${findForm.typ == T(cz.gymtrebon.zaverecky.vjanecek.atlas.entity.enums.Typ).ROOT}">ROOT</option>
+    <option value="GROUP" th:selected="${findForm.typ == T(cz.gymtrebon.zaverecky.vjanecek.atlas.entity.enums.Typ).GROUP}">GROUP</option>
+    <option value="REPRESENTATIVE" th:selected="${findForm.typ == T(cz.gymtrebon.zaverecky.vjanecek.atlas.entity.enums.Typ).REPRESENTATIVE}">REPRESENTATIVE</option>
   </select>
 
   <div name ="parentGroupToggle">
     <label class="paramLabel" for="parentGroup">Parent Group:</label>
-    <input type="text" id="parentGroup" name="parentGroup" th:value="${item.parentGroup}">
+    <input type="text" id="parentGroup" name="parentGroup" th:value="${findForm.parentGroup}">
   </div>
 
   <label class="paramLabel" name ="color_multi_select">Colors:</label>
@@ -55,7 +54,6 @@
     <tbody th:replace="layouts/foundItemTable"></tbody>
   </table>
 </div>
-
 
 <script> <!--TODO tohle se asi nemusí posílat pořáad, ale zatím nechat kvůli přehlednosti -->
 

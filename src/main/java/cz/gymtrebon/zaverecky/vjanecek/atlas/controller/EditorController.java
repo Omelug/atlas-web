@@ -1,12 +1,13 @@
 package cz.gymtrebon.zaverecky.vjanecek.atlas.controller;
 
-import cz.gymtrebon.zaverecky.vjanecek.atlas.dto.Group;
-import cz.gymtrebon.zaverecky.vjanecek.atlas.dto.Representative;
 import cz.gymtrebon.zaverecky.vjanecek.atlas.entity.Item;
+import cz.gymtrebon.zaverecky.vjanecek.atlas.entity.LoggerLine;
 import cz.gymtrebon.zaverecky.vjanecek.atlas.entity.Request;
 import cz.gymtrebon.zaverecky.vjanecek.atlas.entity.User;
 import cz.gymtrebon.zaverecky.vjanecek.atlas.entity.enums.Typ;
 import cz.gymtrebon.zaverecky.vjanecek.atlas.form.ItemForm;
+import cz.gymtrebon.zaverecky.vjanecek.atlas.log.LogTyp;
+import cz.gymtrebon.zaverecky.vjanecek.atlas.repository.CustomLoggerRepository;
 import cz.gymtrebon.zaverecky.vjanecek.atlas.repository.ItemRepository;
 import cz.gymtrebon.zaverecky.vjanecek.atlas.repository.RequestRepository;
 import cz.gymtrebon.zaverecky.vjanecek.atlas.service.AtlasService;
@@ -44,6 +45,7 @@ public class EditorController {
     private final SpringTemplateEngine templateEngine;
     private final UserFindService userFindService;
     private final ColorService colorService;
+    private final CustomLoggerRepository customLoggerRepository;
 
     @GetMapping("/requests")
     public String requests(Principal principal,Model model) {
@@ -54,10 +56,14 @@ public class EditorController {
         return "editor/requests";
     }
 
-    @GetMapping("/group/newItem")
-    public String newGroup(Principal principal,Model model,
-            @RequestParam("idParentGroup") Optional<Long> idParentGroup, @RequestParam("open") boolean open ) {
+    @GetMapping("/{type}/newItem")
+    public String newItem(Principal principal,
+                           Model model,
+                           @RequestParam("idParentGroup") Optional<Long> idParentGroup,
+                           @RequestParam("open") boolean open,
+                           @PathVariable String type) {
         ItemForm form = new ItemForm();
+        form.setFormType(type);
         if (idParentGroup.isPresent()) {
             form.setIdParentGroup(idParentGroup.get());
             model.addAttribute("originalParentId", idParentGroup.get());
@@ -70,20 +76,33 @@ public class EditorController {
         model.addAttribute("newItem", true);
 
         atlasController.addBase(principal, model);
-        return "group-form";
+
+        if(type.equals("GROUP")){
+            return "group-form";
+        }
+        if(type.equals("REPRESENTATIVE")){
+            return "representative-form";
+        }
+        customLoggerRepository.save(new LoggerLine(LogTyp.ERROR, principal.getName(), "User tried create item of invalid type "+type));
+        return "redirect-form";
     }
 
-    @PostMapping(value="/group/save", params="action-save")
-    public String groupEditSave(Principal principal, @RequestParam("colors") List<String> colors, Model model, @Valid @ModelAttribute("itemForm") ItemForm itemForm, BindingResult bindingResult) {
-
-        boolean newGroup = itemForm.getId() == null;
+    /*@PostMapping(value="/item/save", params="action-save")
+    public String groupEditSave(Principal principal, @RequestParam(name = "colors", required = false) List<String> colors, Model model, @Valid @ModelAttribute("itemForm") ItemForm itemForm, BindingResult bindingResult) {
+        System.out.println("gggggggg" + itemForm.getFormType());
+        boolean newGroup = (itemForm.getId() == null);
         model.addAttribute("groups", service.breadCrumbList());
-
 
         if (bindingResult.hasErrors()) {
             breadCrumbsCorrection(model, itemForm.getIdParentGroup());
             atlasController.addBase(principal, model);
-            model.addAttribute("colorsSelected", colors);
+            itemForm.setFormType(Typ.GROUP.name());
+            model.addAttribute("itemForm", itemForm);
+            if (colors != null && !colors.isEmpty()) {
+                model.addAttribute("colorsSelected", colors);
+            }else {
+                model.addAttribute("colorsSelected", new ArrayList<String>());
+            }
             return "group-form";
         }
         Long groupId;
@@ -91,6 +110,7 @@ public class EditorController {
             groupId = service.createGroup(
                     itemForm.getIdParentGroup(),
                     itemForm.getName(),
+                    itemForm.getName2(),
                     itemForm.getText(),
                     colorService.getColorsObject(colors));
 
@@ -99,10 +119,57 @@ public class EditorController {
                     itemForm.getIdParentGroup(),
                     itemForm.getId(),
                     itemForm.getName(),
+                    itemForm.getName2(),
                     itemForm.getText(),
                     colorService.getColorsObject(colors));
         }
-        return "redirect:/group/" + groupId;
+        return "redirect:/item/" + groupId;
+    }*/
+
+
+    @PostMapping(value="/item/save", params="action-save")
+    public String itemEditSave(@RequestParam(name = "colors", required = false) List<String> colors, Model model, @Valid @ModelAttribute("itemForm") ItemForm itemForm, BindingResult bindingResult) {
+
+        System.out.println("fgh typ" + itemForm.getFormType());
+        model.addAttribute("groups", service.breadCrumbList());
+        Typ typ = ItemForm.getType(itemForm.getFormType());
+        if (typ == Typ.ROOT){
+            //TODO predelat
+        }
+
+        if (bindingResult.hasErrors()) {
+            breadCrumbsCorrection(model, itemForm.getIdParentGroup());
+            if (colors != null && !colors.isEmpty()) {
+                model.addAttribute("colorsSelected", colors);
+            }
+            return "group-form";
+        }
+
+        boolean newItem = (itemForm.getId() == null);
+        Long itemId;
+        if (newItem) {
+            if (typ == Typ.ROOT){
+                return "redirect:/home";
+            }
+            itemId = service.createItem(typ,
+                    itemForm.getIdParentGroup(),
+                    itemForm.getName(),
+                    itemForm.getName2(),
+                    itemForm.getAuthor(),
+                    itemForm.getText(),
+                    colorService.getColorsObject(colors));
+
+        } else {
+            itemId = service.saveGroup(typ,
+                    itemForm.getIdParentGroup(),
+                    itemForm.getId(),
+                    itemForm.getName(),
+                    itemForm.getName2(),
+                    itemForm.getAuthor(),
+                    itemForm.getText(),
+                    colorService.getColorsObject(colors));
+        }
+        return "redirect:/item/" + itemId;
     }
 
     private void breadCrumbsCorrection(Model model, Long idParentGroup) {
@@ -117,138 +184,84 @@ public class EditorController {
 
     }
 
-    @GetMapping("/group/root/edit")
-    public String editGroup(Principal principal,
-                            Model model) {
-        Optional<Item> root = itemRepository.findByTyp(Typ.ROOT);
-        if (root.isPresent()) {
-            ItemForm form = new ItemForm(root.get());
-            model.addAttribute("groups", service.breadCrumbList());
-            model.addAttribute("group", form);
-            model.addAttribute("newItem", false);
-            model.addAttribute("root", true);
+    @GetMapping("/item/{id}/edit")
+    public String editItem(Principal principal, @PathVariable("id") Long id, Model model) {
 
-            atlasController.addBase(principal, model);
-            return "group-form";
-        }
-        return "redirect:/home";
-    }
+        Optional<Item> item = itemRepository.findById(id);
 
-    @GetMapping("/group/{id}/edit")
-    public String editGroup(Principal principal, @PathVariable("id") Long id, Model model) {
-
-        Group group = service.findGroupById(id);
-        ItemForm form = new ItemForm(group);
-
-        model.addAttribute("groups", service.breadCrumbList());
-        model.addAttribute("group", form);
-        model.addAttribute("newItem", false);
-        model.addAttribute("root", false);
-
-        atlasController.addBase(principal, model);
-        return "group-form";
-    }
-    @PostMapping(value="/group/save", params="action-delete")
-    public String groupDelete(@ModelAttribute("group") ItemForm form) {
-        if (!(form.getId() == null)) {
-            service.removeGroup(form.getId());
-        }
-        if ( form.getIdParentGroup() == null) {
+        if (item.isEmpty()){
             return "redirect:/home";
         }
-        return "redirect:/group/" + form.getIdParentGroup();
-    }
-    @PostMapping(value="/group/save", params="action-back")
-    public String groupEditBack(
-            Model model,
-            @ModelAttribute("group") ItemForm form) {
-        boolean newGroup = form.getId() == null;
-        if (newGroup) {
-            Integer originalParentId = (Integer) model.getAttribute("originalParentId");
-            if (originalParentId == null) {return "redirect:/home";}
-            return "redirect:/group/" + originalParentId;
-        }
-        return "redirect:/group/" + form.getId();
-    }
-    @GetMapping("/representative/newItem")
-    public String newRepresentative(Principal principal,
-            @RequestParam("idParentGroup") Optional<Long> idParentGroup,
-            Model model) {
 
-        ItemForm form = new ItemForm();
-        if (idParentGroup.isPresent()) {
-            form.setIdParentGroup(idParentGroup.get());
-            model.addAttribute("originalParentId", idParentGroup.get());
-        }
+        ItemForm form = new ItemForm(item.get());
+        model.addAttribute("itemForm", form);
         model.addAttribute("groups", service.breadCrumbList());
-        model.addAttribute("representative", form);
-        model.addAttribute("newItem", true);
-
-        atlasController.addBase(principal, model);
-        return "representative-form";
-    }
-
-    @GetMapping("/representative/{id}/edit")
-    public String editRepresentative(Principal principal, @PathVariable("id") Long id, Model model) {
-
-        Representative representative = service.findRepresentativeById(id);
-        ItemForm form = new ItemForm();
-        form.setId(representative.getId());
-        form.setIdParentGroup(representative.getIdParentGroup());
-        form.setName(representative.getName());
-        form.setName2(representative.getName2());
-        form.setAuthor(representative.getAuthor());
-        form.setText(representative.getText());
-        form.setImages(representative.getImages());
-
-        model.addAttribute("groups", service.breadCrumbList());
-        model.addAttribute("representative", form);
         model.addAttribute("newItem", false);
-
         atlasController.addBase(principal, model);
-        return "representative-form";
+        model.addAttribute("breadcrumbs", service.getBreadCrumbs(item.get().getId()));
+
+        if ((item.get().getTyp() == Typ.GROUP) || (item.get().getTyp() == Typ.ROOT)){
+            return "group-form";
+        }
+        if (item.get().getTyp() == Typ.REPRESENTATIVE){
+            model.addAttribute("representative", service.ItemToRepresentative(item.get()));
+            model.addAttribute("colorsSelected", colorService.colorsToString(item.get().getColors()));
+            return "representative-form";
+        }
+        customLoggerRepository.save(new LoggerLine(LogTyp.ERROR, principal.getName(), "User try edit the item with type " + item.get().getTyp()));
+        return "errors/error404";
     }
 
-    @PostMapping(value="/representative/save", params="action-delete")
-    public String representativeDelete(
-            @ModelAttribute("representative") ItemForm form) {
-        if (!(form.getId() == null)) {
+    @PostMapping(value="/{type}/save", params="action-delete")
+    public String groupDelete(Principal principal, @ModelAttribute("itemForm") ItemForm form, @PathVariable String type) {
+        Typ typ = ItemForm.getType(type);
+        if (typ == Typ.ROOT) {
+            customLoggerRepository.save(new LoggerLine(LogTyp.ERROR, principal.getName(), "Editor tried delete root, it is not allowed"));
+            return "redirect:/home";
+        }
+        if (typ == Typ.GROUP) {
+            service.removeGroup(form.getId());
+        }
+        if (typ == Typ.REPRESENTATIVE) {
             service.removeItem(form.getId());
         }
-
-        return "redirect:/group/" + form.getIdParentGroup();
+        return "redirect:/item/" + form.getIdParentGroup();
     }
 
-    @PostMapping(value="/representative/save", params="action-back")
-    public String representativeEditBack(
+    @PostMapping(value="/item/save", params="action-back")
+    public String itemEditBack(
             Model model,
-            @ModelAttribute("representative") ItemForm form) {
-        boolean newRepresentative = form.getId() == null;
-        if (newRepresentative) {
-            Integer originalParentId = (Integer) model.getAttribute("originalParentId");
-            if (originalParentId == null) {return "redirect:/home";}
-            return "redirect:/"+ form.getIdParentGroup();
+            @ModelAttribute("itemForm") ItemForm form) {
+        boolean newItem = form.getId() == null;
+        if (newItem) {
+            return "redirect:/item/" + form.getIdParentGroup();
         }
-        return "redirect:/representative/" + form.getId();
+        return "redirect:/item/" + form.getId();
     }
 
-    @PostMapping(value="/representative/save", params="action-save")
+    /*
+
+    @PostMapping(value="/item/save", params="action-save")
     public String representativeEditSave(Principal principal,
             Model model, @RequestParam("colors") List<String> colors,
-            @Valid @ModelAttribute("representative") ItemForm form,
+            @Valid @ModelAttribute("itemForm") ItemForm form,
             BindingResult bindingResult) {
 
-        boolean newRepresentative = form.getId() == null;
+        boolean newItem = form.getId() == null;
         model.addAttribute("groups", service.breadCrumbList());
 
         if (bindingResult.hasErrors()) {
             atlasController.addBase(principal, model);
-            model.addAttribute("colorsSelected", colors);
+            if (colors != null && !colors.isEmpty()) {
+                model.addAttribute("colorsSelected", colors);
+            }else {
+                model.addAttribute("colorsSelected", new ArrayList<String>());
+            }
             return "representative-form";
         }
 
         Long idRepresentative;
-        if (newRepresentative) {
+        if (newItem) {
             idRepresentative = service.createRepresentative(
                     form.getIdParentGroup(),
                     form.getName(),
@@ -268,24 +281,22 @@ public class EditorController {
                     form.getText()
             );
         }
-        return "redirect:/representative/" + idRepresentative;
-    }
+        return "redirect:/item/" + idRepresentative;
+    }*/
     @PostMapping("/representative/{ItemId}/upload")
     public String uploadImage(
             @RequestParam("file") MultipartFile file,
             @PathVariable("ItemId") Long ItemId) {
         service.uploadImage(ItemId, file);
-        return "redirect:/representative/" + ItemId;
+        return "redirect:/item/" + ItemId;
     }
 
     @GetMapping("/representative/{id}/delete/{imageId}")
     public String deleteImage(
             @PathVariable("id") Long id,
             @PathVariable("imageId") Long imageId) {
-
         service.deleteImage(imageId);
-
-        return "redirect:/representative/" + id;
+        return "redirect:/item/" + id;
     }
 
     @PostMapping(value="/editor/selectRequest")
@@ -294,7 +305,7 @@ public class EditorController {
         WebContext context = new WebContext(request, response, request.getServletContext());
         Optional<Request> selectedRequest = requestRepository.findByRequestMark(requestMark);
         context.setVariable("selectedRequest", selectedRequest.orElse(null));
-        log.info("Sent request: " + selectedRequest.get().getRequestMark());
+        selectedRequest.ifPresent(value -> log.info("Sent request: " + value.getRequestMark()));
         String text = templateEngine.process("editor/selectedRequest.html", context);
         log.info(text);
         return templateEngine.process("editor/selectedRequest.html", context);

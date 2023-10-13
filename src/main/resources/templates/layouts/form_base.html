@@ -1,13 +1,18 @@
-<form th:action="@{/group/save}" th:object="${itemForm}" method="post">
+<script type="text/javascript" th:src="@{/ckeditor5-35.3.1/build/ckeditor.js}"></script>
+
+<form th:object="${itemForm}" method="post">
+
 
     <input type="hidden" id="inputId" th:field="*{id}">
+    <input type="hidden" id="formType" th:field="*{formType}">
+    <!-- <p th:text="${itemForm.formType}" > </p> -->
 
-    <div class="form-row" th:unless="${root == true}">
+    <div class="form-row" th:unless="${itemForm.formType.equals('ROOT')}">
         <div class="form-group col-md-6">
             <label for="idParentGroup" >Parent group</label>
             <select id="idParentGroup" th:field="*{idParentGroup}">
                 <option value=""></option>
-                <option th:each="s : ${groups}" th:value="${s.id}" th:text="${s.name}" th:selected="${s.id==itemForm.idParentGroup}"></option>
+                <option th:each="s : ${groups}" th:value="${s.id}" th:text="${s.name}" th:selected="${s.id==idParentGroup}"></option>
             </select>
             <p th:if="${#fields.hasErrors('idParentGroup')}" th:errors="*{idParentGroup}"
                class="invalid-feedback"></p>
@@ -22,7 +27,7 @@
         </div>
     </div>
 
-    <div class="form-row">
+    <div class="form-row" th:if="${itemForm.formType.equals('REPRESENTATIVE')}">
         <div class="form-group col-md-6">
             <label for="inputName2">Other names</label>
             <input type="text" class="" id="inputName2" placeholder="Another name" th:field="*{name2}">
@@ -30,7 +35,15 @@
         </div>
     </div>
 
-    <div class="form-row">
+    <div class="form-row" th:if="${itemForm.formType.equals('REPRESENTATIVE')}">
+        <div class="form-group col-md-6">
+            <label for="inputName2">Author</label>
+            <input type="text" class="" id="inputAuthor" placeholder="Author" th:field="*{author}">
+            <p th:if="${#fields.hasErrors('author')}" th:errors="*{author}" class="invalid-feedback"></p>
+        </div>
+    </div>
+
+    <div class="form-row" th:if="${itemForm.formType == 'REPRESENTATIVE'}">
         <label for="colors" class="paramLabel" >Colors:</label>
         <div class="multi_select_box">
             <select id="colors" name="colors" class="multi_select" multiple>
@@ -47,21 +60,46 @@
         <p th:if="${#fields.hasErrors('text')}" th:errors="*{text}" class="invalid-feedback"></p>
     </div>
 
-    <button class="link-button" type="submit" name="action-save">Save</button>
-    |
-    <button class="link-button" type="submit" name="action-back">Back</button>
-    |
-    <button class="link-button" th:if="${newItem == false && itemForm.idParentGroup != null}" type="submit"
-            name="action-delete">Delete</button>
+    <div >
+        <button class="link-button" type="submit"  th:formaction="@{/item/save}" name="action-save">Save</button>
+        |
+        <button class="link-button" type="submit" th:formaction="@{/item/save}" name="action-back">Back</button>
+        |
+        <button th:if="${(itemForm.formType == 'GROUP' || itemForm.formType == 'REPRESENTATIVE') && newItem == false}" class="link-button" th:formaction="@{/item/save}" type="submit"
+                name="action-delete">Delete</button>
+    </div>
+
+    <div class="form-group col-md-6" th:if="${itemForm.formType.equals('REPRESENTATIVE') && newItem == false}" >
+        <h2 th:if="${representative.images != null}">Image list</h2>
+        <h2 th:if="${representative.images == null}">Image list is Empty</h2>
+        <div th:if="${representative.images != null}">
+            <th:block
+                    th:with="partitions=${T(org.apache.commons.collections4.ListUtils).partition(representative.images, 2)}">
+                <div class="row" th:each="partition: ${partitions}">
+                    <div class="col-sm-4" th:each="Photo: ${partition}">
+                        <div class="Photo">
+                            <a class="jmeaObrazku" th:href="${Photo.url}"><b th:text="${Photo.name}"></b></a>
+                            <a th:if="${#authorization.expression('hasAnyAuthority(''EDITOR'', ''ADMIN'')')}" class="smazat" th:href="@{'/representative/'+${representative.id}+'/delete/'+${Photo.id}}">
+                                <b th:if="${#authorization.expression('hasAnyAuthority(''EDITOR'', ''ADMIN'')')}" th:text="smazat"></b></a>
+                            <br>
+                            <a th:href="${Photo.url}"><img class="img-fluid" th:src="${Photo.url}" alt="Photo was not loaded" > </a>
+                        </div>
+                    </div>
+                </div>
+            </th:block>
+        </div>
+        <form
+                th:if="${#authorization.expression('hasAnyAuthority(''EDITOR'', ''ADMIN'')')}"
+                th:action="${newItem == true} ? @{'/representative/imageNoId/upload'} : @{'/representative/'+${representative.id}+'/upload'} "
+                method="post" enctype="multipart/form-data">
+
+            <label path="file">Add image:
+                <td><input type="file" name="file" /></td>
+                <td><input type="submit" value="Save image" /></td>
+            </label>
+
+        </form>
+        <br>
+    </div>
 
 </form>
-
-<!--
-
-    <button class="link-button" type="submit" name="action-save">Save</button>
-    |
-    <button class="link-button" type="submit" name="action-back">Back</button>
-    |
-    <button class="link-button" th:if="${newItem == false}" type="submit"
-            name="action-delete">Delete</button>
-            -->

@@ -27,9 +27,9 @@ public class Item {
 	@GenericGenerator(name="native", strategy = "native")
 	private Long id;
 	
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "parent_group_id")
-    private Item parentGroup;
+	@ManyToOne(fetch = FetchType.LAZY)
+ @JoinColumn(name = "parent_group_id")
+ private Item parentGroup;
     
 	@Column(name="typ", nullable=false)
 	private Typ typ;
@@ -45,9 +45,9 @@ public class Item {
 
 	@ManyToMany
 	@JoinTable(
-			name = "item_color",
-			joinColumns = @JoinColumn(name = "item_id"),
-			inverseJoinColumns = @JoinColumn(name = "color_id")
+					name = "color_item",
+					joinColumns = @JoinColumn(name = "item_id"),
+					inverseJoinColumns = @JoinColumn(name = "color_id")
 	)
 	private Set<Color> colors;
 	

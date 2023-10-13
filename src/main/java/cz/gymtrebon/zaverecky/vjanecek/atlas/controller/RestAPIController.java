@@ -2,13 +2,12 @@ package cz.gymtrebon.zaverecky.vjanecek.atlas.controller;
 
 import cz.gymtrebon.zaverecky.vjanecek.atlas.currentdb.CurrentDatabase;
 import cz.gymtrebon.zaverecky.vjanecek.atlas.dto.*;
+import cz.gymtrebon.zaverecky.vjanecek.atlas.entity.LoggerLine;
 import cz.gymtrebon.zaverecky.vjanecek.atlas.entity.Request;
 import cz.gymtrebon.zaverecky.vjanecek.atlas.entity.RequestImage;
 import cz.gymtrebon.zaverecky.vjanecek.atlas.entity.User;
-import cz.gymtrebon.zaverecky.vjanecek.atlas.repository.RequestImageRepository;
-import cz.gymtrebon.zaverecky.vjanecek.atlas.repository.RequestRepository;
-import cz.gymtrebon.zaverecky.vjanecek.atlas.repository.UDRLinkRepository;
-import cz.gymtrebon.zaverecky.vjanecek.atlas.repository.UserRepository;
+import cz.gymtrebon.zaverecky.vjanecek.atlas.log.LogTyp;
+import cz.gymtrebon.zaverecky.vjanecek.atlas.repository.*;
 import cz.gymtrebon.zaverecky.vjanecek.atlas.service.AtlasService;
 import cz.gymtrebon.zaverecky.vjanecek.atlas.service.CustomUserDetailsService;
 import lombok.RequiredArgsConstructor;
@@ -45,10 +44,11 @@ public class RestAPIController {
 	private final CustomUserDetailsService userDetailsService;
 	private final RequestRepository requestRepository;
 	private final RequestImageRepository requestImageRepository;
+	private final CustomLoggerRepository customLoggerRepository;
 	@Value("${images.path}")
 	private String imagesFolder;
 
-	@GetMapping("/group/{id}")
+	@GetMapping("/group/{id}") //TODO API MOZNA predelat na item misto respresentative a group, zamyslet se nad tim!!!!!!!!
 	public ResponseEntity<TransportItem> group(@PathVariable("id") Long id) {
 		TransportItem tp = service.ItemToTransportItem(id);
 		return ResponseEntity.ok(tp);
@@ -129,7 +129,7 @@ public class RestAPIController {
 				FileUtils.moveFile(imageFile,destFile);
 				imageFile.delete();
 			} catch (IOException e) {
-				e.printStackTrace();
+				customLoggerRepository.save(new LoggerLine(LogTyp.ERROR, "sendTransportRequestImages",imageFile.getPath()+" was not moved to " + destFile.getPath()));
 			}
 		}
 	}

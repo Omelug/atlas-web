@@ -57,7 +57,7 @@
 <hr>
 </div>
 <div th:if="${#authorization.expression('hasAnyAuthority(''EDITOR'', ''ADMIN'')')}" id="buttons">
-	<a class="link-button" th:href="@{'/representative/'+${representative.id}+'/edit'}">Edit</a>
+	<a class="link-button" th:href="@{'/item/'+${representative.id}+'/edit'}">Edit</a>
 
 </div>
 </html>

@@ -3,18 +3,14 @@ package cz.gymtrebon.zaverecky.vjanecek.atlas.controller;
 import cz.gymtrebon.zaverecky.vjanecek.atlas.currentdb.CurrentDatabase;
 import cz.gymtrebon.zaverecky.vjanecek.atlas.dto.Group;
 import cz.gymtrebon.zaverecky.vjanecek.atlas.dto.Representative;
-import cz.gymtrebon.zaverecky.vjanecek.atlas.entity.Image;
-import cz.gymtrebon.zaverecky.vjanecek.atlas.entity.User;
-import cz.gymtrebon.zaverecky.vjanecek.atlas.entity.UserFind;
+import cz.gymtrebon.zaverecky.vjanecek.atlas.entity.*;
 import cz.gymtrebon.zaverecky.vjanecek.atlas.entity.enums.DatabaseAccess;
 import cz.gymtrebon.zaverecky.vjanecek.atlas.entity.enums.Typ;
 import cz.gymtrebon.zaverecky.vjanecek.atlas.form.FindForm;
 import cz.gymtrebon.zaverecky.vjanecek.atlas.form.RegistrationForm;
 import cz.gymtrebon.zaverecky.vjanecek.atlas.form.TestForm;
-import cz.gymtrebon.zaverecky.vjanecek.atlas.repository.ColorRepository;
-import cz.gymtrebon.zaverecky.vjanecek.atlas.repository.DatabaseRepository;
-import cz.gymtrebon.zaverecky.vjanecek.atlas.repository.UserFindRepository;
-import cz.gymtrebon.zaverecky.vjanecek.atlas.repository.UserRepository;
+import cz.gymtrebon.zaverecky.vjanecek.atlas.log.LogTyp;
+import cz.gymtrebon.zaverecky.vjanecek.atlas.repository.*;
 import cz.gymtrebon.zaverecky.vjanecek.atlas.service.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -46,6 +42,7 @@ import java.util.Optional;
 @Slf4j
 
 public class AtlasController {
+	private final CustomLoggerRepository customLoggerRepository;
 	private final ColorRepository colorRepository;
 
 	private final AtlasService service;
@@ -60,6 +57,7 @@ public class AtlasController {
 	private final UserService userService;
 	private final ColorService colorService;
 	private final UserFindService userFindService;
+	private final ItemRepository itemRepository;
 	@GetMapping(value = { ""})
 	public String nothing() {
 		return "redirect:/home";
@@ -81,22 +79,21 @@ public class AtlasController {
 		text = form.getAllText();
 		return "redirect:/test";
 	}
-	//@PreAuthorize("hasAuthority('" + User.USER + "') OR hasAuthority('" + User.EDITOR + "') OR hasAuthority('" + User.ADMIN + "')")
+
 	@GetMapping(value = {"/home"})
 	public String home(Principal principal, Model model) {
 		if (principal == null) {
 			return "without_account";
 		}
-
 		if (CurrentDatabase.getCurrentDatabase() == null) {
 			model.addAttribute("publicDBList", databaseRepository.findAllByDatabaseAccessOrderByName(DatabaseAccess.PUBLIC));
 			model.addAttribute("databaseIsSelected", false);
 			return "without_database";
 		}
 		System.out.println("Curren " + CurrentDatabase.getCurrentDatabase());
-		Group group = service.findORcreateGroup();
+		Group root = service.findORcreateGroup();
 		model.addAttribute("home", true);
-		return groupDetail(principal,model, group.getId());
+		return itemDetail(principal,model, root.getId());
 	}
 
 	@GetMapping("/login")
@@ -143,32 +140,28 @@ public class AtlasController {
 
 	@SuppressWarnings("SameReturnValue")
 	@PreAuthorize("hasAuthority('" + User.USER + "') OR hasAuthority('" + User.EDITOR + "') OR hasAuthority('" + User.ADMIN + "')")
-	@GetMapping("/group/{id}")
-	public String groupDetail(Principal principal,Model model,
-								@PathVariable("id") Long groupId) {
-
-		Group group = service.findGroupById(groupId);
-		model.addAttribute("group", group);
-		model.addAttribute("subgroups", service.subgroupList(group.getId()));
-		model.addAttribute("representatives", service.representativeList(group.getId()));
-		model.addAttribute("breadcrumbs", service.getBreadCrumbs(groupId));
-
+	@GetMapping("/item/{id}")
+	public String itemDetail(Principal principal,Model model,
+								@PathVariable("id") Long itemId) {
+		Item item = itemRepository.getById(itemId);
+		model.addAttribute("breadcrumbs", service.getBreadCrumbs(itemId));
 		addBase(principal, model);
-
-		return "group-detail";
+		if ((item.getTyp() == Typ.GROUP) || (item.getTyp() == Typ.ROOT)){
+			Group group = service.ItemToGroup(item);
+			model.addAttribute("group", group);
+			model.addAttribute("subgroups", service.subgroupList(group.getId()));
+			model.addAttribute("representatives", service.representativeList(group.getId()));
+			return "group-detail";
+		}
+		if (item.getTyp() == Typ.REPRESENTATIVE){
+			Representative representative = service.ItemToRepresentative(item);
+			model.addAttribute("representative", representative);
+			return "representative-detail";
+		}
+		customLoggerRepository.save(new LoggerLine(LogTyp.ERROR, principal.getName(), "User try look on the item type " + item.getTyp()));
+		return "errors/error404";
 	}
-	@SuppressWarnings("SameReturnValue")
-	@PreAuthorize("hasAuthority('" + User.USER + "') OR hasAuthority('" + User.EDITOR + "') OR hasAuthority('" + User.ADMIN + "')")
-	@GetMapping("/representative/{id}")
-	public String detailRepresentative(Principal principal,Model model, @PathVariable("id") Long representativeId) {
-		Representative representative = service.findRepresentativeById(representativeId);
-		model.addAttribute("representative", representative);
-		model.addAttribute("breadcrumbs", service.getBreadCrumbs(representativeId));
 
-		addBase(principal, model);
-
-		return "representative-detail";
-	}
 	@PreAuthorize("hasAuthority('" + User.USER + "') OR hasAuthority('" + User.EDITOR + "') OR hasAuthority('" + User.ADMIN + "')")
 	@GetMapping("/image/{id}")
 	public ResponseEntity<InputStreamResource> Image(@PathVariable("id") Long id) throws IOException {
@@ -206,16 +199,22 @@ public class AtlasController {
 	}
 	public void addBase(Principal principal, Model model) {
 		addDatabaseList(principal, model);
-		UserFind u = userFindService.getUserFind(principal.getName());
-		model.addAttribute("item", u);
+		Optional<UserFind> userFind = userFindRepository.findByUserName(principal.getName());
+		if (userFind.isPresent()){
+			model.addAttribute("findForm", new FindForm(userFind.get())); //TODO errors
+			model.addAttribute("foundItems", findService.findItems(userFind.get()));
+		}else{
+			model.addAttribute("findForm", new FindForm());
+		}
 		model.addAttribute("colorList", colorRepository.findAll());
-		model.addAttribute("foundItems", findService.findItems(u));
 		model.addAttribute("databaseIsSelected", true);
 	}
 
 	@PostMapping(value="/find")
 	@ResponseBody
-	public String find(@RequestParam("colors") List<String> colors, HttpServletRequest request, HttpServletResponse response, Principal principal, @Valid @ModelAttribute("item") FindForm form) {
+	public String find(@RequestParam(value = "colors", required = false) List<String> colors,
+																				HttpServletRequest request, HttpServletResponse response,
+																				Principal principal, @Valid @ModelAttribute("findForm") FindForm form) {
 
 		boolean open = form.isOpen();
 		String name = form.getName();
@@ -246,7 +245,6 @@ public class AtlasController {
 		}
 
 		WebContext context = new WebContext(request, response, request.getServletContext());
-		//TODO searching
 		context.setVariable("foundItems", findService.findItems(userFind));
 		return templateEngine.process("layouts/foundItemTable.html", context);
 	}

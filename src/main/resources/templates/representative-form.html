@@ -3,8 +3,8 @@
 	xmlns:th="http://www.thymeleaf.org">
 
 <div id="info">
-	<h1 th:if="${newItem == true}">New flower</h1>
-	<h1 th:if="${newItem == false}">Flower editor</h1>
+	<h1 th:if="${newItem}">New flower</h1>
+	<h1 th:if="${!newItem}">Flower editor</h1>
 	<hr>
 </div>
 

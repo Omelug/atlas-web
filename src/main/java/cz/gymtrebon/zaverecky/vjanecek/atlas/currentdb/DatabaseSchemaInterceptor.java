@@ -30,7 +30,11 @@ public class DatabaseSchemaInterceptor implements HandlerInterceptor {
         log.info("Principal is "+ principal);
         if (principal != null) {
             Optional<User> user = userRepository.findByName(principal.getName());
-            user.ifPresent(value -> CurrentDatabase.setCurrentDatabase(value.getCurrentDB_name()));
+            if (user.isPresent()){
+                if(!CurrentDatabase.setCurrentDatabase(user.get().getCurrentDB_name())){
+                    return false;
+                }
+            }
             schemaService.updateSchema();
 
             String openValue = request.getParameter("open");

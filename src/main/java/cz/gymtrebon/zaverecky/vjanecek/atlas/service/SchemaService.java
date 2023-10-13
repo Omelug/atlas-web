@@ -3,7 +3,6 @@ package cz.gymtrebon.zaverecky.vjanecek.atlas.service;
 import cz.gymtrebon.zaverecky.vjanecek.atlas.currentdb.CurrentDatabase;
 import cz.gymtrebon.zaverecky.vjanecek.atlas.entity.*;
 import cz.gymtrebon.zaverecky.vjanecek.atlas.log.LogTyp;
-import cz.gymtrebon.zaverecky.vjanecek.atlas.repository.ColorRepository;
 import cz.gymtrebon.zaverecky.vjanecek.atlas.repository.CustomLoggerRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -26,6 +25,7 @@ import javax.sql.DataSource;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.EnumSet;
 import java.util.Properties;
@@ -39,7 +39,6 @@ public class SchemaService {
     private final EntityManagerFactory entityManagerFactory;
     @Value("${images.path}")
     private String imagesFolder;
-    private final ColorRepository colorRepository;
     private final CustomLoggerRepository customLoggerRepository;
     public void updateSchema() {
         String currentDatabase = CurrentDatabase.getCurrentDatabase();
@@ -56,13 +55,13 @@ public class SchemaService {
                     try (Statement statement = connection.createStatement()) {
                         int rowsAffected = statement.executeUpdate("SET search_path TO " + currentDatabase);
                         if (rowsAffected == 0) {
-                            log.info("search_path set successfully to " + currentDatabase);
+                            // log.info("search_path set successfully to " + currentDatabase);
                         } else {
                             log.warn("Setting search_path did not affect any rows: " + rowsAffected);
                         }
                     }
                 });
-                log.info("Switched to schema " + CurrentDatabase.getCurrentDatabase());
+                //log.info("Switched to schema " + CurrentDatabase.getCurrentDatabase());
 
                 transaction.commit();
             } catch (Exception e) {
@@ -81,18 +80,26 @@ public class SchemaService {
         Session session = entityManager.unwrap(Session.class);
 
         session.doWork(connection -> {
-            try (Statement statement = connection.createStatement()) {
-                statement.executeUpdate("CREATE SCHEMA IF NOT EXISTS " + schemaName);
+            if (isValidSchemaName(schemaName)){
+                String query = String.format("CREATE SCHEMA IF NOT EXISTS %s;", schemaName);
+                try (Statement statement = connection.createStatement()) {
+                    statement.execute(query);
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }else{
+                customLoggerRepository.save(new LoggerLine(LogTyp.ERROR, "databaseCreation", "Schema "+schemaName+" was not created"));
             }
         });
+
 
         log.info("Schema created: " + schemaName);
         entityManager.close();
     }
 
-    private boolean isValidSchemaName(String schemaName) {
-        //TODO look oon the database name restriction around user iinput
-        return true;
+    public static  boolean isValidSchemaName(String schemaName) {
+        if (schemaName == null) return true;
+        return schemaName.matches("^[a-zA-Z_][a-zA-Z0-9_]*");
     }
 
     public void createUserSchema(String schemaName) {
@@ -138,11 +145,10 @@ public class SchemaService {
 
         log.info("Tables created in schema: " + schemaName);
 
-
     }
 
     public void createTablesInConfigSchema() {
-        ServiceRegistry serviceRegistry = null;
+        ServiceRegistry serviceRegistry;
         try {
             serviceRegistry = configureServiceRegistry();
         } catch (IOException e) {
@@ -152,7 +158,6 @@ public class SchemaService {
         MetadataSources sources = new MetadataSources(serviceRegistry);
 
         sources.addAnnotatedClass(Database.class);
-        //sources.addAnnotatedClass(AppSettings.class);
         sources.addAnnotatedClass(LoggerLine.class);
         sources.addAnnotatedClass(Role.class);
         sources.addAnnotatedClass(UDRLink.class);
@@ -160,7 +165,6 @@ public class SchemaService {
         sources.addAnnotatedClass(UserFind.class);
 
         Metadata metadata = sources.buildMetadata();
-
 
         SchemaExport schemaExport = new SchemaExport();
         schemaExport.setHaltOnError(true);
@@ -201,13 +205,18 @@ public class SchemaService {
 
         session.doWork(connection -> {
             try (Statement statement = connection.createStatement()) {
-                statement.executeUpdate("DROP SCHEMA IF EXISTS " + schemaName + " CASCADE");
+                String query = String.format("DROP SCHEMA IF EXISTS %s CASCADE;", schemaName);
+                if (isValidSchemaName(schemaName)){
+                    statement.executeUpdate(query);
+                }else{
+                    customLoggerRepository.save(new LoggerLine(LogTyp.ERROR, "databaseDeletion", "Schema "+schemaName+" was not deleted"));
+                }
             }
         });
         try {
             FileUtils.deleteDirectory(new File(imagesFolder+schemaName));
         } catch (IOException e) {
-            e.printStackTrace();
+            customLoggerRepository.save(new LoggerLine(LogTyp.ERROR, "Database deletion", imagesFolder + " was not dleleted"));
         }
         log.info("Schema deleted: " + schemaName);
         entityManager.close();

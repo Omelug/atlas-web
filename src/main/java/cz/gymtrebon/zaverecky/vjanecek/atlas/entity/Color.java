@@ -19,7 +19,7 @@ public class Color {
 
     private String name;
 
-    @ManyToMany
+    @ManyToMany(mappedBy = "colors")
     private Set<Item> itemList;
 
     public Color(String name) {

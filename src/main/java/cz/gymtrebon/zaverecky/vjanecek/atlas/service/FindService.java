@@ -1,8 +1,10 @@
 package cz.gymtrebon.zaverecky.vjanecek.atlas.service;
 
+import cz.gymtrebon.zaverecky.vjanecek.atlas.entity.Color;
 import cz.gymtrebon.zaverecky.vjanecek.atlas.entity.Item;
-import cz.gymtrebon.zaverecky.vjanecek.atlas.entity.enums.Typ;
 import cz.gymtrebon.zaverecky.vjanecek.atlas.entity.UserFind;
+import cz.gymtrebon.zaverecky.vjanecek.atlas.entity.enums.Typ;
+import cz.gymtrebon.zaverecky.vjanecek.atlas.repository.ColorRepository;
 import cz.gymtrebon.zaverecky.vjanecek.atlas.repository.ItemRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -12,6 +14,8 @@ import javax.persistence.criteria.Join;
 import javax.persistence.criteria.Predicate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -19,6 +23,7 @@ import java.util.List;
 public class FindService {
 
     private final ItemRepository itemRepository;
+    private final ColorRepository colorRepository;
 
    /* public List<Item> findItems(UserFind userFind) {
         Typ typ = userFind.getTyp();
@@ -61,7 +66,9 @@ public class FindService {
                 predicates.add(criteriaBuilder.like(criteriaBuilder.lower(root.get("author")), "%" + author.toLowerCase() + "%"));
             }
             if (color != null && !color.isEmpty()) {
-                predicates.add(criteriaBuilder.like(criteriaBuilder.lower(root.get("color")), "%" + color.toLowerCase() + "%"));
+                Set<Color> colorSet = UserFind.deserializeColors(color);
+                Join<Item, Color> colorJoin = root.join("colors");
+                predicates.add(colorJoin.get("id").in(colorSet.stream().map(Color::getId).collect(Collectors.toList())));
             }
             if (text != null && !text.isEmpty()) {
                 predicates.add(criteriaBuilder.like(criteriaBuilder.lower(root.get("text")), "%" + text.toLowerCase() + "%"));
@@ -74,4 +81,5 @@ public class FindService {
             return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
         });
     }
+
 }

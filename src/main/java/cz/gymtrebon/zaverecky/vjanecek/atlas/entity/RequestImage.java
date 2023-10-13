@@ -11,7 +11,7 @@ import javax.persistence.*;
 import java.util.Date;
 
 @Entity
-@Table(name = "imageRequest")
+@Table(name = "imagerequest")
 @Getter @Setter
 @NoArgsConstructor
 public class RequestImage {

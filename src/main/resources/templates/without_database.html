@@ -27,7 +27,7 @@
 		<h2 th:if="${not #lists.isEmpty(subgroups)}" th:text="${#lists.size(subgroups) == 1} ? 'Subgroup' : 'Subgroups'"></h2>
 
 		<ul>
-			<li th:each="subgroup : ${subgroups}"><a th:href="'/group/'+${subgroup.id}"
+			<li th:each="subgroup : ${subgroups}"><a th:href="'/item/'+${subgroup.id}"
 													 th:text="${subgroup.name}"></a></li>
 		</ul>
 
@@ -38,12 +38,12 @@
 			</li>
 		</ul>
 		<div th:if="${#authorization.expression('hasAnyAuthority(''EDITOR'', ''ADMIN'')')}" id="buttons">
-			<a  th:href="@{'/group/newItem?idParentGroup='+${group.id}}">Add group</a>
+			<a  th:href="@{'/GROUP/newItem?idParentGroup='+${group.id}}">Add group</a>
 			|
-			<a th:href="@{'/representative/newItem?idParentGroup='+${group.id}}">Add representative</a>
+			<a th:href="@{'/REPRESENTATIVE/newItem?idParentGroup='+${group.id}}">Add representative</a>
 			|
-			<a th:unless="${group.isRoot() == true}" th:href="@{'/group/'+${group.id}+'/edit'}">Edit</a>
-			<a th:if="${group.isRoot() == true}" th:href="@{'/group/root/edit'}">Edit</a>
+			<a th:unless="${group.isRoot() == true}" th:href="@{'/item/'+${group.id}+'/edit'}">Edit</a>
+			<a th:if="${group.isRoot() == true}" th:href="@{'/item/'+${group.id} +'/edit'}">Edit</a>
 		</div > -->
 	</main>
 </div>
